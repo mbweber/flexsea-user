@@ -41,11 +41,17 @@ extern "C" {
 #include "../inc/flexsea_system.h"
 #include "../../inc/flexsea_cmd_user.h"
 
+//Execute boards only:
+#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
+#include "main.h"
+#endif	//BOARD_TYPE_FLEXSEA_EXECUTE
+
 //****************************************************************************
 // Variable(s)
 //****************************************************************************
 
-
+//Will change this, but for now the payloads will be stored in: (ToDo eliminate soon)
+uint8_t tmp_payload_xmit[PAYLOAD_BUF_LEN];
 
 //****************************************************************************
 // Function(s)
