@@ -9,11 +9,14 @@
 //	Biomechatronics research group <http://biomech.media.mit.edu/>  
 //****************************************************************************  
 
-**Note 1:** This repository is part of the FlexSEA project. All the directories that were under JFDuval/FlexSEA now have separate repositories.
+**Note 1:** This repository is part of the FlexSEA project. All the directories  
+that were under JFDuval/FlexSEA now have separate repositories.
 
 **Note 2:** Most (or all) projects will require /flexsea-comm, /flexsea-system,  
 /flexsea-shared, and /flexsea-user to compile.
   
-Documentation available at <http://flexsea.media.mit.edu>. It is recommended to start learning about the system by reading the two IEEE BioRob papers.
+Documentation available at <http://flexsea.media.mit.edu>. It is recommended to  
+start learning about the system by reading the two IEEE BioRob papers.
   
-**Please reach out to jfduval at dephy.com if you have questions, or if you'd like to get involved!**  
+**Please reach out to jfduval at dephy.com if you have questions, or if you'd  
+like to get involved!**  
