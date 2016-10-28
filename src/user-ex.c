@@ -94,4 +94,3 @@ static void init_barebone(void)
 }
 
 #endif //BOARD_TYPE_FLEXSEA_EXECUTE
-

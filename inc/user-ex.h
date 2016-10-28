@@ -33,6 +33,8 @@
   to select a different TopDesign file than the one included by default (check
   the folder, there is more than one included) */
 
+#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
+
 #ifndef INC_USER_H
 #define INC_USER_H
 
@@ -281,3 +283,5 @@ void user_fsm(void);
 //****************************************************************************	
 
 #endif	//INC_USER_H
+
+#endif //BOARD_TYPE_FLEXSEA_EXECUTE

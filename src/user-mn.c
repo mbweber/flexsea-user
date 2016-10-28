@@ -1,6 +1,6 @@
 /****************************************************************************
 	[Project] FlexSEA: Flexible & Scalable Electronics Architecture
-	[Sub-project] 'flexsea-execute' Advanced Motion Controller
+	[Sub-project] 'flexsea-manage' Mid-level computing, and networking
 	Copyright (C) 2016 Dephy, Inc. <http://dephy.com/>
 
 	This program is free software: you can redistribute it and/or modify
@@ -16,48 +16,87 @@
 	You should have received a copy of the GNU General Public License
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *****************************************************************************
-	[Lead developper] Luke Mooney, lmooney at dephy dot com.
+	[Lead developper] Jean-Francois (JF) Duval, jfduval at dephy dot com.
 	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab 
 	Biomechatronics research group <http://biomech.media.mit.edu/>
-	[Contributors] Luke Mooney, Elliott Rouse
+	[Contributors] 
 *****************************************************************************
-	[This file] knee: knee functions
+	[This file] user: User Projects & Functions
 *****************************************************************************
 	[Change log] (Convention: YYYY-MM-DD | author | comment)
-	* 2016-09-29 | jfduval | Released under GPL-3.0 release
+	* 2016-09-23 | jfduval | Initial GPL-3.0 release
 	*
 ****************************************************************************/
 
-#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
+#include "main.h"
 
-#ifndef INC_RICNU_KNEE_H
-#define INC_RICNU_KNEE_H
+#ifdef BOARD_TYPE_FLEXSEA_MANAGE
 
 //****************************************************************************
 // Include(s)
 //****************************************************************************
+
+#include "../inc/user-mn.h"
+
+//****************************************************************************
+// Variable(s)
+//****************************************************************************
+
+//MIT Ankle 2-DoF:
+#if(ACTIVE_PROJECT == PROJECT_ANKLE_2DOF)
+
+struct ankle2dof_s ankle2dof_left, ankle2dof_right;
+
+#endif	//PROJECT_ANKLE_2DOF
+
+//****************************************************************************
+// Private Function Prototype(s):
+//****************************************************************************	
+
+//****************************************************************************
+// Public Function(s)
+//****************************************************************************
+
+//Initialization function - call once in main.c, before while()
+void init_user(void)
+{
+	//RIC/NU Knee:
+	#if(ACTIVE_PROJECT == PROJECT_RICNU_KNEE)
+	init_ricnu_knee();
+	#endif	//PROJECT_RICNU_KNEE
 	
-#include "main.h"
+	//MIT Ankle 2-DoF:
+	#if(ACTIVE_PROJECT == PROJECT_ANKLE_2DOF)
+	init_ankle_2dof();
+	#endif	//PROJECT_ANKLE_2DOF
+}
+
+//Call this function in one of the main while time slots.
+void user_fsm_1(void)
+{
+	//MIT Ankle 2-DoF:
+	#if(ACTIVE_PROJECT == PROJECT_ANKLE_2DOF)
+	ankle_2dof_fsm_1();
+	#endif	//PROJECT_ANKLE_2DOF
 	
-//****************************************************************************
-// Shared variable(s)
-//****************************************************************************
+	//RIC/NU Knee code
+	#if(ACTIVE_PROJECT == PROJECT_RICNU_KNEE)
+	ricnu_knee_fsm();
+	#endif	//PROJECT_RICNU_KNEE
+}
+
+//Optional second FSM
+//Call this function in one of the main while time slots.
+void user_fsm_2(void)
+{
+	//MIT Ankle 2-DoF:
+	#if(ACTIVE_PROJECT == PROJECT_ANKLE_2DOF)
+	ankle_2dof_fsm_2();
+	#endif	//PROJECT_ANKLE_2DOF
+}
 
 //****************************************************************************
-// Public Function Prototype(s):
+// Private Function(s)
 //****************************************************************************
 
-void init_ricnu_knee(void);
-void ricnu_knee_fsm(void);
-
-//****************************************************************************
-// Definition(s):
-//****************************************************************************
-
-//****************************************************************************
-// Structure(s)
-//****************************************************************************
-
-#endif	//INC_RICNU_KNEE_H
-
-#endif //BOARD_TYPE_FLEXSEA_EXECUTE
+#endif 	//BOARD_TYPE_FLEXSEA_MANAGE

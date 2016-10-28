@@ -28,7 +28,7 @@
 	*
 ****************************************************************************/
 
-#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
+#ifdef BOARD_TYPE_FLEXSEA_MANAGE
 
 #ifndef INC_RICNU_KNEE_H
 #define INC_RICNU_KNEE_H
@@ -57,7 +57,7 @@ void ricnu_knee_fsm(void);
 //****************************************************************************
 // Structure(s)
 //****************************************************************************
-
+	
 #endif	//INC_RICNU_KNEE_H
 
-#endif //BOARD_TYPE_FLEXSEA_EXECUTE
+#endif //BOARD_TYPE_FLEXSEA_MANAGE

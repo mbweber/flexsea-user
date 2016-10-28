@@ -1,6 +1,6 @@
 /****************************************************************************
 	[Project] FlexSEA: Flexible & Scalable Electronics Architecture
-	[Sub-project] 'flexsea-execute' Advanced Motion Controller
+	[Sub-project] 'flexsea-manage' Mid-level computing, and networking
 	Copyright (C) 2016 Dephy, Inc. <http://dephy.com/>
 
 	This program is free software: you can redistribute it and/or modify
@@ -16,22 +16,22 @@
 	You should have received a copy of the GNU General Public License
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *****************************************************************************
-	[Lead developper] Luke Mooney, lmooney at dephy dot com.
+	[Lead developper] Jean-Francois (JF) Duval, jfduval at dephy dot com.
 	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab 
 	Biomechatronics research group <http://biomech.media.mit.edu/>
-	[Contributors] Luke Mooney, Elliott Rouse
+	[Contributors] 
 *****************************************************************************
-	[This file] knee: knee functions
+	[This file] user_ankle_2dof: 2-DoF Ankle Functions
 *****************************************************************************
 	[Change log] (Convention: YYYY-MM-DD | author | comment)
-	* 2016-09-29 | jfduval | Released under GPL-3.0 release
+	* 2016-09-23 | jfduval | Initial GPL-3.0 release
 	*
 ****************************************************************************/
 
-#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
+#ifdef BOARD_TYPE_FLEXSEA_MANAGE
 
-#ifndef INC_RICNU_KNEE_H
-#define INC_RICNU_KNEE_H
+#ifndef INC_ANKLE_2DOF_H
+#define INC_ANKLE_2DOF_H
 
 //****************************************************************************
 // Include(s)
@@ -45,19 +45,21 @@
 
 //****************************************************************************
 // Public Function Prototype(s):
-//****************************************************************************
+//****************************************************************************	
 
-void init_ricnu_knee(void);
-void ricnu_knee_fsm(void);
+void init_ankle_2dof(void);
+void ankle_2dof_fsm_1(void);
+void ankle_2dof_fsm_2(void);
 
 //****************************************************************************
 // Definition(s):
-//****************************************************************************
+//****************************************************************************	
 
 //****************************************************************************
 // Structure(s)
-//****************************************************************************
+//****************************************************************************	
 
-#endif	//INC_RICNU_KNEE_H
+	
+#endif	//INC_ANKLE_2DOF_H
 
-#endif //BOARD_TYPE_FLEXSEA_EXECUTE
+#endif 	//BOARD_TYPE_FLEXSEA_MANAGE

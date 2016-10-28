@@ -28,6 +28,8 @@
 	*
 ****************************************************************************/
 
+#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
+
 #ifndef INC_ANKLE_2DOF_H
 #define INC_ANKLE_2DOF_H
 
@@ -63,3 +65,5 @@ int32 get_enc_custom(void);
 
 	
 #endif	//INC_ANKLE_2DOF_H
+
+#endif //BOARD_TYPE_FLEXSEA_EXECUTE
