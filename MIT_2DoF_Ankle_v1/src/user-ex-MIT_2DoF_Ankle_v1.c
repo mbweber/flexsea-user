@@ -28,6 +28,8 @@
 	*
 ****************************************************************************/
  
+#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
+
 //****************************************************************************
 // Include(s)
 //****************************************************************************
@@ -242,3 +244,5 @@ void set_ankle_torque(int32 des_torque) //des_torque in mNm
 }
  
 //That function can be called from the FSM.
+
+#endif //BOARD_TYPE_FLEXSEA_EXECUTE

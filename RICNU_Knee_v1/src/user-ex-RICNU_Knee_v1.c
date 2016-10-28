@@ -28,6 +28,8 @@
 	*
 ****************************************************************************/
 
+#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
+
 //****************************************************************************
 // Include(s)
 //****************************************************************************
@@ -149,3 +151,5 @@ static void ricnu_knee_refresh_values(void)
 	//...
 }
 //That function can be called from the FSM.
+
+#endif //BOARD_TYPE_FLEXSEA_EXECUTE

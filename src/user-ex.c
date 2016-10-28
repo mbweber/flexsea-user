@@ -28,6 +28,8 @@
 	*
 ****************************************************************************/
 
+#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
+
 /*Important: we reached a point where we couldn't support all configurations
   without changing the TopDesign (we ran out of ressources). You might have
   to select a different TopDesign file than the one included by default (check
@@ -90,3 +92,6 @@ static void init_barebone(void)
 	board_id = SLAVE_ID;
 	#endif	//PROJECT_BAREBONE
 }
+
+#endif //BOARD_TYPE_FLEXSEA_EXECUTE
+
