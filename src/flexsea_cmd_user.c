@@ -57,7 +57,7 @@ extern "C" {
 void init_flexsea_payload_ptr_user(void)
 {
 	//MIT 2-dof Ankle:
-	flexsea_payload_ptr[CMD_USER1][RX_PTYPE_READ] = &rx_cmd_special_5;
+	flexsea_payload_ptr[CMD_USER1][RX_PTYPE_READ] = &rx_cmd_special_5;	//ToDo fix
 
 	//RIC/NU Knee:
 	flexsea_payload_ptr[CMD_USER2][RX_PTYPE_READ] = &rx_cmd_ricnu_rw;
