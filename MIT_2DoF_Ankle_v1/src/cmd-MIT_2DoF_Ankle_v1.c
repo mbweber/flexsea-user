@@ -57,6 +57,102 @@ uint8_t tmp_payload_xmit[PAYLOAD_BUF_LEN];
 // Function(s)
 //****************************************************************************
 
+uint32_t tx_cmd_ankle2dof_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
+							uint16_t *len, uint8_t slave)
+{
+	//Variable(s) & command:
+	uint16_t index = 0;
+	(*cmd) = CMD_A2DOF;
+	(*cmdType) = CMD_WRITE;
+
+	//Data:
+	shBuf[index++] = slave;
+
+	#ifdef BOARD_TYPE_FLEXSEA_MANAGE
+
+		//Structure pointer. Points to exec1 by default.
+		struct execute_s *exec_s_ptr = &exec1;
+
+		//Assign data structure based on slave:
+		if(slave == 0)
+		{
+			exec_s_ptr = &exec1;
+		}
+		else
+		{
+			exec_s_ptr = &exec2;
+		}
+
+		SPLIT_16((uint16_t)exec_s_ptr->gyro.x, shBuf, &index);
+		SPLIT_16((uint16_t)exec_s_ptr->gyro.y, shBuf, &index);
+		SPLIT_16((uint16_t)exec_s_ptr->gyro.z, shBuf, &index);
+		SPLIT_16((uint16_t)exec_s_ptr->accel.x, shBuf, &index);
+		SPLIT_16((uint16_t)exec_s_ptr->accel.y, shBuf, &index);
+		SPLIT_16((uint16_t)exec_s_ptr->accel.z, shBuf, &index);
+
+		SPLIT_16(exec_s_ptr->strain, shBuf, &index);
+		SPLIT_16(exec_s_ptr->analog[0], shBuf, &index);
+		SPLIT_16(exec_s_ptr->analog[1], shBuf, &index);
+
+		SPLIT_32((uint32_t)exec_s_ptr->enc_display, shBuf, &index);
+		SPLIT_16((uint16_t)exec_s_ptr->current, shBuf, &index);
+
+		shBuf[index++] = exec_s_ptr->volt_batt;
+		shBuf[index++] = exec_s_ptr->volt_int;
+		shBuf[index++] = exec_s_ptr->temp;
+		shBuf[index++] = exec_s_ptr->status1;
+		shBuf[index++] = exec_s_ptr->status2;
+
+	#endif	//BOARD_TYPE_FLEXSEA_MANAGE
+
+	#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
+
+		SPLIT_16((uint16_t)imu.gyro.x, shBuf, &index);
+		SPLIT_16((uint16_t)imu.gyro.y, shBuf, &index);
+		SPLIT_16((uint16_t)imu.gyro.z, shBuf, &index);
+		SPLIT_16((uint16_t)imu.accel.x, shBuf, &index);
+		SPLIT_16((uint16_t)imu.accel.y, shBuf, &index);
+		SPLIT_16((uint16_t)imu.accel.z, shBuf, &index);
+
+		SPLIT_16(strain_read(), shBuf, &index);
+		SPLIT_16(read_analog(0), shBuf, &index);
+		SPLIT_16(read_analog(1), shBuf, &index);
+
+
+		SPLIT_32((uint32_t)refresh_enc_display(), shBuf, &index);
+		SPLIT_16((uint16_t)ctrl.current.actual_val, shBuf, &index);
+
+		shBuf[index++] = safety_cop.v_vb;
+		shBuf[index++] = safety_cop.v_vg;
+		shBuf[index++] = safety_cop.temperature;
+		shBuf[index++] = safety_cop.status1;
+		shBuf[index++] = safety_cop.status2;
+
+	#endif	//BOARD_TYPE_FLEXSEA_EXECUTE
+
+	//Payload length:
+	(*len) = index;
+}
+
+uint32_t tx_cmd_ankle2dof_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
+							uint16_t *len, uint8_t slave, uint8_t controller, \
+							int16_t ctrl_i, int16_t ctrl_o)
+{
+	//Variable(s) & command:
+	uint16_t index = 0;
+	(*cmd) = CMD_A2DOF;
+	(*cmdType) = CMD_READ;
+
+	//Data:
+	shBuf[index++] = slave;
+	shBuf[index++] = controller;
+	SPLIT_16((uint16_t)ctrl_i, shBuf, &index);
+	SPLIT_16((uint16_t)ctrl_o, shBuf, &index);
+
+	//Payload length:
+	(*len) = index;
+}
+
 //Transmission of a CTRL_SPECIAL_5 command: Ankle 2DOF
 uint32_t tx_cmd_ctrl_special_5(uint8_t receiver, uint8_t cmd_type, uint8_t *buf, uint32_t len, \
 								uint8_t slave, uint8_t controller, int16_t ctrl_i, int16_t ctrl_o)

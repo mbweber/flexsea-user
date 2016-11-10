@@ -8,7 +8,7 @@ extern "C" {
 
 #define TEST_PL_LEN		4
 
-void test_tx_cmd_ctrl_special_5(void)
+void test_tx_cmd_ctrl_special_5_r(void)
 {
 	uint8_t rid = FLEXSEA_EXECUTE_1;
 	uint8_t slave = 17, controller = CTRL_OPEN;
@@ -41,11 +41,35 @@ void test_tx_cmd_ctrl_special_5(void)
 //	TEST_ASSERT_EQUAL((P_DATA1 + TEST_PL_LEN), numb);
 }
 
+void test_tx_cmd_ctrl_special_5_w(void)
+{
+	uint8_t rid = FLEXSEA_EXECUTE_1;
+	uint8_t slave = 18, controller = CTRL_CURRENT;
+	int16_t pwm = 2345, current = -12500;
+	uint8_t cmdCode = CMD_SPC5, cmdType = CMD_WRITE;
+	uint16_t len = TEST_PL_LEN, numb = 0;
+//	uint8_t myPayloadData[TEST_PL_LEN] = {0xAA, 0xBB, 0xCC, 0xDD};
+	uint8_t outputBuf[48];
+
+//	numb = tx_cmd(myPayloadData, cmdCode, cmdType, len, FLEXSEA_EXECUTE_1, outputBuf);
+
+	numb = tx_cmd_ctrl_special_5(rid, cmdType, outputBuf, PAYLOAD_BUF_LEN, \
+								slave, controller, current, pwm);
+
+	TEST_ASSERT_EQUAL(1, outputBuf[P_CMDS]);
+	TEST_ASSERT_EQUAL(CMD_W(cmdCode), outputBuf[P_CMD1]);
+	TEST_ASSERT_EQUAL(slave, outputBuf[P_DATA1]);
+
+//	TEST_ASSERT_EQUAL_UINT8_ARRAY(myPayloadData, &outputBuf[P_DATA1], TEST_PL_LEN);
+//	TEST_ASSERT_EQUAL((P_DATA1 + TEST_PL_LEN), numb);
+}
+
 void test_cmd_user(void)
 {
 	UNITY_BEGIN();
 
-	RUN_TEST(test_tx_cmd_ctrl_special_5);
+	RUN_TEST(test_tx_cmd_ctrl_special_5_r);
+	RUN_TEST(test_tx_cmd_ctrl_special_5_w);
 
 	UNITY_END();
 }
