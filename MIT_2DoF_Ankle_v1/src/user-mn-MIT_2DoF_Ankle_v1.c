@@ -156,6 +156,7 @@ void ankle_2dof_fsm_2(void)
 	static uint32_t timer = 0;
 	int tx_byte = 0, commstrlen = 0;
 	uint8_t test_payload[PAYLOAD_BUF_LEN];
+	uint8_t info[2] = {PORT_485_1, PORT_485_1};
 
 	//This FSM talks to the slaves at 250Hz each
 	switch(ex_refresh_fsm_state)
@@ -176,10 +177,15 @@ void ankle_2dof_fsm_2(void)
 			break;
 		case 1:	//Communicating with Execute #1
 
+			/*
 			tx_byte = tx_cmd_ctrl_special_5(FLEXSEA_EXECUTE_1, CMD_READ, test_payload, PAYLOAD_BUF_LEN, 0, 1, 0, my_pwm);
 			 commstrlen = comm_gen_str(test_payload, comm_str_485_1, tx_byte);
 			 commstrlen = COMM_STR_BUF_LEN;
 			 flexsea_send_serial_slave(PORT_RS485_1, comm_str_485_1, commstrlen);
+			 */
+			info[0] = PORT_485_1;
+			tx_cmd_ankle2dof_r(TX_N_DEFAULT, 0, 1, 0, my_pwm);
+			packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_1, info, SEND_TO_SLAVE);
 
 			 slaves_485_1.xmit.listen = 1;
 			ex_refresh_fsm_state++;
@@ -190,10 +196,15 @@ void ankle_2dof_fsm_2(void)
 			break;
 		case 3:	//Communicating with Execute #2
 
+			/*
 			tx_byte = tx_cmd_ctrl_special_5(FLEXSEA_EXECUTE_2, CMD_READ, test_payload, PAYLOAD_BUF_LEN, 1, 1, 0, my_pwm);
 			 commstrlen = comm_gen_str(test_payload, comm_str_485_2, tx_byte);
 			 commstrlen = COMM_STR_BUF_LEN;
 			 flexsea_send_serial_slave(PORT_RS485_2, comm_str_485_2, commstrlen);
+			 */
+			info[0] = PORT_485_2;
+			tx_cmd_ankle2dof_r(TX_N_DEFAULT, 1, 1, 0, my_pwm);
+			packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_2, info, SEND_TO_SLAVE);
 
 			 slaves_485_2.xmit.listen = 1;
 			ex_refresh_fsm_state++;
