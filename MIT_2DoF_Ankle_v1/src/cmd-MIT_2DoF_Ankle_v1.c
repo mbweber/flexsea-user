@@ -152,6 +152,121 @@ uint32_t tx_cmd_ankle2dof_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 	(*len) = index;
 }
 
+void rx_cmd_a2dof_rw(uint8_t *buf, uint8_t *info)
+{
+	#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
+
+		uint8_t slave = 0;
+		uint16_t index = P_DATA1;
+		slave = buf[index++];
+
+		//Update controller:
+		control_strategy(buf[index++]);
+
+		//Only change the setpoint if we are in current control mode:
+		if(ctrl.active_ctrl == CTRL_CURRENT)
+		{
+			index = P_DATA1+2;
+			tmp_wanted_current = (int16_t) REBUILD_UINT16(buf, &index);
+			ctrl.current.setpoint_val = tmp_wanted_current;
+		}
+		else if(ctrl.active_ctrl == CTRL_OPEN)
+		{
+			index = P_DATA1+4;
+			tmp_open_spd = int16_t) REBUILD_UINT16(buf, &index);;
+			motor_open_speed_1(tmp_open_spd);
+		}
+
+	#endif	//BOARD_TYPE_FLEXSEA_EXECUTE
+
+	#ifdef BOARD_TYPE_FLEXSEA_MANAGE
+
+		uint8_t slave = 0;
+		slave = buf[P_DATA1];
+
+	#endif	//BOARD_TYPE_FLEXSEA_MANAGE
+
+	//Reply:
+	tx_cmd_ankle2dof_w(TX_N_DEFAULT, buf[P_DATA1]);
+	packAndSend(P_AND_S_DEFAULT, buf[P_XID], info, SEND_TO_MASTER);
+}
+
+void rx_cmd_a2dof_rr(uint8_t *buf, uint8_t *info)
+{
+	(void)info;	//Unused for now
+
+	#if((defined BOARD_TYPE_FLEXSEA_MANAGE) || (defined BOARD_TYPE_FLEXSEA_PLAN))
+
+		uint8_t slave = 0;
+		uint16_t index = 0;
+		struct execute_s *exec_s_ptr = &exec1;
+
+		#if((defined BOARD_TYPE_FLEXSEA_MANAGE))
+
+			slave = buf[P_XID];
+			//Assign data structure based on slave:
+			if(slave == FLEXSEA_EXECUTE_1)
+			{
+				exec_s_ptr = &exec1;
+			}
+			else
+			{
+				exec_s_ptr = &exec2;
+			}
+
+		#endif	//((defined BOARD_TYPE_FLEXSEA_MANAGE))
+
+		#if((defined BOARD_TYPE_FLEXSEA_PLAN))
+
+			slave = buf[P_DATA1];
+			//Assign data structure based on slave:
+			if(slave == 0)
+			{
+				exec_s_ptr = &exec1;
+			}
+			else
+			{
+				exec_s_ptr = &exec2;
+			}
+
+		#endif	//((defined BOARD_TYPE_FLEXSEA_MANAGE))
+
+		#if((defined BOARD_TYPE_FLEXSEA_MANAGE) || (defined BOARD_TYPE_FLEXSEA_PLAN))
+
+			index = P_DATA1+1;
+			exec_s_ptr->gyro.x = (int16_t) REBUILD_UINT16(buf, &index);
+			exec_s_ptr->gyro.y = (int16_t) REBUILD_UINT16(buf, &index);
+			exec_s_ptr->gyro.z = (int16_t) REBUILD_UINT16(buf, &index);
+			exec_s_ptr->accel.x = (int16_t) REBUILD_UINT16(buf, &index);
+			exec_s_ptr->accel.y = (int16_t) REBUILD_UINT16(buf, &index);
+			exec_s_ptr->accel.z = (int16_t) REBUILD_UINT16(buf, &index);
+
+			exec_s_ptr->strain = (int16_t) REBUILD_UINT16(buf, &index);
+			exec_s_ptr->analog[0] = (int16_t) REBUILD_UINT16(buf, &index);
+			exec_s_ptr->analog[1] = (int16_t) REBUILD_UINT16(buf, &index);
+			exec_s_ptr->enc_display = (int32_t) REBUILD_UINT32(buf, &index);
+			exec_s_ptr->current = (int16_t) REBUILD_UINT16(buf, &index);
+
+			exec_s_ptr->volt_batt = buf[index++];
+			exec_s_ptr->volt_int = buf[index++];
+			exec_s_ptr->temp = buf[index++];
+			exec_s_ptr->status1 = buf[index++];
+			exec_s_ptr->status2 = buf[index++];
+
+		#endif	//BOARD_TYPE_FLEXSEA_PLAN
+
+	#else
+
+		(void)buf;
+
+	#endif	//((defined BOARD_TYPE_FLEXSEA_MANAGE) || (defined BOARD_TYPE_FLEXSEA_PLAN))
+}
+
+//****************************************************************************
+// Antiquated function(s) - will be deleted soon:
+//****************************************************************************
+
+/*
 //Transmission of a CTRL_SPECIAL_5 command: Ankle 2DOF
 uint32_t tx_cmd_ctrl_special_5(uint8_t receiver, uint8_t cmd_type, uint8_t *buf, uint32_t len, \
 								uint8_t slave, uint8_t controller, int16_t ctrl_i, int16_t ctrl_o)
@@ -494,6 +609,7 @@ void rx_cmd_special_5(uint8_t *buf)
 		}
 	}
 }
+*/
 
 #ifdef __cplusplus
 }

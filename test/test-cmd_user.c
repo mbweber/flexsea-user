@@ -9,6 +9,7 @@ extern "C" {
 
 #define TEST_PL_LEN		4
 
+/*
 void test_tx_cmd_ctrl_special_5_r(void)
 {
 	uint8_t rid = FLEXSEA_EXECUTE_1;
@@ -41,6 +42,7 @@ void test_tx_cmd_ctrl_special_5_r(void)
 //	TEST_ASSERT_EQUAL_UINT8_ARRAY(myPayloadData, &outputBuf[P_DATA1], TEST_PL_LEN);
 //	TEST_ASSERT_EQUAL((P_DATA1 + TEST_PL_LEN), numb);
 }
+*/
 
 void test_tx_cmd_a2dof_w(void)
 {
@@ -98,6 +100,7 @@ void test_tx_cmd_a2dof_r(void)
 	TEST_ASSERT_EQUAL(pwm, res_pwm);
 }
 
+/*
 void test_tx_cmd_ctrl_special_5_w(void)
 {
 	uint8_t rid = FLEXSEA_EXECUTE_1;
@@ -120,13 +123,16 @@ void test_tx_cmd_ctrl_special_5_w(void)
 //	TEST_ASSERT_EQUAL_UINT8_ARRAY(myPayloadData, &outputBuf[P_DATA1], TEST_PL_LEN);
 //	TEST_ASSERT_EQUAL((P_DATA1 + TEST_PL_LEN), numb);
 }
+*/
 
-void test_cmd_user(void)
+void test_ankle2dof(void)
 {
 	UNITY_BEGIN();
 
+	/*
 	RUN_TEST(test_tx_cmd_ctrl_special_5_r);
 	RUN_TEST(test_tx_cmd_ctrl_special_5_w);
+	*/
 
 	RUN_TEST(test_tx_cmd_a2dof_w);
 	RUN_TEST(test_tx_cmd_a2dof_r);

@@ -22,7 +22,7 @@ extern "C" {
 void flexsea_user_test(void)
 {
 	//One call per file here:
-	test_cmd_user();
+	test_ankle2dof();
 }
 
 #ifdef __cplusplus
