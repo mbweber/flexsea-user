@@ -37,11 +37,12 @@ extern "C" {
 // Include(s)
 //****************************************************************************
 
-#include <stdio.h>
-#include <stdlib.h>
+//#include <stdio.h>
+//#include <stdlib.h>
 #include "../inc/flexsea_system.h"
 #include "../inc/flexsea_cmd_user.h"
 #include "../MIT_2DoF_Ankle_v1/inc/cmd-MIT_2DoF_Ankle_v1.h"
+#include "../RICNU_Knee_v1/inc/cmd-RICNU_Knee_v1.h"
 
 //****************************************************************************
 // Variable(s)
@@ -62,14 +63,11 @@ void init_flexsea_payload_ptr_user(void)
 	flexsea_payload_ptr[CMD_A2DOF][RX_PTYPE_READ] = &rx_cmd_ankle2dof_rw;
 	flexsea_payload_ptr[CMD_A2DOF][RX_PTYPE_REPLY] = &rx_cmd_ankle2dof_rr;
 
-	/*
 	//RIC/NU Knee:
 	flexsea_payload_ptr[CMD_USER2][RX_PTYPE_READ] = &rx_cmd_ricnu_rw;
 	flexsea_payload_ptr[CMD_USER2][RX_PTYPE_WRITE] = &rx_cmd_ricnu_w;
 	flexsea_payload_ptr[CMD_USER2][RX_PTYPE_REPLY] = &rx_cmd_ricnu_rr;
-	*/
 }
-
 
 #ifdef __cplusplus
 }
