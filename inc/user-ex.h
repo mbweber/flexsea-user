@@ -33,6 +33,8 @@
   to select a different TopDesign file than the one included by default (check
   the folder, there is more than one included) */
 
+#include "main.h"
+
 #ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 
 #ifndef INC_USER_H
@@ -42,7 +44,6 @@
 // Include(s)
 //****************************************************************************
 
-#include "main.h"
 #include "../MIT_2DoF_Ankle_v1/inc/user-ex-MIT_2DoF_Ankle_v1.h"
 #include "../RICNU_Knee_v1/inc/user-ex-RICNU_Knee_v1.h"
 //Add your project specific user_x.h file here

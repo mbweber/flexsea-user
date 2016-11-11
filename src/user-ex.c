@@ -28,6 +28,8 @@
 	*
 ****************************************************************************/
 
+#include "main.h"
+
 #ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 
 /*Important: we reached a point where we couldn't support all configurations
@@ -39,7 +41,6 @@
 // Include(s)
 //****************************************************************************
 
-#include "main.h"
 #include "../inc/user-ex.h"
 
 //****************************************************************************
