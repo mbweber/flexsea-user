@@ -52,8 +52,8 @@ void test_tx_cmd_a2dof_w(void)
 	uint8_t outputBuf[48];
 	uint8_t slave = 99;
 
-	numb = tx_cmd_ankle2dof_w(outputBuf, &test_cmdCode, &test_cmdType, \
-								&test_len, slave);
+	tx_cmd_ankle2dof_w(outputBuf, &test_cmdCode, &test_cmdType, \
+						&test_len, slave);
 
 	TEST_ASSERT_EQUAL(CMD_A2DOF, test_cmdCode);
 	TEST_ASSERT_EQUAL(CMD_WRITE, test_cmdType);
@@ -84,8 +84,8 @@ void test_tx_cmd_a2dof_r(void)
 	uint8_t outputBuf[48];
 	uint16_t index = 0;
 
-	numb = tx_cmd_ankle2dof_r(outputBuf, &test_cmdCode, &test_cmdType, \
-								&test_len, slave, controller, current, pwm);
+	tx_cmd_ankle2dof_r(outputBuf, &test_cmdCode, &test_cmdType, \
+						&test_len, slave, controller, current, pwm);
 
 	TEST_ASSERT_EQUAL(CMD_A2DOF, test_cmdCode);
 	TEST_ASSERT_EQUAL(CMD_READ, test_cmdType);
