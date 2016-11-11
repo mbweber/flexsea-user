@@ -51,7 +51,8 @@ void init_flexsea_payload_ptr_user(void);
 //Give nickname to function codes here. Always remember that they have to be
 //in the 100-127 range!
 
-#define CMD_SPC5				100
+#define CMD_SPC5				100		//ToDo remove, being replaced...
+#define CMD_A2DOF				100		//...by this one
 #define CMD_RICNU				101
 #define CMD_READ_ALL_RICNU		102
 

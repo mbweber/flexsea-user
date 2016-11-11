@@ -161,6 +161,7 @@ void tx_cmd_ricnu_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 void rx_cmd_ricnu_rw(uint8_t *buf, uint8_t *info)
 {
 	uint16_t index = 0;
+	(void)info;
 
 	//Temporary variables
 	uint8_t offset = 0;
