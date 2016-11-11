@@ -42,6 +42,9 @@
 	
 //****************************************************************************
 // Shared variable(s)
+extern int16_t glob_var_1;
+extern int16_t glob_var_2;
+extern int16_t glob_var_3;
 //****************************************************************************
 
 //****************************************************************************
@@ -51,6 +54,10 @@
 void init_ankle_2dof(void);
 void ankle_2dof_fsm_1(void);
 void ankle_2dof_fsm_2(void);
+int16_t get_ankle_ang(double);
+int16_t get_ankle_trans(double);
+void set_ankle_torque_1(int32_t);
+void set_ankle_torque_2(int32_t);
 
 //****************************************************************************
 // Definition(s):
