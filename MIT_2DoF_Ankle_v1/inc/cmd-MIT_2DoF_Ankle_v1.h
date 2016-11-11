@@ -42,8 +42,8 @@ void tx_cmd_ankle2dof_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 void tx_cmd_ankle2dof_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 							uint16_t *len, uint8_t slave, uint8_t controller, \
 							int16_t ctrl_i, int16_t ctrl_o);
-void rx_cmd_a2dof_rw(uint8_t *buf, uint8_t *info);
-void rx_cmd_a2dof_rr(uint8_t *buf, uint8_t *info);
+void rx_cmd_ankle2dof_rw(uint8_t *buf, uint8_t *info);
+void rx_cmd_ankle2dof_rr(uint8_t *buf, uint8_t *info);
 
 /*
 uint32_t tx_cmd_ctrl_special_5(uint8_t receiver, uint8_t cmd_type, uint8_t *buf, uint32_t len, \

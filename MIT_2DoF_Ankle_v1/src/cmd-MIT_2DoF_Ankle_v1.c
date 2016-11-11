@@ -152,7 +152,7 @@ void tx_cmd_ankle2dof_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 	(*len) = index;
 }
 
-void rx_cmd_a2dof_rw(uint8_t *buf, uint8_t *info)
+void rx_cmd_ankle2dof_rw(uint8_t *buf, uint8_t *info)
 {
 	#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 
@@ -192,7 +192,7 @@ void rx_cmd_a2dof_rw(uint8_t *buf, uint8_t *info)
 	packAndSend(P_AND_S_DEFAULT, buf[P_XID], info, SEND_TO_MASTER);
 }
 
-void rx_cmd_a2dof_rr(uint8_t *buf, uint8_t *info)
+void rx_cmd_ankle2dof_rr(uint8_t *buf, uint8_t *info)
 {
 	(void)info;	//Unused for now
 
