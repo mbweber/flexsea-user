@@ -57,7 +57,7 @@ uint8_t tmp_payload_xmit[PAYLOAD_BUF_LEN];
 // Function(s)
 //****************************************************************************
 
-uint32_t tx_cmd_ankle2dof_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
+void tx_cmd_ankle2dof_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 							uint16_t *len, uint8_t slave)
 {
 	//Variable(s) & command:
@@ -133,7 +133,7 @@ uint32_t tx_cmd_ankle2dof_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 	(*len) = index;
 }
 
-uint32_t tx_cmd_ankle2dof_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
+void tx_cmd_ankle2dof_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 							uint16_t *len, uint8_t slave, uint8_t controller, \
 							int16_t ctrl_i, int16_t ctrl_o)
 {
@@ -156,6 +156,7 @@ void rx_cmd_a2dof_rw(uint8_t *buf, uint8_t *info)
 {
 	#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 
+		int16_t tmp_wanted_current = 0, tmp_open_spd = 0;
 		uint8_t slave = 0;
 		uint16_t index = P_DATA1;
 		slave = buf[index++];
@@ -173,7 +174,7 @@ void rx_cmd_a2dof_rw(uint8_t *buf, uint8_t *info)
 		else if(ctrl.active_ctrl == CTRL_OPEN)
 		{
 			index = P_DATA1+4;
-			tmp_open_spd = int16_t) REBUILD_UINT16(buf, &index);;
+			tmp_open_spd = (int16_t) REBUILD_UINT16(buf, &index);;
 			motor_open_speed_1(tmp_open_spd);
 		}
 
