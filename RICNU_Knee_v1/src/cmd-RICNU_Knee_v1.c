@@ -327,7 +327,6 @@ void rx_cmd_ricnu_Action1(uint8_t controller, int32_t setpoint, uint8_t setGains
 //Transmission of a READ_ALL_RICNU command
 uint32_t tx_cmd_data_read_all_ricnu(uint8_t receiver, uint8_t cmd_type, uint8_t *buf, uint32_t len)
 {
-	uint8_t tmp0 = 0, tmp1 = 0, tmp2 = 0, tmp3 = 0;
 	uint32_t bytes = 0;
 
 	//Fresh payload string:
@@ -349,6 +348,8 @@ uint32_t tx_cmd_data_read_all_ricnu(uint8_t receiver, uint8_t cmd_type, uint8_t 
 		buf[P_CMD1] = CMD_W(CMD_READ_ALL_RICNU);
 
 		#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
+
+		uint8_t tmp0 = 0, tmp1 = 0, tmp2 = 0, tmp3 = 0;
 
 		//Arguments:
 		uint16_to_bytes((uint16_t)imu.gyro.x, &tmp0, &tmp1);
