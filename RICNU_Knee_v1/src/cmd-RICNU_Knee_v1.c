@@ -50,9 +50,6 @@ extern "C" {
 // Variable(s)
 //****************************************************************************
 
-//Will change this, but for now the payloads will be stored in: (ToDo eliminate soon)
-uint8_t tmp_payload_xmit[PAYLOAD_BUF_LEN];
-
 //****************************************************************************
 // Function(s)
 //****************************************************************************
@@ -96,7 +93,8 @@ void tx_cmd_ricnu_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 	(*cmdType) = READ;
 
 	//Data:
-	shBuf[index++] = offset;
+	shBuf[index++] = 100 + offset;
+	//An offset >= 100 means a pure Read, with no writing (not a RW)
 
 	//Payload length:
 	(*len) = index;
@@ -182,15 +180,18 @@ void rx_cmd_ricnu_rw(uint8_t *buf, uint8_t *info)
 
 	#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 
-	//Act on the decoded data:
-	rx_cmd_ricnu_Action1(tmpController, tmpSetpoint, tmpSetGains, tmpGain[0],
-							tmpGain[1], tmpGain[2], tmpGain[3]);
+	//An offset >= 100 means a pure Read, with no writing (not a RW)
+	if(offset < 100)
+	{
+		//Act on the decoded data:
+		rx_cmd_ricnu_Action1(tmpController, tmpSetpoint, tmpSetGains, tmpGain[0],
+								tmpGain[1], tmpGain[2], tmpGain[3]);
+	}
 	#endif
 
-	//Generate the reply:
-//	numb = tx_cmd_ricnu_w(TX_CMD_DEFAULT, offset, 0, 0, 0, 0, 0, 0);	//ToDo
-//	COMM_GEN_STR_DEFAULT
-//	flexsea_send_serial_master(myPort, myData, myLen);	//ToDo
+	//Reply:
+	tx_cmd_ankle2dof_w(TX_N_DEFAULT, buf[P_DATA1]);
+	packAndSend(P_AND_S_DEFAULT, buf[P_XID], info, SEND_TO_MASTER);
 }
 
 //Gets called when our Slave sends us a Reply to our Read Request
@@ -319,210 +320,6 @@ void rx_cmd_ricnu_Action1(uint8_t controller, int32_t setpoint, uint8_t setGains
 
 	#endif
 }
-
-//==================
-//Hum, do we still need this? Keeping it for now to avoid breaking stuff... (ToDo)
-
-//TODO move to user files
-//Transmission of a READ_ALL_RICNU command
-uint32_t tx_cmd_data_read_all_ricnu(uint8_t receiver, uint8_t cmd_type, uint8_t *buf, uint32_t len)
-{
-	uint32_t bytes = 0;
-
-	//Fresh payload string:
-	prepare_empty_payload(board_id, receiver, buf, len);
-
-	//Command:
-	buf[P_CMDS] = 1;                     //1 command in string
-
-	if(cmd_type == CMD_READ)
-	{
-		buf[P_CMD1] = CMD_R(CMD_READ_ALL_RICNU);
-
-		bytes = P_CMD1 + 1;     //Bytes is always last+1
-	}
-	else if(cmd_type == CMD_WRITE)
-	{
-		//In that case Write is only used for the Reply
-
-		buf[P_CMD1] = CMD_W(CMD_READ_ALL_RICNU);
-
-		#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
-
-		uint8_t tmp0 = 0, tmp1 = 0, tmp2 = 0, tmp3 = 0;
-
-		//Arguments:
-		uint16_to_bytes((uint16_t)imu.gyro.x, &tmp0, &tmp1);
-		buf[P_DATA1 + 0] = tmp0;
-		buf[P_DATA1 + 1] = tmp1;
-		uint16_to_bytes((uint16_t)imu.gyro.y, &tmp0, &tmp1);
-		buf[P_DATA1 + 2] = tmp0;
-		buf[P_DATA1 + 3] = tmp1;
-		uint16_to_bytes((uint16_t)imu.gyro.z, &tmp0, &tmp1);
-		buf[P_DATA1 + 4] = tmp0;
-		buf[P_DATA1 + 5] = tmp1;
-
-		uint16_to_bytes((uint16_t)imu.accel.x, &tmp0, &tmp1);
-		buf[P_DATA1 + 6] = tmp0;
-		buf[P_DATA1 + 7] = tmp1;
-		uint16_to_bytes((uint16_t)imu.accel.y, &tmp0, &tmp1);
-		buf[P_DATA1 + 8] = tmp0;
-		buf[P_DATA1 + 9] = tmp1;
-		uint16_to_bytes((uint16_t)imu.accel.z, &tmp0, &tmp1);
-		buf[P_DATA1 + 10] = tmp0;
-		buf[P_DATA1 + 11] = tmp1;
-
-		//Motor encoder, multi-turns
-		uint32_to_bytes((uint32_t)exec1.enc_motor, &tmp0, &tmp1, &tmp2, &tmp3);
-		buf[P_DATA1 + 12] = tmp0;
-		buf[P_DATA1 + 13] = tmp1;
-		buf[P_DATA1 + 14] = tmp2;
-		buf[P_DATA1 + 15] = tmp3;
-
-		//Joint encoder, limited to 1 rotation
-		uint32_to_bytes((uint32_t)exec1.enc_joint, &tmp0, &tmp1, &tmp2, &tmp3);
-		buf[P_DATA1 + 16] = tmp0;
-		buf[P_DATA1 + 17] = tmp1;
-		buf[P_DATA1 + 18] = tmp2;
-		buf[P_DATA1 + 19] = tmp3;
-
-		uint16_to_bytes((uint16_t)ctrl.current.actual_val, &tmp0, &tmp1);
-		buf[P_DATA1 + 20] = tmp0;
-		buf[P_DATA1 + 21] = tmp1;
-
-		//Compressed Strain:
-		buf[P_DATA1 + 22] = strain1.compressedBytes[0];
-		buf[P_DATA1 + 23] = strain1.compressedBytes[1];
-		buf[P_DATA1 + 24] = strain1.compressedBytes[2];
-		buf[P_DATA1 + 25] = strain1.compressedBytes[3];
-		buf[P_DATA1 + 26] = strain1.compressedBytes[4];
-		buf[P_DATA1 + 27] = strain1.compressedBytes[5];
-		buf[P_DATA1 + 28] = strain1.compressedBytes[6];
-		buf[P_DATA1 + 29] = strain1.compressedBytes[7];
-		buf[P_DATA1 + 30] = strain1.compressedBytes[8];
-
-		bytes = P_DATA1 + 31;     //Bytes is always last+1
-
-		#endif	//BOARD_TYPE_FLEXSEA_EXECUTE
-	}
-	else
-	{
-		//Invalid
-		flexsea_error(SE_INVALID_READ_TYPE);
-		bytes = 0;
-	}
-
-	return bytes;
-}
-
-//TODO move to user files
-//Reception of a READ_ALL_RICNU command
-void rx_cmd_data_read_all_ricnu(uint8_t *buf)
-{
-	uint8_t numb = 0, sampling = 0;
-
-	#if((defined BOARD_TYPE_FLEXSEA_MANAGE) || (defined BOARD_TYPE_FLEXSEA_PLAN))
-
-	//Structure pointer. Points to ricnu_1 by default.
-	struct execute_s *exec_s_ptr = &exec1;
-	struct ricnu_s *ricnu_s_ptr = &ricnu_1;
-	//struct executeD_s *execD_s_ptr = &execD1;
-
-	#endif	//((defined BOARD_TYPE_FLEXSEA_MANAGE) || (defined BOARD_TYPE_FLEXSEA_PLAN))
-
-	if(IS_CMD_RW(buf[P_CMD1]) == READ)
-	{
-		//Received a Read command from our master, prepare a reply:
-
-		#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
-
-		//Generate the reply:
-		numb = tx_cmd_data_read_all_ricnu(buf[P_XID], CMD_WRITE, tmp_payload_xmit, PAYLOAD_BUF_LEN);
-		numb = comm_gen_str(tmp_payload_xmit, comm_str_485_1, numb);
-		numb = COMM_STR_BUF_LEN;	//Fixed length for now to accomodate the DMA
-
-		//Delayed response:
-		rs485_reply_ready(comm_str_485_1, (numb));
-
-		#ifdef USE_USB
-		usb_puts(comm_str_485_1, (numb));
-		#endif
-
-		#endif	//BOARD_TYPE_FLEXSEA_EXECUTE
-
-		#ifdef BOARD_TYPE_FLEXSEA_MANAGE
-
-		//ToDo
-
-		#endif	//BOARD_TYPE_FLEXSEA_EXECUTE
-	}
-	else if(IS_CMD_RW(buf[P_CMD1]) == WRITE)
-	{
-		//Two options: from Master of from slave (a read reply)
-
-		//Decode data:
-		//...
-
-		if(sent_from_a_slave(buf))
-		{
-			//We received a reply to our read request
-
-			#if((defined BOARD_TYPE_FLEXSEA_MANAGE) || (defined BOARD_TYPE_FLEXSEA_PLAN))
-
-			//Store values:
-
-			ricnu_s_ptr->ex.gyro.x = (int16_t) (BYTES_TO_UINT16(buf[P_DATA1+0], buf[P_DATA1+1]));
-			ricnu_s_ptr->ex.gyro.y = (int16_t) (BYTES_TO_UINT16(buf[P_DATA1+2], buf[P_DATA1+3]));
-			ricnu_s_ptr->ex.gyro.z = (int16_t) (BYTES_TO_UINT16(buf[P_DATA1+4], buf[P_DATA1+5]));
-
-			ricnu_s_ptr->ex.accel.x = (int16_t) (BYTES_TO_UINT16(buf[P_DATA1+6], buf[P_DATA1+7]));
-			ricnu_s_ptr->ex.accel.y = (int16_t) (BYTES_TO_UINT16(buf[P_DATA1+8], buf[P_DATA1+9]));
-			ricnu_s_ptr->ex.accel.z = (int16_t) (BYTES_TO_UINT16(buf[P_DATA1+10], buf[P_DATA1+11]));
-
-			ricnu_s_ptr->ex.enc_motor = (int32_t) (BYTES_TO_UINT32(buf[P_DATA1+12], buf[P_DATA1+13], \
-																		buf[P_DATA1+14], buf[P_DATA1+15]));
-			ricnu_s_ptr->ex.enc_joint = (int32_t) (BYTES_TO_UINT32(buf[P_DATA1+16], buf[P_DATA1+17], \
-																		buf[P_DATA1+18], buf[P_DATA1+19]));
-
-			ricnu_s_ptr->ex.current = (int16_t) (BYTES_TO_UINT16(buf[P_DATA1+20], buf[P_DATA1+21]));
-
-			ricnu_s_ptr->st.compressedBytes[0] = buf[P_DATA1 + 22];
-			ricnu_s_ptr->st.compressedBytes[1] = buf[P_DATA1 + 23];
-			ricnu_s_ptr->st.compressedBytes[2] = buf[P_DATA1 + 24];
-			ricnu_s_ptr->st.compressedBytes[3] = buf[P_DATA1 + 25];
-			ricnu_s_ptr->st.compressedBytes[4] = buf[P_DATA1 + 26];
-			ricnu_s_ptr->st.compressedBytes[5] = buf[P_DATA1 + 27];
-			ricnu_s_ptr->st.compressedBytes[6] = buf[P_DATA1 + 28];
-			ricnu_s_ptr->st.compressedBytes[7] = buf[P_DATA1 + 29];
-			ricnu_s_ptr->st.compressedBytes[8] = buf[P_DATA1 + 30];
-
-			#endif	//((defined BOARD_TYPE_FLEXSEA_MANAGE) || (defined BOARD_TYPE_FLEXSEA_PLAN))
-
-			//Plan uses the Super Structure to save decoded values:
-			#if(defined BOARD_TYPE_FLEXSEA_PLAN)
-			*exec_s_ptr = ricnu_s_ptr->ex;
-			#endif //#(defined BOARD_TYPE_FLEXSEA_PLAN)
-		}
-		else
-		{
-			//Master is writing a value to this board
-
-			#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
-
-			//Nothing to do for now
-
-			#endif	//BOARD_TYPE_FLEXSEA_EXECUTE
-
-			#ifdef BOARD_TYPE_FLEXSEA_MANAGE
-
-			//Nothing to do for now
-
-			#endif	//BOARD_TYPE_FLEXSEA_EXECUTE
-		}
-	}
-}
-
-//===
 
 #ifdef __cplusplus
 }
