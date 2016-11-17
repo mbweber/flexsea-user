@@ -96,8 +96,8 @@ void user_fsm(void);
 //Step 1) Select active project (from list):
 //==========================================
 
-#define ACTIVE_PROJECT			PROJECT_ANKLE_2DOF
-#define ACTIVE_SUBPROJECT		SUBPROJECT_A
+#define ACTIVE_PROJECT			PROJECT_BAREBONE
+#define ACTIVE_SUBPROJECT		SUBPROJECT_NONE
 
 //Step 2) Customize the enabled/disabled sub-modules:
 //===================================================
@@ -240,8 +240,7 @@ void user_fsm(void);
 	#define USE_EEPROM			//Non-volatile memory, EEPROM
 	//#define USE_FLASH			//Non-volatile memory, FLASH
 	//#define USE_BLUETOOTH		//Bluetooth module on EX12/EX13
-	#define USE_I2T_LIMIT		//I2t current limit
-	
+	#define USE_I2T_LIMIT		//I2t current limit	
 	#define USE_EXT_I2C_STRAIN	//External Strain Amplifier, on I2C0
 	#define USE_AS5048B			//14-bit Position Sensor, on I2C0
 	
@@ -279,7 +278,10 @@ void user_fsm(void);
 	#endif
 	
 	//Project specific definitions:
-	#define CURRENT_ZERO			((int32)2053)
+	#define CURRENT_ZERO			((int32)2065)
+	
+	//Slave ID:
+	#define SLAVE_ID				FLEXSEA_EXECUTE_1
 	
 #endif	//PROJECT_RICNU_KNEE
 

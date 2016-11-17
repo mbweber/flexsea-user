@@ -65,7 +65,7 @@ void tx_cmd_ricnu_rw(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType,uint16_t *le
 
 	//Formatting:
 	(*cmd) = CMD_RICNU;
-	(*cmdType) = READ;
+	(*cmdType) = CMD_READ;
 
 	//Data:
 	shBuf[index++] = offset;
@@ -90,11 +90,19 @@ void tx_cmd_ricnu_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 
 	//Formatting:
 	(*cmd) = CMD_RICNU;
-	(*cmdType) = READ;
+	(*cmdType) = CMD_READ;
 
 	//Data:
 	shBuf[index++] = 100 + offset;
 	//An offset >= 100 means a pure Read, with no writing (not a RW)
+	//Fill the other fields with zeros to avoid problems:
+	shBuf[index++] = 0;
+	SPLIT_32(0, shBuf, &index);
+	shBuf[index++] = 0;
+	SPLIT_16(0, shBuf, &index);
+	SPLIT_16(0, shBuf, &index);
+	SPLIT_16(0, shBuf, &index);
+	SPLIT_16(0, shBuf, &index);
 
 	//Payload length:
 	(*len) = index;
@@ -109,7 +117,7 @@ void tx_cmd_ricnu_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 
 	//Formatting:
 	(*cmd) = CMD_RICNU;
-	(*cmdType) = WRITE;
+	(*cmdType) = CMD_WRITE;
 
 	//Data:
 	shBuf[index++] = offset;
@@ -180,17 +188,22 @@ void rx_cmd_ricnu_rw(uint8_t *buf, uint8_t *info)
 
 	#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 
-	//An offset >= 100 means a pure Read, with no writing (not a RW)
-	if(offset < 100)
-	{
-		//Act on the decoded data:
-		rx_cmd_ricnu_Action1(tmpController, tmpSetpoint, tmpSetGains, tmpGain[0],
-								tmpGain[1], tmpGain[2], tmpGain[3]);
-	}
+		//An offset >= 100 means a pure Read, with no writing (not a RW)
+		if(offset < 100)
+		{
+			//Act on the decoded data:
+			rx_cmd_ricnu_Action1(tmpController, tmpSetpoint, tmpSetGains, tmpGain[0],
+									tmpGain[1], tmpGain[2], tmpGain[3]);
+		}
+		else
+		{
+			offset -= 100;
+		}
+	
 	#endif
 
 	//Reply:
-	tx_cmd_ankle2dof_w(TX_N_DEFAULT, buf[P_DATA1]);
+	tx_cmd_ricnu_w(TX_N_DEFAULT, offset);
 	packAndSend(P_AND_S_DEFAULT, buf[P_XID], info, SEND_TO_MASTER);
 }
 
