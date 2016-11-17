@@ -50,9 +50,6 @@ extern "C" {
 // Variable(s)
 //****************************************************************************
 
-//Will change this, but for now the payloads will be stored in: (ToDo eliminate soon)
-uint8_t tmp_payload_xmit[PAYLOAD_BUF_LEN];
-
 //****************************************************************************
 // Function(s)
 //****************************************************************************

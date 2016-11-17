@@ -97,7 +97,7 @@ void user_fsm(void);
 //==========================================
 
 #define ACTIVE_PROJECT			PROJECT_ANKLE_2DOF
-#define ACTIVE_SUBPROJECT		SUBPROJECT_B
+#define ACTIVE_SUBPROJECT		SUBPROJECT_A
 
 //Step 2) Customize the enabled/disabled sub-modules:
 //===================================================
@@ -150,7 +150,7 @@ void user_fsm(void);
 	#define USE_USB
 	#define USE_COMM			//Requires USE_RS485 and/or USE_USB
 	//#define USE_QEI
-	//#define USE_TRAPEZ
+	#define USE_TRAPEZ
 	#define USE_I2C_0			//3V3, IMU & Expansion.
 	#define USE_I2C_1			//5V, Safety-CoP & strain gauge pot.
 	#define USE_IMU				//Requires USE_I2C_0

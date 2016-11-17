@@ -59,7 +59,6 @@ extern "C" {
 void init_flexsea_payload_ptr_user(void)
 {
 	//MIT 2-dof Ankle:
-	//flexsea_payload_ptr[CMD_USER1][RX_PTYPE_READ] = &rx_cmd_special_5;	//ToDo remove
 	flexsea_payload_ptr[CMD_A2DOF][RX_PTYPE_READ] = &rx_cmd_ankle2dof_rw;
 	flexsea_payload_ptr[CMD_A2DOF][RX_PTYPE_REPLY] = &rx_cmd_ankle2dof_rr;
 
