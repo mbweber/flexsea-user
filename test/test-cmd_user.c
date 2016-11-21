@@ -44,7 +44,6 @@ void test_tx_cmd_a2dof_r(void)
 	uint8_t slave = 17, controller = CTRL_OPEN;
 	int16_t pwm = -1234, current = 12500;
 	int16_t res_pwm = 0, res_current = 0;
-	uint16_t numb = 0;
 	uint8_t outputBuf[48];
 	uint16_t index = 0;
 

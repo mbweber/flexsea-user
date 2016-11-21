@@ -50,12 +50,6 @@ void tx_cmd_ricnu_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 void tx_cmd_ricnu_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 					uint16_t *len, uint8_t offset);
 
-//Read All RICNU - ToDo delete?
-uint32_t tx_cmd_data_read_all_ricnu(uint8_t receiver, uint8_t cmd_type, uint8_t *buf, uint32_t len);
-
-
-void rx_cmd_data_read_all_ricnu(uint8_t *buf);
-
 //Decoding:
 void rx_cmd_ricnu_Action1(uint8_t controller, int32_t setpoint, uint8_t setGains,
 						int16_t g0,	int16_t g1,	int16_t g2, int16_t g3);

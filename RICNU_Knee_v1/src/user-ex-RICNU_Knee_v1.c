@@ -55,6 +55,8 @@ static void ricnu_knee_refresh_values(void);
 //Call this function once in main.c, just before the while()
 void init_ricnu_knee(void)
 {	
+	board_id = SLAVE_ID;
+	
 	//FlexSEA-Execute setup:
     //Example:	ctrl.active_ctrl = CTRL_OPEN;	//Open controller
     //Example: motor_open_speed_1(0);			//0% PWM
@@ -75,7 +77,7 @@ void init_ricnu_knee(void)
 }
 
 //Knee Finite State Machine.
-//Call this function in one of the main while time slots.
+//Call this function in one of the main while time slots (demo only)
 void ricnu_knee_fsm(void)
 {
     static uint16 time = 0;
