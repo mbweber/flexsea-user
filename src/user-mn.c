@@ -17,9 +17,9 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *****************************************************************************
 	[Lead developper] Jean-Francois (JF) Duval, jfduval at dephy dot com.
-	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab 
+	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab
 	Biomechatronics research group <http://biomech.media.mit.edu/>
-	[Contributors] 
+	[Contributors]
 *****************************************************************************
 	[This file] user: User Projects & Functions
 *****************************************************************************
@@ -51,7 +51,7 @@ struct ankle2dof_s ankle2dof_left, ankle2dof_right;
 
 //****************************************************************************
 // Private Function Prototype(s):
-//****************************************************************************	
+//****************************************************************************
 
 //****************************************************************************
 // Public Function(s)
@@ -64,7 +64,7 @@ void init_user(void)
 	#if(ACTIVE_PROJECT == PROJECT_RICNU_KNEE)
 	init_ricnu_knee();
 	#endif	//PROJECT_RICNU_KNEE
-	
+
 	//MIT Ankle 2-DoF:
 	#if(ACTIVE_PROJECT == PROJECT_ANKLE_2DOF)
 	init_ankle_2dof();
@@ -78,10 +78,10 @@ void user_fsm_1(void)
 	#if(ACTIVE_PROJECT == PROJECT_ANKLE_2DOF)
 	ankle_2dof_fsm_1();
 	#endif	//PROJECT_ANKLE_2DOF
-	
+
 	//RIC/NU Knee code
 	#if(ACTIVE_PROJECT == PROJECT_RICNU_KNEE)
-	ricnu_knee_fsm();
+	ricnu_knee_fsm_1();
 	#endif	//PROJECT_RICNU_KNEE
 }
 
@@ -93,6 +93,11 @@ void user_fsm_2(void)
 	#if(ACTIVE_PROJECT == PROJECT_ANKLE_2DOF)
 	ankle_2dof_fsm_2();
 	#endif	//PROJECT_ANKLE_2DOF
+
+	//RIC/NU Knee code
+	#if(ACTIVE_PROJECT == PROJECT_RICNU_KNEE)
+	ricnu_knee_fsm_2();
+	#endif	//PROJECT_RICNU_KNEE
 }
 
 //****************************************************************************

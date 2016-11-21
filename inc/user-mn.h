@@ -17,9 +17,9 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *****************************************************************************
 	[Lead developper] Jean-Francois (JF) Duval, jfduval at dephy dot com.
-	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab 
+	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab
 	Biomechatronics research group <http://biomech.media.mit.edu/>
-	[Contributors] 
+	[Contributors]
 *****************************************************************************
 	[This file] user: User Projects & Functions
 *****************************************************************************
@@ -37,12 +37,12 @@
 
 //****************************************************************************
 // Include(s)
-//****************************************************************************		
-	
+//****************************************************************************
+
 #include "user-mn-RICNU_Knee_v1.h"
 #include "user-mn-MIT_2DoF_Ankle_v1.h"
 //Add your project specific user_x.h file here
-	
+
 //****************************************************************************
 // Shared variable(s)
 //****************************************************************************
@@ -56,7 +56,7 @@ extern struct ankle2dof_s ankle2dof_left, ankle2dof_right;
 
 //****************************************************************************
 // Public Function Prototype(s):
-//****************************************************************************	
+//****************************************************************************
 
 void init_user(void);
 void user_fsm_1(void);
@@ -64,7 +64,7 @@ void user_fsm_2(void);
 
 //****************************************************************************
 // Definition(s):
-//****************************************************************************	
+//****************************************************************************
 
 //List of projects:
 #define PROJECT_BAREBONE		0	//Barebone Execute, default option.
@@ -81,7 +81,7 @@ void user_fsm_2(void);
 //Step 1) Select active project (from list):
 //==========================================
 
-#define ACTIVE_PROJECT			PROJECT_ANKLE_2DOF
+#define ACTIVE_PROJECT			PROJECT_RICNU_KNEE
 #define ACTIVE_SUBPROJECT		SUBPROJECT_NONE
 
 //Step 2) Customize the enabled/disabled sub-modules:
@@ -89,7 +89,7 @@ void user_fsm_2(void);
 
 //Barebone FlexSEA-Manage project - no external peripherals.
 #if(ACTIVE_PROJECT == PROJECT_BAREBONE)
-	
+
 	//Enable/Disable sub-modules:
 	//ToDo see what drivers I have, and mod this code:
 	#define USE_RS485
@@ -98,13 +98,13 @@ void user_fsm_2(void);
 	//#define USE_I2C_0			//3V3, IMU & Expansion.
 	//#define USE_I2C_1			//5V, Safety-CoP & strain gauge pot.
 	//#define USE_IMU			//Requires USE_I2C_0
-	
+
 	//Runtime finite state machine (FSM):
 	#define RUNTIME_FSM		DISABLED
-	
+
 	//Project specific definitions:
 	//...
-	
+
 #endif	//PROJECT_BAREBONE
 
 //CSEA Knee
@@ -114,33 +114,45 @@ void user_fsm_2(void);
 
 //RIC/NU Knee
 #if(ACTIVE_PROJECT == PROJECT_RICNU_KNEE)
-//...
-#endif	//PROJECT_RICNU_KNEE
 
-//MIT 2-DoF Ankle
-#if(ACTIVE_PROJECT == PROJECT_ANKLE_2DOF)
-	
 	//Enable/Disable sub-modules:
 	#define USE_RS485
 	#define USE_USB
 	#define USE_COMM			//Requires USE_RS485 and/or USE_USB
-	//#define USE_TRAPEZ
-	//#define USE_I2C_0			//3V3, IMU & Expansion.
-	//#define USE_I2C_1			//5V, Safety-CoP & strain gauge pot.
-	//#define USE_IMU			//Requires USE_I2C_0
-	
+	//#define USE_I2C			//
+	//#define USE_IMU			//Requires USE_I2C
+
 	//Runtime finite state machine (FSM):
 	#define RUNTIME_FSM1		ENABLED
 	#define RUNTIME_FSM2		ENABLED
-	
+
 	//Project specific definitions:
 	//...
-	
+
+#endif	//PROJECT_RICNU_KNEE
+
+//MIT 2-DoF Ankle
+#if(ACTIVE_PROJECT == PROJECT_ANKLE_2DOF)
+
+	//Enable/Disable sub-modules:
+	#define USE_RS485
+	#define USE_USB
+	#define USE_COMM			//Requires USE_RS485 and/or USE_USB
+	//#define USE_I2C			//
+	//#define USE_IMU			//Requires USE_I2C
+
+	//Runtime finite state machine (FSM):
+	#define RUNTIME_FSM1		ENABLED
+	#define RUNTIME_FSM2		ENABLED
+
+	//Project specific definitions:
+	//...
+
 #endif	//PROJECT_ANKLE_2DOF
 
 //****************************************************************************
 // Structure(s)
-//****************************************************************************	
+//****************************************************************************
 
 struct ankle2dof_s
 {
@@ -151,7 +163,7 @@ struct ankle2dof_s
 	uint8_t ctrl_i;					//Current
 	struct gains_s ctrl_i_gains;	//Current controller gains
 };
-	
+
 #endif	//INC_USER_H
 
 #endif //BOARD_TYPE_FLEXSEA_MANAGE
