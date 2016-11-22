@@ -158,11 +158,10 @@ void ricnu_knee_fsm_2(void)
 
 			break;
 
-		case 1:	//Communicating with Execute #1
+		case 1:	//Communicating with Execute #1, offset = 0
 
 			info[0] = PORT_485_1;
 			tx_cmd_ricnu_rw(TX_N_DEFAULT, 0, my_ricnu_control, my_ricnu_pwm, KEEP, 0, 0, 0, 0);
-
 			packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_1, info, SEND_TO_SLAVE);
 
 			slaves_485_1.xmit.listen = 1;
@@ -177,9 +176,13 @@ void ricnu_knee_fsm_2(void)
 
 			break;
 
-		case 3:	//
+		case 3:	//Communicating with Execute #1, offset = 1
 
-			//Skipping one cycle
+			info[0] = PORT_485_1;
+			tx_cmd_ricnu_rw(TX_N_DEFAULT, 1, my_ricnu_control, my_ricnu_pwm, KEEP, 0, 0, 0, 0);
+			packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_1, info, SEND_TO_SLAVE);
+
+			slaves_485_1.xmit.listen = 1;
 			ex_refresh_fsm_state++;
 
 			break;
