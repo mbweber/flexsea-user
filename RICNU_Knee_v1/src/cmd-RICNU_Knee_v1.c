@@ -159,6 +159,47 @@ void tx_cmd_ricnu_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 
 	#endif	//BOARD_TYPE_FLEXSEA_EXECUTE
 
+
+	#ifdef BOARD_TYPE_FLEXSEA_MANAGE
+
+		//struct execute_s *ex = &exec1;
+		struct ricnu_s *rn = &ricnu_1;
+
+		//Arguments:
+		if(offset == 0)
+		{
+			SPLIT_16((uint16_t)rn->ex.gyro.x, shBuf, &index);
+			SPLIT_16((uint16_t)rn->ex.gyro.y, shBuf, &index);
+			SPLIT_16((uint16_t)rn->ex.gyro.z, shBuf, &index);
+			SPLIT_16((uint16_t)rn->ex.accel.x, shBuf, &index);
+			SPLIT_16((uint16_t)rn->ex.accel.y, shBuf, &index);
+			SPLIT_16((uint16_t)rn->ex.accel.z, shBuf, &index);
+			SPLIT_32((uint32_t)rn->ex.enc_motor, shBuf, &index);
+			SPLIT_32((uint32_t)rn->ex.enc_joint, shBuf, &index);
+			SPLIT_16((uint16_t)rn->ex.current, shBuf, &index);
+		}
+		else if(offset == 1)
+		{
+			//Compressed Strain:
+
+			shBuf[index++] = rn->st.compressedBytes[0];
+			shBuf[index++] = rn->st.compressedBytes[1];
+			shBuf[index++] = rn->st.compressedBytes[2];
+			shBuf[index++] = rn->st.compressedBytes[3];
+			shBuf[index++] = rn->st.compressedBytes[4];
+			shBuf[index++] = rn->st.compressedBytes[5];
+			shBuf[index++] = rn->st.compressedBytes[6];
+			shBuf[index++] = rn->st.compressedBytes[7];
+			shBuf[index++] = rn->st.compressedBytes[8];
+			//Include other variables here (ToDo)
+		}
+		else
+		{
+			//Deal with other offsets here...
+		}
+
+	#endif	//BOARD_TYPE_FLEXSEA_EXECUTE
+
 	//Payload length:
 	(*len) = index;
 }
@@ -186,21 +227,21 @@ void rx_cmd_ricnu_rw(uint8_t *buf, uint8_t *info)
 	tmpGain[2] = (int16_t)REBUILD_UINT16(buf, &index);
 	tmpGain[3] = (int16_t)REBUILD_UINT16(buf, &index);
 
-	#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
+	//An offset >= 100 means a pure Read, with no writing (not a RW)
+	if(offset < 100)
+	{
+		#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 
-		//An offset >= 100 means a pure Read, with no writing (not a RW)
-		if(offset < 100)
-		{
 			//Act on the decoded data:
 			rx_cmd_ricnu_Action1(tmpController, tmpSetpoint, tmpSetGains, tmpGain[0],
 									tmpGain[1], tmpGain[2], tmpGain[3]);
-		}
-		else
-		{
-			offset -= 100;
-		}
-	
-	#endif
+
+		#endif
+	}
+	else
+	{
+		offset -= 100;
+	}
 
 	//Reply:
 	tx_cmd_ricnu_w(TX_N_DEFAULT, offset);
