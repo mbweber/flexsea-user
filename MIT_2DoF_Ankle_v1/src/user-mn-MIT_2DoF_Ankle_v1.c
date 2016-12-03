@@ -203,8 +203,8 @@ void ankle_2dof_fsm_1(void)
 				tx_cmd_ctrl_i_g_w(TX_N_DEFAULT, 30, 0, 0);
 				packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_2, info, SEND_TO_SLAVE);
 
-				user_data.w[0] = 100;
-				user_data.w[1] = 100;
+				user_data_1.w[0] = 100;
+				user_data_1.w[1] = 100;
 			}
 
             break;
@@ -402,8 +402,8 @@ static void ankle_2dof_refresh_values(void)
 	mot_vel_1 = (mot_angs_1[0]-mot_angs_1[5]);
 	mot_vel_2 = (mot_angs_2[0]-mot_angs_2[5]);
 
-	user_data.r[0] = ank_angs_1[0];
-	user_data.r[1] = ank_angs_2[0];
+	user_data_1.r[0] = ank_angs_1[0];
+	user_data_1.r[1] = ank_angs_2[0];
 
 }
 //That function can be called from the FSM.
@@ -447,7 +447,7 @@ void set_ankle_torque_1(int32_t des_torque) //des_torque in mNm
     int32_t motor_torque = des_torque/(ankle_trans_1/10); 	//[mNm] at the motor
     int32_t des_motor_current = motor_torque*10; 			//[mA] at the motor
     my_cur[0] = des_motor_current; 							//[current IU]
-    user_data.r[2] = des_motor_current; 					//[current IU]
+    user_data_1.r[2] = des_motor_current; 					//[current IU]
 }
 
 void set_ankle_torque_2(int32_t des_torque) //des_torque in mNm
@@ -455,7 +455,7 @@ void set_ankle_torque_2(int32_t des_torque) //des_torque in mNm
     int32_t motor_torque = des_torque/(ankle_trans_2/10); 	//[mNm] at the motor
     int32_t des_motor_current = motor_torque*10; 			//[mA] at the motor
     my_cur[1] = des_motor_current; 							//[current IU]
-    user_data.r[3] = des_motor_current; 					//[current IU]
+    user_data_1.r[3] = des_motor_current; 					//[current IU]
 }
 
 #endif 	//BOARD_TYPE_FLEXSEA_MANAGE
