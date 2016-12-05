@@ -91,9 +91,9 @@ void init_ankle_2dof(void)
 //Call this function in one of the main while time slots.
 void ankle_2dof_fsm_1(void)
 {
-	uint8_t info[2] = {PORT_485_1, PORT_485_1};
-
 	#if(ACTIVE_PROJECT == PROJECT_ANKLE_2DOF)
+
+	uint8_t info[2] = {PORT_485_1, PORT_485_1};
     static uint32_t time = 0, state_t = 0;
 
     //Increment time (1 tick = 1ms)
