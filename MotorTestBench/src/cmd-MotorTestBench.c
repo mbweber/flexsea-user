@@ -183,10 +183,12 @@ void tx_cmd_motortb_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 
 void rx_cmd_motortb_rw(uint8_t *buf, uint8_t *info)
 {
+	uint8_t offset = 0;
+	offset = buf[P_DATA1];
+
 	#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 
 		int16_t tmp_wanted_current = 0, tmp_open_spd = 0;
-		uint8_t offset = 0;
 		uint16_t index = P_DATA1;
 		offset = buf[index++];
 
@@ -213,9 +215,6 @@ void rx_cmd_motortb_rw(uint8_t *buf, uint8_t *info)
 	#endif	//BOARD_TYPE_FLEXSEA_EXECUTE
 
 	#ifdef BOARD_TYPE_FLEXSEA_MANAGE
-
-		uint8_t offset = 0;
-		offset = buf[P_DATA1];
 
 	#endif	//BOARD_TYPE_FLEXSEA_MANAGE
 
@@ -257,7 +256,7 @@ void rx_cmd_motortb_rr(uint8_t *buf, uint8_t *info)
 			{
 				exec_s_ptr = &exec1;
 			}
-			else if(slave == 1)
+			else if(offset == 1)
 			{
 				exec_s_ptr = &exec2;
 			}
