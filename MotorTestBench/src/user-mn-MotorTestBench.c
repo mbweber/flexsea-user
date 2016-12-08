@@ -137,7 +137,7 @@ void MotorTestBench_fsm_1(void)
 			break;
 	}
 
-	#endif	//ACTIVE_PROJECT == PROJECT_ANKLE_2DOF
+	#endif	//ACTIVE_PROJECT == PROJECT_MOTORTB
 }
 
 //Second state machine for the Ankle project

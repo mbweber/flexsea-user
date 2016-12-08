@@ -104,7 +104,7 @@ void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 			shBuf[index++] = exec_s_ptr->status1;
 			shBuf[index++] = exec_s_ptr->status2;
 		}
-		else
+		else if(slave == 2)
 		{
 			//Offset 2: Battery board and Manage status
 
@@ -160,7 +160,7 @@ void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 }
 
 void tx_cmd_motortb_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
-							uint16_t *len, uint8_t slave, uint8_t controller, \
+							uint16_t *len, uint8_t offset, uint8_t controller, \
 							int16_t ctrl_i, int16_t ctrl_o)
 {
 	//Variable(s) & command:
@@ -169,10 +169,13 @@ void tx_cmd_motortb_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 	(*cmdType) = CMD_READ;
 
 	//Data:
-	shBuf[index++] = slave;
-	shBuf[index++] = controller;
-	SPLIT_16((uint16_t)ctrl_i, shBuf, &index);
-	SPLIT_16((uint16_t)ctrl_o, shBuf, &index);
+	shBuf[index++] = offset;
+	if(offset == 0 || offset == 1)
+	{
+		shBuf[index++] = controller;
+		SPLIT_16((uint16_t)ctrl_i, shBuf, &index);
+		SPLIT_16((uint16_t)ctrl_o, shBuf, &index);
+	}
 
 	//Payload length:
 	(*len) = index;
@@ -183,38 +186,41 @@ void rx_cmd_motortb_rw(uint8_t *buf, uint8_t *info)
 	#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 
 		int16_t tmp_wanted_current = 0, tmp_open_spd = 0;
-		uint8_t slave = 0;
+		uint8_t offset = 0;
 		uint16_t index = P_DATA1;
-		slave = buf[index++];
+		offset = buf[index++];
 
-		//Update controller:
-		control_strategy(buf[index++]);
+		if(offset == 0 || offset == 1)
+		{
+			//Update controller:
+			control_strategy(buf[index++]);
 
-		//Only change the setpoint if we are in current control mode:
-		if(ctrl.active_ctrl == CTRL_CURRENT)
-		{
-			index = P_DATA1+2;
-			tmp_wanted_current = (int16_t) REBUILD_UINT16(buf, &index);
-			ctrl.current.setpoint_val = tmp_wanted_current;
-		}
-		else if(ctrl.active_ctrl == CTRL_OPEN)
-		{
-			index = P_DATA1+4;
-			tmp_open_spd = (int16_t) REBUILD_UINT16(buf, &index);;
-			motor_open_speed_1(tmp_open_spd);
+			//Only change the setpoint if we are in current control mode:
+			if(ctrl.active_ctrl == CTRL_CURRENT)
+			{
+				index = P_DATA1+2;
+				tmp_wanted_current = (int16_t) REBUILD_UINT16(buf, &index);
+				ctrl.current.setpoint_val = tmp_wanted_current;
+			}
+			else if(ctrl.active_ctrl == CTRL_OPEN)
+			{
+				index = P_DATA1+4;
+				tmp_open_spd = (int16_t) REBUILD_UINT16(buf, &index);;
+				motor_open_speed_1(tmp_open_spd);
+			}
 		}
 
 	#endif	//BOARD_TYPE_FLEXSEA_EXECUTE
 
 	#ifdef BOARD_TYPE_FLEXSEA_MANAGE
 
-		uint8_t slave = 0;
-		slave = buf[P_DATA1];
+		uint8_t offset = 0;
+		offset = buf[P_DATA1];
 
 	#endif	//BOARD_TYPE_FLEXSEA_MANAGE
 
 	//Reply:
-	tx_cmd_motortb_w(TX_N_DEFAULT, buf[P_DATA1]);
+	tx_cmd_motortb_w(TX_N_DEFAULT, offset);
 	packAndSend(P_AND_S_DEFAULT, buf[P_XID], info, SEND_TO_MASTER);
 }
 
@@ -224,30 +230,30 @@ void rx_cmd_motortb_rr(uint8_t *buf, uint8_t *info)
 
 	#if((defined BOARD_TYPE_FLEXSEA_MANAGE) || (defined BOARD_TYPE_FLEXSEA_PLAN))
 
-		uint8_t slave = 0;
+		uint8_t offset = 0;
 		uint16_t index = 0;
 		struct execute_s *exec_s_ptr = &exec1;
 
 		#if((defined BOARD_TYPE_FLEXSEA_MANAGE))
 
-			slave = buf[P_XID];
-			//Assign data structure based on slave:
-			if(slave == FLEXSEA_EXECUTE_1)
-			{
-				exec_s_ptr = &exec1;
-			}
-			else
-			{
-				exec_s_ptr = &exec2;
-			}
+		offset = buf[P_XID];
+		//Assign data structure based on slave:
+		if(offset == FLEXSEA_EXECUTE_1)
+		{
+			exec_s_ptr = &exec1;
+		}
+		else
+		{
+			exec_s_ptr = &exec2;
+		}
 
 		#endif	//((defined BOARD_TYPE_FLEXSEA_MANAGE))
 
 		#if((defined BOARD_TYPE_FLEXSEA_PLAN))
 
-			slave = buf[P_DATA1];
+			offset = buf[P_DATA1];
 			//Assign data structure based on slave:
-			if(slave == 0)
+			if(offset == 0)
 			{
 				exec_s_ptr = &exec1;
 			}
@@ -261,7 +267,7 @@ void rx_cmd_motortb_rr(uint8_t *buf, uint8_t *info)
 		#if((defined BOARD_TYPE_FLEXSEA_MANAGE) || (defined BOARD_TYPE_FLEXSEA_PLAN))
 
 			index = P_DATA1+1;
-			if(slave == 0 || slave == 1)
+			if(offset == 0 || offset == 1)
 			{
 				exec_s_ptr->gyro.x = (int16_t) REBUILD_UINT16(buf, &index);
 				exec_s_ptr->gyro.y = (int16_t) REBUILD_UINT16(buf, &index);
@@ -282,7 +288,7 @@ void rx_cmd_motortb_rr(uint8_t *buf, uint8_t *info)
 				exec_s_ptr->status1 = buf[index++];
 				exec_s_ptr->status2 = buf[index++];
 			}
-			else
+			else if(offset == 2)
 			{
 				batt1.rawBytes[0] = buf[index++];
 				batt1.rawBytes[1] = buf[index++];

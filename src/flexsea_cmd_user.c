@@ -62,9 +62,9 @@ void init_flexsea_payload_ptr_user(void)
 	flexsea_payload_ptr[CMD_A2DOF][RX_PTYPE_REPLY] = &rx_cmd_ankle2dof_rr;
 
 	//RIC/NU Knee:
-	flexsea_payload_ptr[CMD_USER2][RX_PTYPE_READ] = &rx_cmd_ricnu_rw;
-	flexsea_payload_ptr[CMD_USER2][RX_PTYPE_WRITE] = &rx_cmd_ricnu_w;
-	flexsea_payload_ptr[CMD_USER2][RX_PTYPE_REPLY] = &rx_cmd_ricnu_rr;
+	flexsea_payload_ptr[CMD_RICNU][RX_PTYPE_READ] = &rx_cmd_ricnu_rw;
+	flexsea_payload_ptr[CMD_RICNU][RX_PTYPE_WRITE] = &rx_cmd_ricnu_w;
+	flexsea_payload_ptr[CMD_RICNU][RX_PTYPE_REPLY] = &rx_cmd_ricnu_rr;
 
 	//Motor Test Bench:
 	flexsea_payload_ptr[CMD_MOTORTB][RX_PTYPE_READ] = &rx_cmd_motortb_rw;
