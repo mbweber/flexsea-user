@@ -52,6 +52,8 @@ int16_t mtb_glob_var_1;
 int16_t mtb_glob_var_2;
 int16_t mtb_glob_var_3;
 
+struct motortb_s motortb;
+
 
 //****************************************************************************
 // Private Function Prototype(s):
@@ -219,7 +221,14 @@ void MotorTestBench_fsm_2(void)
 //
 static void MotorTestBench_refresh_values(void)
 {
-	//...
+	//Test values:
+	motortb.mn1[0] = -100;
+	motortb.mn1[1] = -50;
+	motortb.mn1[2] = 0;
+	motortb.mn1[3] = 50;
+	motortb.mn1[4] = 100;
+	motortb.mn1[5] = 10000;
+	motortb.mn1[6] = 32768;
 }
 //That function can be called from the FSM.
 
