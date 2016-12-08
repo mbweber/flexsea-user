@@ -230,20 +230,22 @@ void rx_cmd_motortb_rr(uint8_t *buf, uint8_t *info)
 
 	#if((defined BOARD_TYPE_FLEXSEA_MANAGE) || (defined BOARD_TYPE_FLEXSEA_PLAN))
 
-		uint8_t offset = 0;
+		uint8_t offset = 0, slave = 0;
 		uint16_t index = 0;
 		struct execute_s *exec_s_ptr = &exec1;
 
 		#if((defined BOARD_TYPE_FLEXSEA_MANAGE))
 
-		offset = buf[P_XID];
+		slave = buf[P_XID];
 		//Assign data structure based on slave:
-		if(offset == FLEXSEA_EXECUTE_1)
+		if(slave == FLEXSEA_EXECUTE_1)
 		{
+			offset = 0;
 			exec_s_ptr = &exec1;
 		}
 		else
 		{
+			offset = 1;
 			exec_s_ptr = &exec2;
 		}
 
