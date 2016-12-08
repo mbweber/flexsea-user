@@ -1,6 +1,6 @@
 /****************************************************************************
 	[Project] FlexSEA: Flexible & Scalable Electronics Architecture
-	[Sub-project] 'flexsea-user' User projects
+	[Sub-project] 'user/MIT_2DoF_Ankle' MIT Biomechatronics 2-dof Ankle
 	Copyright (C) 2016 Dephy, Inc. <http://dephy.com/>
 
 	This program is free software: you can redistribute it and/or modify
@@ -16,90 +16,46 @@
 	You should have received a copy of the GNU General Public License
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *****************************************************************************
-	[Lead developper] Jean-Francois Duval, jfduval at dephy dot com.
-	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab 
+	[Lead developper] Jean-Francois (JF) Duval, jfduval at dephy dot com.
+	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab
 	Biomechatronics research group <http://biomech.media.mit.edu/>
 	[Contributors]
 *****************************************************************************
-	[This file] user-ex: User Projects & Functions, FlexSEA-Execute
-*****************************************************************************
-	[Change log] (Convention: YYYY-MM-DD | author | comment)
-	* 2016-10-30 | jfduval | New release
-	*
+	[This file] cmd-MIT_2DoF_Ankle: Custom commands for this project
 ****************************************************************************/
 
-#include "main.h"
-
-#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
-
-/*Important: we reached a point where we couldn't support all configurations
-  without changing the TopDesign (we ran out of ressources). You might have
-  to select a different TopDesign file than the one included by default (check
-  the folded, there is more than one included) */
+#ifndef INC_FLEXSEA_CMD_MOTORTB_H
+#define INC_FLEXSEA_CMD_MOTORTB_H
 
 //****************************************************************************
 // Include(s)
 //****************************************************************************
 
-#include "../inc/user-ex.h"
+#include "flexsea_system.h"
 
 //****************************************************************************
-// Variable(s)
+// Prototype(s):
+//****************************************************************************
+
+void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
+							uint16_t *len, uint8_t slave);
+void tx_cmd_motortb_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
+							uint16_t *len, uint8_t slave, uint8_t controller, \
+							int16_t ctrl_i, int16_t ctrl_o);
+void rx_cmd_motortb_rw(uint8_t *buf, uint8_t *info);
+void rx_cmd_motortb_rr(uint8_t *buf, uint8_t *info);
+
+//****************************************************************************
+// Definition(s):
 //****************************************************************************
 
 //****************************************************************************
-// Private Function Prototype(s):
+// Structure(s):
 //****************************************************************************
 
-static void init_barebone(void);
-
 //****************************************************************************
-// Public Function(s)
+// Shared variable(s)
 //****************************************************************************
 
-//Initialization function - call once in main.c, before while()
-void init_user(void)
-{	
-	//Barebone:
-	#if(ACTIVE_PROJECT == PROJECT_BAREBONE)
-	init_barebone();
-	#endif	//PROJECT_BAREBONE
-	
-	//MIT Ankle 2-DoF:
-	#if(ACTIVE_PROJECT == PROJECT_ANKLE_2DOF)
-	init_ankle_2dof();
-	#endif	//PROJECT_ANKLE_2DOF
-	
-	//RIC/NU Knee:
-	#if(ACTIVE_PROJECT == PROJECT_RICNU_KNEE)
-	init_ricnu_knee();
-	#endif	//PROJECT_RICNU_KNEE
-	
-	//Motor Test Bench:
-	#if(ACTIVE_PROJECT == PROJECT_MOTORTB)
-	initMotorTestBench();
-	#endif	//PROJECT_MOTORTB
-}
 
-//Call this function in one of the main while time slots.
-void user_fsm(void)
-{
-	//Motor Test Bench:
-	#if(ACTIVE_PROJECT == PROJECT_MOTORTB)
-	MotorTestBench_fsm();
-	#endif	//PROJECT_MOTORTB
-}
-
-//****************************************************************************
-// Private Function(s)
-//****************************************************************************
-
-static void init_barebone(void)
-{
-	//Barebone:
-	#if(ACTIVE_PROJECT == PROJECT_BAREBONE)
-	board_id = SLAVE_ID;
-	#endif	//PROJECT_BAREBONE
-}
-
-#endif //BOARD_TYPE_FLEXSEA_EXECUTE
+#endif	//INC_FLEXSEA_CMD_MOTORTB_H

@@ -69,6 +69,11 @@ void init_user(void)
 	#if(ACTIVE_PROJECT == PROJECT_ANKLE_2DOF)
 	init_ankle_2dof();
 	#endif	//PROJECT_ANKLE_2DOF
+
+	//Motor Test Bench:
+	#if(ACTIVE_PROJECT == PROJECT_MOTORTB)
+	init_MotorTestBench();
+	#endif	//PROJECT_MOTORTB
 }
 
 //Call this function in one of the main while time slots.
@@ -83,6 +88,11 @@ void user_fsm_1(void)
 	#if(ACTIVE_PROJECT == PROJECT_RICNU_KNEE)
 	ricnu_knee_fsm_1();
 	#endif	//PROJECT_RICNU_KNEE
+
+	//Motor Test Bench
+	#if(ACTIVE_PROJECT == PROJECT_MOTORTB)
+	MotorTestBench_fsm_1();
+	#endif	//PROJECT_MOTORTB
 }
 
 //Optional second FSM
@@ -98,6 +108,11 @@ void user_fsm_2(void)
 	#if(ACTIVE_PROJECT == PROJECT_RICNU_KNEE)
 	ricnu_knee_fsm_2();
 	#endif	//PROJECT_RICNU_KNEE
+
+	//Motor Test Bench
+	#if(ACTIVE_PROJECT == PROJECT_MOTORTB)
+	MotorTestBench_fsm_2();
+	#endif	//PROJECT_MOTORTB
 }
 
 //****************************************************************************
