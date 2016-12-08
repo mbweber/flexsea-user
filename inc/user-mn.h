@@ -97,7 +97,6 @@ void user_fsm_2(void);
 	#define USE_I2C_1			//3V3, IMU & Digital pot
 	#define USE_I2C_2			//3V3, Expansion
 	#define USE_IMU				//Requires USE_I2C_1
-	#define USE_BATTBOARD		//Battery Board
 
 	//Runtime finite state machine (FSM):
 	#define RUNTIME_FSM1		DISABLED
