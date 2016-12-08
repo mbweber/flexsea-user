@@ -33,6 +33,7 @@
 //****************************************************************************
 
 #include "flexsea_system.h"
+#include "flexsea_user_structs.h"
 
 //Include one or more a user project(s):
 #include "../MIT_2DoF_Ankle_v1/inc/cmd-MIT_2DoF_Ankle_v1.h"

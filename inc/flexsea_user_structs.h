@@ -1,6 +1,6 @@
 /****************************************************************************
 	[Project] FlexSEA: Flexible & Scalable Electronics Architecture
-	[Sub-project] 'flexsea-manage' Mid-level computing, and networking
+	[Sub-project] 'flexsea-system' System commands & functions
 	Copyright (C) 2016 Dephy, Inc. <http://dephy.com/>
 
 	This program is free software: you can redistribute it and/or modify
@@ -16,45 +16,51 @@
 	You should have received a copy of the GNU General Public License
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *****************************************************************************
-	[Lead developper] Luke Mooney, lmooney at dephy dot com.
+	[Lead developper] Jean-Francois (JF) Duval, jfduval at dephy dot com.
 	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab
 	Biomechatronics research group <http://biomech.media.mit.edu/>
 	[Contributors]
 *****************************************************************************
-	[This file]
+	[This file] flexsea_global_structs: contains all the data structures
+	used across the project
+*****************************************************************************
+	[Change log] (Convention: YYYY-MM-DD | author | comment)
+	* 2016-12-08 | jfduval | Initial release
+	*
 ****************************************************************************/
 
-#include "main.h"
-
-#ifdef BOARD_TYPE_FLEXSEA_MANAGE
-
-#ifndef INC_MOTORTB_MN_H
-#define INC_MOTORTB_MN_H
+#ifndef INC_FLEXSEA_USER_STRUCT_H
+#define INC_FLEXSEA_USER_STRUCT_H
 
 //****************************************************************************
 // Include(s)
 //****************************************************************************
 
-//****************************************************************************
-// Public Function Prototype(s):
-//****************************************************************************
+#include <stdint.h>
 
-void init_MotorTestBench(void);
-void MotorTestBench_fsm_1(void);
-void MotorTestBench_fsm_2(void);
+//****************************************************************************
+// Prototype(s):
+//****************************************************************************
 
 //****************************************************************************
 // Definition(s):
 //****************************************************************************
 
 //****************************************************************************
-// Structure(s)
+// Structure(s):
 //****************************************************************************
+
+struct motortb_s
+{
+	int16_t ex1[6];
+	int16_t ex2[6];
+	int16_t mn1[4];
+};
 
 //****************************************************************************
 // Shared variable(s)
 //****************************************************************************
 
-#endif	//INC_MOTORTB_MN_H
+extern struct motortb_s motortb;
 
-#endif 	//BOARD_TYPE_FLEXSEA_MANAGE
+#endif	//INC_FLEXSEA_GLOBAL_STRUCT_H
