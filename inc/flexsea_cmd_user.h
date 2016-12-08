@@ -37,6 +37,7 @@
 //Include one or more a user project(s):
 #include "../MIT_2DoF_Ankle_v1/inc/cmd-MIT_2DoF_Ankle_v1.h"
 #include "../RICNU_Knee_v1/inc/cmd-RICNU_Knee_v1.h"
+#include "../MotorTestBench/inc/cmd-MotorTestBench.h"
 
 //****************************************************************************
 // Prototype(s):
@@ -55,6 +56,7 @@ void init_flexsea_payload_ptr_user(void);
 #define CMD_A2DOF				100		//...by this one
 #define CMD_RICNU				101
 #define CMD_READ_ALL_RICNU		102
+#define CMD_MOTORTB				100		//Same as A2DOF
 
 //****************************************************************************
 // Structure(s):

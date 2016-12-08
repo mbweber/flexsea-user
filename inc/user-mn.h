@@ -41,6 +41,7 @@
 
 #include "user-mn-RICNU_Knee_v1.h"
 #include "user-mn-MIT_2DoF_Ankle_v1.h"
+#include "user-mn-MotorTestBench.h"
 //Add your project specific user_x.h file here
 
 //****************************************************************************
@@ -70,6 +71,7 @@ void user_fsm_2(void);
 #define PROJECT_BAREBONE		0	//Barebone Execute, default option.
 #define PROJECT_ANKLE_2DOF		1	//Biomechatronics 2-DOF Ankle
 #define PROJECT_RICNU_KNEE		3	//RIC/NU Knee
+#define PROJECT_MOTORTB			4
 
 //List of sub-projects:
 #define SUBPROJECT_NONE			0
@@ -146,6 +148,27 @@ void user_fsm_2(void);
 	//...
 
 #endif	//PROJECT_ANKLE_2DOF
+
+//Dephy's Motor Test Bench
+#if(ACTIVE_PROJECT == PROJECT_MOTORTB)
+
+	//Enable/Disable sub-modules:
+	#define USE_RS485
+	#define USE_USB
+	#define USE_COMM			//Requires USE_RS485 and/or USE_USB
+	#define USE_I2C_1			//3V3, IMU & Digital pot
+	#define USE_I2C_2			//3V3, Expansion
+	#define USE_IMU				//Requires USE_I2C_1
+	#define USE_BATTBOARD		//Battery Board, requires USE_I2C_1
+
+	//Runtime finite state machine (FSM):
+	#define RUNTIME_FSM1		ENABLED
+	#define RUNTIME_FSM2		ENABLED
+
+	//Project specific definitions:
+	//...
+
+#endif	//PROJECT_MOTORTB
 
 //****************************************************************************
 // Structure(s)

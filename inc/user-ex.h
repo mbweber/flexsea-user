@@ -17,7 +17,7 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *****************************************************************************
 	[Lead developper] Jean-Francois Duval, jfduval at dephy dot com.
-	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab 
+	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab
 	Biomechatronics research group <http://biomech.media.mit.edu/>
 	[Contributors]
 *****************************************************************************
@@ -46,8 +46,9 @@
 
 #include "../MIT_2DoF_Ankle_v1/inc/user-ex-MIT_2DoF_Ankle_v1.h"
 #include "../RICNU_Knee_v1/inc/user-ex-RICNU_Knee_v1.h"
+#include "../MotorTestBench/inc/user-ex-MotorTestBench.h"
 //Add your project specific user_x.h file here
-	
+
 //****************************************************************************
 // Shared variable(s)
 //****************************************************************************
@@ -71,7 +72,7 @@ void user_fsm(void);
 #define ENC_ANALOG				3	//Potentiometer (or other), on ext. analog in.
 #define ENC_AS5047				4	//16-bit Magnetic Position Sensor, SPI
 #define ENC_AS5048B				5	//14-bit Magnetic Position Sensor, I2C
-#define ENC_CUSTOM			  	6	//Heavily modified user variable that cannot 
+#define ENC_CUSTOM			  	6	//Heavily modified user variable that cannot
 									//be represented CTRL_ENC_FCT
 //(later you'll assign what encoder is used by the controllers, for motor
 // commutation, and which one is displayed in the GUI)
@@ -85,6 +86,7 @@ void user_fsm(void);
 #define PROJECT_BAREBONE		0	//Barebone Execute, default option.
 #define PROJECT_ANKLE_2DOF		1	//Biomechatronics 2-DOF Ankle
 #define PROJECT_RICNU_KNEE		2	//RIC/NU Knee
+#define PROJECT_MOTORTB			4
 
 //List of sub-projects:
 #define SUBPROJECT_NONE			0
@@ -132,19 +134,19 @@ void user_fsm(void);
 	#define ENC_DISPLAY		ENC_NONE
 	
 	//Control encoder function:
-	#define CTRL_ENC_FCT(x) (x)	
-	
+	#define CTRL_ENC_FCT(x) (x)
+
 	//Slave ID:
 	#define SLAVE_ID		FLEXSEA_EXECUTE_1
-	
+
 	//Project specific definitions:
 	//...
-	
+
 #endif	//PROJECT_BAREBONE
 
 //MIT 2-DoF Ankle
 #if(ACTIVE_PROJECT == PROJECT_ANKLE_2DOF)
-	 
+
 	//Enable/Disable sub-modules:
 	#define USE_RS485
 	#define USE_USB
@@ -157,11 +159,11 @@ void user_fsm(void);
 	//#define USE_STRAIN		//Requires USE_I2C_1
 	#define USE_AS5047			//16-bit Position Sensor, SPI
 	//#define USE_SPI_COMMUT	//
-	#define USE_EEPROM			//	
+	#define USE_EEPROM			//
 	#define USE_FLASH			//
 	#define USE_BLUETOOTH		//
 	#define USE_I2T_LIMIT		//I2t current limit
-	 
+
 	//Motor type and commutation:
 	#define MOTOR_COMMUT		COMMUT_SINE
 	#define MOTOR_TYPE			MOTOR_BRUSHLESS
@@ -179,8 +181,8 @@ void user_fsm(void);
 			//#define RUNTIME_FSM	 ENABLED
 		#endif
 	#endif
-	
-	#define CURRENT_ZERO		((int32)2065)  
+
+	#define CURRENT_ZERO		((int32)2065)
 
 	//Encoders:
 	#define ENC_CONTROL			ENC_AS5047
@@ -189,42 +191,42 @@ void user_fsm(void);
 
 	//Subproject A: Left execute board looking at the back of the ankle while it is standing up
 	#if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
-		 
+
 		//Control encoder function:
- 
-		#define PWM_SIGN			1 
-		#define CTRL_ENC_FCT(x) 	(x) 
-		#define CTRL_ENC_VEL_FCT(x) (x) 
-		//...
-		
-		//Slave ID:
-		#define SLAVE_ID		FLEXSEA_EXECUTE_2
-		 
-	#endif  //SUBPROJECT_A
-	 
-	//Subproject B: Right actuator
-	#if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
-		 
-		//Control encoder function:
-		#define PWM_SIGN		 -1
-		#define CTRL_ENC_FCT(x) (x) 
+
+		#define PWM_SIGN			1
+		#define CTRL_ENC_FCT(x) 	(x)
 		#define CTRL_ENC_VEL_FCT(x) (x)
 		//...
-		
+
+		//Slave ID:
+		#define SLAVE_ID		FLEXSEA_EXECUTE_2
+
+	#endif  //SUBPROJECT_A
+
+	//Subproject B: Right actuator
+	#if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
+
+		//Control encoder function:
+		#define PWM_SIGN		 -1
+		#define CTRL_ENC_FCT(x) (x)
+		#define CTRL_ENC_VEL_FCT(x) (x)
+		//...
+
 		//Slave ID:
 		#define SLAVE_ID		FLEXSEA_EXECUTE_1
 
 	#endif  //SUBPROJECT_B
-	 
+
 	//Project specific definitions:
 	extern int32 ankle_ang, ankle_trans, mot_vel;
-	//...   
-	
+	//...
+
 #endif  //PROJECT_ANKLE_2DOF
 
 //RIC/NU Knee
 #if(ACTIVE_PROJECT == PROJECT_RICNU_KNEE)
-	
+
 	//Enable/Disable sub-modules:
 	#define USE_RS485
 	#define USE_USB
@@ -240,18 +242,18 @@ void user_fsm(void);
 	#define USE_EEPROM			//Non-volatile memory, EEPROM
 	//#define USE_FLASH			//Non-volatile memory, FLASH
 	//#define USE_BLUETOOTH		//Bluetooth module on EX12/EX13
-	#define USE_I2T_LIMIT		//I2t current limit	
+	#define USE_I2T_LIMIT		//I2t current limit
 	#define USE_EXT_I2C_STRAIN	//External Strain Amplifier, on I2C0
 	#define USE_AS5048B			//14-bit Position Sensor, on I2C0
-	
+
 	//Motor type, direction and commutation:
 	#define MOTOR_COMMUT 			COMMUT_SINE
 	#define MOTOR_TYPE				MOTOR_BRUSHLESS
 	#define PWM_SIGN				1
-	
+
 	//Define if you want to find the poles:
-	//#define FINDPOLES 
-	 
+	//#define FINDPOLES
+
 	//Runtime finite state machine (FSM):
 	#ifdef FINDPOLES
 		#define RUNTIME_FSM	 	DISABLED
@@ -266,8 +268,8 @@ void user_fsm(void);
 	//Encoders:
 	#define ENC_CONTROL				ENC_AS5047
 	#define ENC_COMMUT				ENC_AS5047
-	#define ENC_DISPLAY				ENC_CONTROL	
-	
+	#define ENC_DISPLAY				ENC_CONTROL
+
 	//Control encoder function:
 	#if (ENC_CONTROL == ENC_AS5047)
 		#define CTRL_ENC_FCT(x) 		(x)	//ToDo make better
@@ -276,18 +278,97 @@ void user_fsm(void);
 		#define CTRL_ENC_FCT(x) 		(x)	//ToDo make better
 		#define CTRL_ENC_VEL_FCT(x) 	((x>>8))	//encoder velocity is measured in clicks/ms x 1024
 	#endif
-	
+
 	//Project specific definitions:
 	#define CURRENT_ZERO			((int32)2065)
-	
+
 	//Slave ID:
 	#define SLAVE_ID				FLEXSEA_EXECUTE_1
-	
+
 #endif	//PROJECT_RICNU_KNEE
+
+//Motor test bench
+#if(ACTIVE_PROJECT == PROJECT_MOTORTB)
+
+	//Enable/Disable sub-modules:
+	#define USE_RS485
+	#define USE_USB
+	#define USE_COMM			//Requires USE_RS485 and/or USE_USB
+	//#define USE_QEI
+	#define USE_TRAPEZ
+	#define USE_I2C_0			//3V3, IMU & Expansion.
+	#define USE_I2C_1			//5V, Safety-CoP & strain gauge pot.
+	#define USE_IMU				//Requires USE_I2C_0
+	#define USE_STRAIN			//Requires USE_I2C_1
+	#define USE_AS5047			//16-bit Position Sensor, SPI
+	//#define USE_SPI_COMMUT	//
+	#define USE_EEPROM			//
+	#define USE_FLASH			//
+	#define USE_BLUETOOTH		//
+	#define USE_I2T_LIMIT		//I2t current limit
+
+	//Motor type and commutation:
+	#define MOTOR_COMMUT		COMMUT_SINE
+	#define MOTOR_TYPE			MOTOR_BRUSHLESS
+
+	//Runtime finite state machine (FSM):
+
+	//#define FINDPOLES //define if you want to find the poles
+
+	#ifdef FINDPOLES
+		#define RUNTIME_FSM	 DISABLED
+	#else
+		#ifdef USE_TRAPEZ
+			#define RUNTIME_FSM	 DISABLED
+		#else
+			//#define RUNTIME_FSM	 ENABLED
+		#endif
+	#endif
+
+	#define CURRENT_ZERO		((int32)2065)
+
+	//Encoders:
+	#define ENC_CONTROL			ENC_AS5047
+	#define ENC_COMMUT			ENC_AS5047
+	#define ENC_DISPLAY			ENC_CONTROL
+
+	//Subproject A: Left execute board looking at the back of the ankle while it is standing up
+	#if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
+
+		//Control encoder function:
+
+		#define PWM_SIGN			1
+		#define CTRL_ENC_FCT(x) 	(x)
+		#define CTRL_ENC_VEL_FCT(x) (x)
+		//...
+
+		//Slave ID:
+		#define SLAVE_ID		FLEXSEA_EXECUTE_2
+
+	#endif  //SUBPROJECT_A
+
+	//Subproject B: Right actuator
+	#if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
+
+		//Control encoder function:
+		#define PWM_SIGN		 -1
+		#define CTRL_ENC_FCT(x) (x)
+		#define CTRL_ENC_VEL_FCT(x) (x)
+		//...
+
+		//Slave ID:
+		#define SLAVE_ID		FLEXSEA_EXECUTE_1
+
+	#endif  //SUBPROJECT_B
+
+	//Project specific definitions:
+	//...
+
+#endif  //PROJECT_MOTORTB
 
 //****************************************************************************
 // Structure(s)
-//****************************************************************************	
+//****************************************************************************
 
 #endif	//INC_USER_EX_H
 

@@ -16,15 +16,15 @@
 	You should have received a copy of the GNU General Public License
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *****************************************************************************
-	[Lead developper] Jean-Francois Duval, jfduval at dephy dot com.
+	[Lead developper] Luke Mooney, lmooney at dephy dot com.
 	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab 
 	Biomechatronics research group <http://biomech.media.mit.edu/>
 	[Contributors]
 *****************************************************************************
-	[This file] user-ex: User Projects & Functions, FlexSEA-Execute
+	[This file] user-ex-MotorTestBench: User code running on Execute
 *****************************************************************************
 	[Change log] (Convention: YYYY-MM-DD | author | comment)
-	* 2016-10-30 | jfduval | New release
+	* 2016-12-06 | jfduval | New release
 	*
 ****************************************************************************/
 
@@ -32,74 +32,45 @@
 
 #ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 
-/*Important: we reached a point where we couldn't support all configurations
-  without changing the TopDesign (we ran out of ressources). You might have
-  to select a different TopDesign file than the one included by default (check
-  the folded, there is more than one included) */
+#ifndef INC_MOTORTB_EX_H
+#define INC_MOTORTB_EX_H
 
 //****************************************************************************
 // Include(s)
 //****************************************************************************
 
-#include "../inc/user-ex.h"
 
 //****************************************************************************
-// Variable(s)
+// Public Function Prototype(s):
+//****************************************************************************
+
+void initMotorTestBench(void);
+void MotorTestBench_fsm(void);
+
+//****************************************************************************
+// Definition(s):
 //****************************************************************************
 
 //****************************************************************************
-// Private Function Prototype(s):
+// Structure(s)
 //****************************************************************************
 
-static void init_barebone(void);
-
-//****************************************************************************
-// Public Function(s)
-//****************************************************************************
-
-//Initialization function - call once in main.c, before while()
-void init_user(void)
-{	
-	//Barebone:
-	#if(ACTIVE_PROJECT == PROJECT_BAREBONE)
-	init_barebone();
-	#endif	//PROJECT_BAREBONE
-	
-	//MIT Ankle 2-DoF:
-	#if(ACTIVE_PROJECT == PROJECT_ANKLE_2DOF)
-	init_ankle_2dof();
-	#endif	//PROJECT_ANKLE_2DOF
-	
-	//RIC/NU Knee:
-	#if(ACTIVE_PROJECT == PROJECT_RICNU_KNEE)
-	init_ricnu_knee();
-	#endif	//PROJECT_RICNU_KNEE
-	
-	//Motor Test Bench:
-	#if(ACTIVE_PROJECT == PROJECT_MOTORTB)
-	initMotorTestBench();
-	#endif	//PROJECT_MOTORTB
-}
-
-//Call this function in one of the main while time slots.
-void user_fsm(void)
+struct motortb_s
 {
-	//Motor Test Bench:
-	#if(ACTIVE_PROJECT == PROJECT_MOTORTB)
-	MotorTestBench_fsm();
-	#endif	//PROJECT_MOTORTB
-}
+	int16_t v1;
+	int16_t v2;
+	int16_t v3;
+	int16_t v4;
+	int16_t v5;
+	int16_t v6;
+};
 
 //****************************************************************************
-// Private Function(s)
+// Shared variable(s)
 //****************************************************************************
 
-static void init_barebone(void)
-{
-	//Barebone:
-	#if(ACTIVE_PROJECT == PROJECT_BAREBONE)
-	board_id = SLAVE_ID;
-	#endif	//PROJECT_BAREBONE
-}
+extern struct motortb_s my_motortb;
+
+#endif	//INC_MOTORTB_EX_H
 
 #endif //BOARD_TYPE_FLEXSEA_EXECUTE
