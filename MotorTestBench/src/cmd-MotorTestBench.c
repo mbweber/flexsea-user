@@ -257,10 +257,12 @@ void rx_cmd_motortb_rr(uint8_t *buf, uint8_t *info)
 			//Assign data structure based on slave:
 			if(offset == 0)
 			{
+				motortbPtr = motortb.ex1;
 				exec_s_ptr = &exec1;
 			}
 			else if(offset == 1)
 			{
+				motortbPtr = motortb.ex2;
 				exec_s_ptr = &exec2;
 			}
 
