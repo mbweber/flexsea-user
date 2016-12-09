@@ -309,8 +309,6 @@ void rx_cmd_motortb_rr(uint8_t *buf, uint8_t *info)
 				motortb.mn1[1] = (int16_t) REBUILD_UINT16(buf, &index);
 				motortb.mn1[2] = (int16_t) REBUILD_UINT16(buf, &index);
 				motortb.mn1[3] = (int16_t) REBUILD_UINT16(buf, &index);
-				motortb.mn1[4] = (int16_t) REBUILD_UINT16(buf, &index);
-				motortb.mn1[5] = (int16_t) REBUILD_UINT16(buf, &index);
 			}
 
 		#endif	//BOARD_TYPE_FLEXSEA_PLAN

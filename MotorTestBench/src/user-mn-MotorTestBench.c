@@ -226,9 +226,6 @@ static void MotorTestBench_refresh_values(void)
 	motortb.mn1[1] = -50;
 	motortb.mn1[2] = 0;
 	motortb.mn1[3] = 50;
-	motortb.mn1[4] = 100;
-	motortb.mn1[5] = 10000;
-	motortb.mn1[6] = 32768;
 }
 //That function can be called from the FSM.
 
