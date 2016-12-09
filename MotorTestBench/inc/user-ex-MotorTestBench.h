@@ -56,21 +56,9 @@ void MotorTestBench_refresh_values(void);
 // Structure(s)
 //****************************************************************************
 
-struct motortb_s
-{
-	int16_t v1;
-	int16_t v2;
-	int16_t v3;
-	int16_t v4;
-	int16_t v5;
-	int16_t v6;
-};
-
 //****************************************************************************
 // Shared variable(s)
 //****************************************************************************
-
-extern struct motortb_s my_motortb;
 
 #endif	//INC_MOTORTB_EX_H
 

@@ -69,12 +69,12 @@ void initMotorTestBench(void)
     ctrl.position.gain.P_KI = 0;
 	
 	//User variables:
-	my_motortb.v1 = 0;
-	my_motortb.v2 = 0;
-	my_motortb.v3 = 0;
-	my_motortb.v4 = 0;
-	my_motortb.v5 = 0;
-	my_motortb.v6 = 0;
+	motortb.ex1[0] = 0;
+	motortb.ex1[1] = 0;
+	motortb.ex1[2] = 0;
+	motortb.ex1[3] = 0;
+	motortb.ex1[4] = 0;
+	motortb.ex1[5] = 0;
 }
  
 //Knee Finite State Machine.
@@ -96,10 +96,10 @@ void MotorTestBench_fsm(void)
 //Here's an example function:
 void MotorTestBench_refresh_values(void)
 {
-	my_motortb.v2 = as5047.filt.vel_rpm;
-    my_motortb.v3 = as5047.raw.ang_clks;
-    my_motortb.v4 = sine_commut_pwm;
-    my_motortb.v5 = ((strain_read()-31937)*1831)>>13;   
+	motortb.ex1[1] = as5047.filt.vel_rpm;
+    motortb.ex1[2] = as5047.raw.ang_clks;
+    motortb.ex1[3] = sine_commut_pwm;
+    motortb.ex1[4] = ((strain_read()-31937)*1831)>>13;   
 }
 
 //****************************************************************************

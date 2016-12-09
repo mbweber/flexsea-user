@@ -132,12 +132,12 @@ void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 
 	#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 
-		SPLIT_16((uint16_t)my_motortb.v1, shBuf, &index);
-		SPLIT_16((uint16_t)my_motortb.v2, shBuf, &index);
-		SPLIT_16((uint16_t)my_motortb.v3, shBuf, &index);
-		SPLIT_16((uint16_t)my_motortb.v4, shBuf, &index);
-		SPLIT_16((uint16_t)my_motortb.v5, shBuf, &index);
-		SPLIT_16((uint16_t)my_motortb.v6, shBuf, &index);
+		SPLIT_16((uint16_t)motortb.ex1[0], shBuf, &index);
+		SPLIT_16((uint16_t)motortb.ex1[1], shBuf, &index);
+		SPLIT_16((uint16_t)motortb.ex1[2], shBuf, &index);
+		SPLIT_16((uint16_t)motortb.ex1[3], shBuf, &index);
+		SPLIT_16((uint16_t)motortb.ex1[4], shBuf, &index);
+		SPLIT_16((uint16_t)motortb.ex1[5], shBuf, &index);
 
 		SPLIT_16(strain_read(), shBuf, &index);
 		SPLIT_16(read_analog(0), shBuf, &index);
