@@ -52,8 +52,11 @@ int16_t mtb_glob_var_1;
 int16_t mtb_glob_var_2;
 int16_t mtb_glob_var_3;
 
-struct motortb_s motortb;
-
+int16_t exec_1_pwm_max = 500;
+int16_t exec_1_pwm_step = 25;
+int16_t exec_1_pwm_counter = 2;
+int16_t max_curr_counter = 0;
+int16_t max_curr = 8000;
 
 //****************************************************************************
 // Private Function Prototype(s):
@@ -87,6 +90,10 @@ void MotorTestBench_fsm_1(void)
 	//Before going to a state we refresh values:
     MotorTestBench_refresh_values();
 
+    if (user_data_1.w[2] == 1)
+    {
+    	mtb_state = 20;
+    }
 	//Nothing programmed yet...
 	switch(mtb_state)
 	{
@@ -96,47 +103,144 @@ void MotorTestBench_fsm_1(void)
 			mtb_my_control = CTRL_OPEN;
 			mtb_my_pwm[0] = 0;
 			mtb_my_pwm[1] = 0;
-			if (state_t>10000)
+			if (state_t>10000 && user_data_1.w[0] != 0)
 			{
-				mtb_state = 1;
+				mtb_state = 0;
+				state_t = 0;
 			}
 
 			break;
 
+		case 0:
+			mtb_my_control = CTRL_OPEN;
+			mtb_my_pwm[0] = state_t/10;
+			mtb_my_pwm[1] = state_t/10;
+
+			if (mtb_my_pwm[0]>= exec_1_pwm_counter*exec_1_pwm_step)
+			{
+				state_t = 0;
+				mtb_state = 1;
+			}
+			break;
 		case 1:	//PWM = 100 for 5s
 
-			if(user_data_1.w[0] <= 200)
-			{
-				mtb_my_pwm[0] = user_data_1.w[0];
-			}
-			else
-			{
-				mtb_my_pwm[0] = 0;
-			}
+			mtb_my_control = CTRL_OPEN;
+			mtb_my_pwm[0] = exec_1_pwm_counter*exec_1_pwm_step;
+			mtb_my_pwm[1] = exec_1_pwm_counter*exec_1_pwm_step-state_t/10;
 
-			if (time >= 1000)
+			if (mtb_my_pwm[1]<-mtb_my_pwm[0] || max_curr_counter>10)
 			{
-				time = 0;
+				state_t = 0;
 				mtb_state = 2;
 			}
 
-            break;
-
-        case 2:	//PWM = 0 for 5s
-
-        	mtb_my_pwm[0] = 0;
-
-			if (time >= 1000)
+			if (user_data_1.w[0] == 0)
 			{
-				time = 0;
-				mtb_state = 1;
+				state_t = 0;
+				mtb_state = 10;
 			}
 
             break;
+		case 2:
+			mtb_my_control = CTRL_OPEN;
+			if (mtb_my_pwm[0]>0)
+			{
+				mtb_my_pwm[0]--;
+			}
+			else if (mtb_my_pwm[0]<0)
+			{
+				mtb_my_pwm[0]++;
+			}
 
+			if (mtb_my_pwm[1]>0)
+			{
+				mtb_my_pwm[1]--;
+			}
+			else if (mtb_my_pwm[1]<0)
+			{
+				mtb_my_pwm[1]++;
+			}
+
+			if (mtb_my_pwm[0] == 0 && mtb_my_pwm[1] == 0)
+			{
+				mtb_state = 3;
+				state_t = 0;
+			}
+
+			break;
+
+		case 3: //measure motor resistance
+			mtb_my_control = 6;
+			mtb_my_pwm[0] = 0;
+			mtb_my_pwm[1] = 0;
+
+			if (state_t>1000)
+			{
+
+				state_t = 0;
+				if ((exec_1_pwm_counter+1)*exec_1_pwm_step<=exec_1_pwm_max)
+				{
+					exec_1_pwm_counter++;
+				}
+				else
+				{
+					exec_1_pwm_counter = 2;
+				}
+				if ((exec1.current>-5000 && exec1.current<0)||(exec1.current<5000 && exec1.current>0))
+				{
+					mtb_state = 11;
+				}
+				else
+				{
+					mtb_state = 0;
+				}
+			}
+
+			if (user_data_1.w[0] == 0)
+			{
+				state_t = 0;
+				mtb_state = 10;
+			}
+			break;
+		case 10:
+			mtb_my_control = CTRL_OPEN;
+			mtb_my_pwm[0] = 0;
+			mtb_my_pwm[1] = 0;
+			if (user_data_1.w[0] != 0)
+			{
+				state_t = 0;
+				mtb_state = 0;
+				exec_1_pwm_counter = 2;
+			}
+			break;
+		case 11:
+			mtb_my_control = CTRL_OPEN;
+			mtb_my_pwm[0] = 0;
+			mtb_my_pwm[1] = 0;
+			if (user_data_1.w[0] == 2)
+			{
+				state_t = 0;
+				mtb_state = 0;
+				exec_1_pwm_counter = 2;
+			}
+			break;
+		case 20:
+			mtb_my_control = 6;
+			mtb_my_pwm[0] = 0;
+			mtb_my_pwm[1] = 0;
+
+			if (user_data_1.w[2] != 1)
+			{
+
+				state_t = 0;
+				exec_1_pwm_counter = 2;
+				mtb_state = 10;
+			}
+			break;
         default:
 			//Handle exceptions here
 			break;
+
 	}
 
 	#endif	//ACTIVE_PROJECT == PROJECT_MOTORTB
@@ -221,11 +325,16 @@ void MotorTestBench_fsm_2(void)
 //
 static void MotorTestBench_refresh_values(void)
 {
-	//Test values:
-	motortb.mn1[0] = -100;
-	motortb.mn1[1] = -50;
-	motortb.mn1[2] = 0;
-	motortb.mn1[3] = 50;
+	motortb.mn1[0] = mtb_state;
+
+	if ((exec1.current>max_curr || exec1.current<-max_curr) && mtb_state != 3)
+	{
+		max_curr_counter++;
+	}
+	else
+	{
+		max_curr_counter = 0;
+	}
 }
 //That function can be called from the FSM.
 
