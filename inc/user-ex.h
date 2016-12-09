@@ -99,7 +99,7 @@ void user_fsm(void);
 //==========================================
 
 #define ACTIVE_PROJECT			PROJECT_MOTORTB
-#define ACTIVE_SUBPROJECT		SUBPROJECT_B
+#define ACTIVE_SUBPROJECT		SUBPROJECT_A
 
 //Step 2) Customize the enabled/disabled sub-modules:
 //===================================================

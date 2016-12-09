@@ -47,8 +47,6 @@ struct motortb_s my_motortb;
 //****************************************************************************
 // Private Function Prototype(s):
 //****************************************************************************  
-
-static void MotorTestBench_refresh_values(void);
  
 //****************************************************************************
 // Public Function(s)
@@ -71,12 +69,12 @@ void initMotorTestBench(void)
     ctrl.position.gain.P_KI = 0;
 	
 	//User variables:
-	my_motortb.v1 = 1;
-	my_motortb.v2 = 2;
-	my_motortb.v3 = 3;
-	my_motortb.v4 = 4;
-	my_motortb.v5 = 5;
-	my_motortb.v6 = 6;
+	my_motortb.v1 = 0;
+	my_motortb.v2 = 0;
+	my_motortb.v3 = 0;
+	my_motortb.v4 = 0;
+	my_motortb.v5 = 0;
+	my_motortb.v6 = 0;
 }
  
 //Knee Finite State Machine.
@@ -84,8 +82,6 @@ void initMotorTestBench(void)
 void MotorTestBench_fsm(void)
 {
     static int state = 0;
-     
-    MotorTestBench_refresh_values();
      
     switch (state)
     {
@@ -97,16 +93,17 @@ void MotorTestBench_fsm(void)
 	//Code does nothing, everything is happening on Manage
 }
 
+//Here's an example function:
+void MotorTestBench_refresh_values(void)
+{
+	my_motortb.v2 = as5047.filt.vel_rpm;
+    my_motortb.v3 = as5047.raw.ang_clks;
+    my_motortb.v4 = sine_commut_pwm;
+    my_motortb.v5 = ((strain_read()-31937)*1831)>>13;   
+}
+
 //****************************************************************************
 // Private Function(s)
 //****************************************************************************
- 
-//Here's an example function:
-static void MotorTestBench_refresh_values(void)
-{
-	//Example:
-	my_motortb.v1++;
-}
-
 
 #endif //BOARD_TYPE_FLEXSEA_EXECUTE

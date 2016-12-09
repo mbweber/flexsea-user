@@ -46,6 +46,7 @@
 
 void initMotorTestBench(void);
 void MotorTestBench_fsm(void);
+void MotorTestBench_refresh_values(void);
 
 //****************************************************************************
 // Definition(s):
