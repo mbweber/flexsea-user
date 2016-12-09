@@ -59,6 +59,7 @@ void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 {
 	//Variable(s) & command:
 	uint16_t index = 0;
+	int16_t *motortbPtr;
 	(*cmd) = CMD_MOTORTB;
 	(*cmdType) = CMD_WRITE;
 
@@ -77,19 +78,21 @@ void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 
 			if(slave == 0)
 			{
+				motortbPtr = motortb.ex1;
 				exec_s_ptr = &exec1;
 			}
 			else
 			{
+				motortbPtr = motortb.ex2;
 				exec_s_ptr = &exec2;
 			}
 
-			SPLIT_16((uint16_t)exec_s_ptr->gyro.x, shBuf, &index);
-			SPLIT_16((uint16_t)exec_s_ptr->gyro.y, shBuf, &index);
-			SPLIT_16((uint16_t)exec_s_ptr->gyro.z, shBuf, &index);
-			SPLIT_16((uint16_t)exec_s_ptr->accel.x, shBuf, &index);
-			SPLIT_16((uint16_t)exec_s_ptr->accel.y, shBuf, &index);
-			SPLIT_16((uint16_t)exec_s_ptr->accel.z, shBuf, &index);
+			SPLIT_16((uint16_t)motortbPtr[0], shBuf, &index);
+			SPLIT_16((uint16_t)motortbPtr[1], shBuf, &index);
+			SPLIT_16((uint16_t)motortbPtr[2], shBuf, &index);
+			SPLIT_16((uint16_t)motortbPtr[3], shBuf, &index);
+			SPLIT_16((uint16_t)motortbPtr[4], shBuf, &index);
+			SPLIT_16((uint16_t)motortbPtr[5], shBuf, &index);
 
 			SPLIT_16(exec_s_ptr->strain, shBuf, &index);
 			SPLIT_16(exec_s_ptr->analog[0], shBuf, &index);
@@ -123,8 +126,6 @@ void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 			SPLIT_16((uint16_t)motortb.mn1[1], shBuf, &index);
 			SPLIT_16((uint16_t)motortb.mn1[2], shBuf, &index);
 			SPLIT_16((uint16_t)motortb.mn1[3], shBuf, &index);
-			SPLIT_16((uint16_t)motortb.mn1[4], shBuf, &index);
-			SPLIT_16((uint16_t)motortb.mn1[5], shBuf, &index);
 		}
 
 	#endif	//BOARD_TYPE_FLEXSEA_MANAGE
@@ -271,14 +272,6 @@ void rx_cmd_motortb_rr(uint8_t *buf, uint8_t *info)
 			index = P_DATA1+1;
 			if(offset == 0 || offset == 1)
 			{
-				/*
-				exec_s_ptr->gyro.x = (int16_t) REBUILD_UINT16(buf, &index);
-				exec_s_ptr->gyro.y = (int16_t) REBUILD_UINT16(buf, &index);
-				exec_s_ptr->gyro.z = (int16_t) REBUILD_UINT16(buf, &index);
-				exec_s_ptr->accel.x = (int16_t) REBUILD_UINT16(buf, &index);
-				exec_s_ptr->accel.y = (int16_t) REBUILD_UINT16(buf, &index);
-				exec_s_ptr->accel.z = (int16_t) REBUILD_UINT16(buf, &index);
-				*/
 				motortbPtr[0] = (int16_t) REBUILD_UINT16(buf, &index);
 				motortbPtr[1] = (int16_t) REBUILD_UINT16(buf, &index);
 				motortbPtr[2] = (int16_t) REBUILD_UINT16(buf, &index);
