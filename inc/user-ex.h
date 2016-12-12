@@ -99,7 +99,7 @@ void user_fsm(void);
 //==========================================
 
 #define ACTIVE_PROJECT			PROJECT_MOTORTB
-#define ACTIVE_SUBPROJECT		SUBPROJECT_A
+#define ACTIVE_SUBPROJECT		SUBPROJECT_B
 
 //Step 2) Customize the enabled/disabled sub-modules:
 //===================================================
@@ -321,7 +321,7 @@ void user_fsm(void);
 		#ifdef USE_TRAPEZ
 			#define RUNTIME_FSM	 DISABLED
 		#else
-			//#define RUNTIME_FSM	 ENABLED
+			#define RUNTIME_FSM	 ENABLED
 		#endif
 	#endif
 
@@ -341,7 +341,7 @@ void user_fsm(void);
 		//...
         
         #define CURRENT_ZERO		((int32)1981)
-        
+
 		//Slave ID:
 		#define SLAVE_ID		FLEXSEA_EXECUTE_2
 
@@ -357,7 +357,7 @@ void user_fsm(void);
 		//...
         
         #define CURRENT_ZERO		((int32)2123)
-
+        
 		//Slave ID:
 		#define SLAVE_ID		FLEXSEA_EXECUTE_1
 

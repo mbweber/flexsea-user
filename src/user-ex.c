@@ -86,7 +86,10 @@ void user_fsm(void)
 {
 	//Motor Test Bench:
 	#if(ACTIVE_PROJECT == PROJECT_MOTORTB)
-	MotorTestBench_fsm();
+        MotorTestBench_refresh_values();   
+        #if(RUNTIME_FSM == ENABLED)            
+	        MotorTestBench_fsm();
+        #endif
 	#endif	//PROJECT_MOTORTB
 }
 
