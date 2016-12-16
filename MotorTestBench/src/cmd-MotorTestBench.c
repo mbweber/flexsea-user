@@ -209,7 +209,14 @@ void rx_cmd_motortb_rw(uint8_t *buf, uint8_t *info)
 				tmp_open_spd = (int16_t) REBUILD_UINT16(buf, &index);;
 				motor_open_speed_1(tmp_open_spd);
 			}
+            else if(ctrl.active_ctrl == CTRL_MEASRES)
+			{
+				index = P_DATA1+4;
+				tmp_open_spd = (int16_t) REBUILD_UINT16(buf, &index);;
+				motor_open_speed_1(tmp_open_spd);
+			}
 		}
+		
 
 	#endif	//BOARD_TYPE_FLEXSEA_EXECUTE
 

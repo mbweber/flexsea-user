@@ -72,6 +72,7 @@ void user_fsm_2(void);
 #define PROJECT_ANKLE_2DOF		1	//Biomechatronics 2-DOF Ankle
 #define PROJECT_RICNU_KNEE		3	//RIC/NU Knee
 #define PROJECT_MOTORTB			4
+#define PROJECT_DEV				5	//Experimental code - use with care
 
 //List of sub-projects:
 #define SUBPROJECT_NONE			0
@@ -83,7 +84,7 @@ void user_fsm_2(void);
 //Step 1) Select active project (from list):
 //==========================================
 
-#define ACTIVE_PROJECT			PROJECT_MOTORTB
+#define ACTIVE_PROJECT			PROJECT_DEV
 #define ACTIVE_SUBPROJECT		SUBPROJECT_NONE
 
 //Step 2) Customize the enabled/disabled sub-modules:
@@ -99,6 +100,7 @@ void user_fsm_2(void);
 	#define USE_I2C_1			//3V3, IMU & Digital pot
 	//#define USE_I2C_2			//3V3, Expansion
 	#define USE_IMU				//Requires USE_I2C_1
+	#define USE_FLASH_MEM		//FLASH memory
 
 	//Runtime finite state machine (FSM):
 	#define RUNTIME_FSM1		DISABLED
@@ -169,6 +171,28 @@ void user_fsm_2(void);
 	//...
 
 #endif	//PROJECT_MOTORTB
+
+//Experimental/Dev/Use only if you know what you are doing
+#if(ACTIVE_PROJECT == PROJECT_DEV)
+
+	//Enable/Disable sub-modules:
+	#define USE_RS485
+	#define USE_USB
+	#define USE_COMM			//Requires USE_RS485 and/or USE_USB
+	#define USE_I2C_1			//3V3, IMU & Digital pot
+	#define USE_I2C_2			//3V3, Expansion
+	#define USE_IMU				//Requires USE_I2C_1
+	#define USE_BATTBOARD		//Battery Board, requires USE_I2C_1
+	#define USE_FLASH_MEM		//FLASH memory
+
+	//Runtime finite state machine (FSM):
+	#define RUNTIME_FSM1		DISABLED
+	#define RUNTIME_FSM2		DISABLED
+
+	//Project specific definitions:
+	//...
+
+#endif	//PROJECT_BAREBONE
 
 //****************************************************************************
 // Structure(s)
