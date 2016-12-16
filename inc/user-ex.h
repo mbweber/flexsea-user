@@ -99,7 +99,7 @@ void user_fsm(void);
 //==========================================
 
 #define ACTIVE_PROJECT			PROJECT_MOTORTB
-#define ACTIVE_SUBPROJECT		SUBPROJECT_A
+#define ACTIVE_SUBPROJECT		SUBPROJECT_B
 
 //Step 2) Customize the enabled/disabled sub-modules:
 //===================================================
@@ -321,18 +321,16 @@ void user_fsm(void);
 		#ifdef USE_TRAPEZ
 			#define RUNTIME_FSM	 DISABLED
 		#else
-			//#define RUNTIME_FSM	 ENABLED
+			#define RUNTIME_FSM	 ENABLED
 		#endif
 	#endif
-
-	#define CURRENT_ZERO		((int32)2065)
 
 	//Encoders:
 	#define ENC_CONTROL			ENC_AS5047
 	#define ENC_COMMUT			ENC_AS5047
 	#define ENC_DISPLAY			ENC_CONTROL
 
-	//Subproject A: Left execute board looking at the back of the ankle while it is standing up
+	//Subproject A: No torque sensor, execute 2
 	#if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
 
 		//Control encoder function:
@@ -341,13 +339,15 @@ void user_fsm(void);
 		#define CTRL_ENC_FCT(x) 	(x)
 		#define CTRL_ENC_VEL_FCT(x) (x)
 		//...
+        
+        #define CURRENT_ZERO		((int32)1981)
 
 		//Slave ID:
 		#define SLAVE_ID		FLEXSEA_EXECUTE_2
 
 	#endif  //SUBPROJECT_A
 
-	//Subproject B: Right actuator
+	//Subproject B: Has the torque sensor, Execute 1
 	#if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
 
 		//Control encoder function:
@@ -355,7 +355,9 @@ void user_fsm(void);
 		#define CTRL_ENC_FCT(x) (x)
 		#define CTRL_ENC_VEL_FCT(x) (x)
 		//...
-
+        
+        #define CURRENT_ZERO		((int32)2123)
+        
 		//Slave ID:
 		#define SLAVE_ID		FLEXSEA_EXECUTE_1
 
