@@ -83,7 +83,7 @@ void user_fsm_2(void);
 //Step 1) Select active project (from list):
 //==========================================
 
-#define ACTIVE_PROJECT			PROJECT_MOTORTB
+#define ACTIVE_PROJECT			PROJECT_BAREBONE
 #define ACTIVE_SUBPROJECT		SUBPROJECT_NONE
 
 //Step 2) Customize the enabled/disabled sub-modules:
@@ -99,6 +99,7 @@ void user_fsm_2(void);
 	#define USE_I2C_1			//3V3, IMU & Digital pot
 	//#define USE_I2C_2			//3V3, Expansion
 	#define USE_IMU				//Requires USE_I2C_1
+	#define USE_FLASH_MEM		//FLASH memory
 
 	//Runtime finite state machine (FSM):
 	#define RUNTIME_FSM1		DISABLED
