@@ -41,8 +41,8 @@ extern "C" {
 #include "../inc/flexsea_system.h"
 #include "../../inc/flexsea_cmd_user.h"
 
-//Execute boards only:
-#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
+//Execute & Manage boards only:
+#if (defined BOARD_TYPE_FLEXSEA_EXECUTE || defined BOARD_TYPE_FLEXSEA_MANAGE)
 #include "main.h"
 #endif	//BOARD_TYPE_FLEXSEA_EXECUTE
 
@@ -136,6 +136,7 @@ void tx_cmd_ricnu_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 			SPLIT_32((uint32_t)exec1.enc_motor, shBuf, &index);
 			SPLIT_32((uint32_t)exec1.enc_joint, shBuf, &index);
 			SPLIT_16((uint16_t)ctrl.current.actual_val, shBuf, &index);
+			//(22 bytes)
 		}
 		else if(offset == 1)
 		{
@@ -150,7 +151,28 @@ void tx_cmd_ricnu_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 			shBuf[index++] = strain1.compressedBytes[6];
 			shBuf[index++] = strain1.compressedBytes[7];
 			shBuf[index++] = strain1.compressedBytes[8];
-			//Include other variables here (ToDo)
+
+			//Padding the Batt board variables with zeros. Not sure it's needed,
+			//but won't hurt
+			shBuf[index++] = 0;
+			shBuf[index++] = 0;
+			shBuf[index++] = 0;
+			shBuf[index++] = 0;
+			shBuf[index++] = 0;
+			shBuf[index++] = 0;
+			shBuf[index++] = 0;
+			shBuf[index++] = 0;
+		}
+		else if(offset == 2)
+		{
+			//User variables:
+			SPLIT_16((uint16_t)rn->gen_var[0], shBuf, &index);
+			SPLIT_16((uint16_t)rn->gen_var[1], shBuf, &index);
+			SPLIT_16((uint16_t)rn->gen_var[2], shBuf, &index);
+			SPLIT_16((uint16_t)rn->gen_var[3], shBuf, &index);
+			SPLIT_16((uint16_t)rn->gen_var[4], shBuf, &index);
+			SPLIT_16((uint16_t)rn->gen_var[5], shBuf, &index);
+			//(12 bytes, we could add more variables here)
 		}
 		else
 		{
@@ -177,11 +199,11 @@ void tx_cmd_ricnu_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 			SPLIT_32((uint32_t)rn->ex.enc_motor, shBuf, &index);
 			SPLIT_32((uint32_t)rn->ex.enc_joint, shBuf, &index);
 			SPLIT_16((uint16_t)rn->ex.current, shBuf, &index);
+			//(22 bytes)
 		}
 		else if(offset == 1)
 		{
 			//Compressed Strain:
-
 			shBuf[index++] = rn->st.compressedBytes[0];
 			shBuf[index++] = rn->st.compressedBytes[1];
 			shBuf[index++] = rn->st.compressedBytes[2];
@@ -191,7 +213,44 @@ void tx_cmd_ricnu_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 			shBuf[index++] = rn->st.compressedBytes[6];
 			shBuf[index++] = rn->st.compressedBytes[7];
 			shBuf[index++] = rn->st.compressedBytes[8];
-			//Include other variables here (ToDo)
+
+			//Battery board?
+			#ifdef USE_BATTBOARD
+
+				shBuf[index++] = batt1.rawBytes[0];
+				shBuf[index++] = batt1.rawBytes[1];
+				shBuf[index++] = batt1.rawBytes[2];
+				shBuf[index++] = batt1.rawBytes[3];
+				shBuf[index++] = batt1.rawBytes[4];
+				shBuf[index++] = batt1.rawBytes[5];
+				shBuf[index++] = batt1.rawBytes[6];
+				shBuf[index++] = batt1.rawBytes[7];
+
+			#else
+
+				//Pad with zeros:
+				shBuf[index++] = 0;
+				shBuf[index++] = 0;
+				shBuf[index++] = 0;
+				shBuf[index++] = 0;
+				shBuf[index++] = 0;
+				shBuf[index++] = 0;
+				shBuf[index++] = 0;
+				shBuf[index++] = 0;
+
+			#endif
+			//(17 bytes)
+		}
+		else if(offset == 2)
+		{
+			//User variables:
+			SPLIT_16((uint16_t)rn->gen_var[0], shBuf, &index);
+			SPLIT_16((uint16_t)rn->gen_var[1], shBuf, &index);
+			SPLIT_16((uint16_t)rn->gen_var[2], shBuf, &index);
+			SPLIT_16((uint16_t)rn->gen_var[3], shBuf, &index);
+			SPLIT_16((uint16_t)rn->gen_var[4], shBuf, &index);
+			SPLIT_16((uint16_t)rn->gen_var[5], shBuf, &index);
+			//(12 bytes, we could add more variables here)
 		}
 		else
 		{
@@ -272,6 +331,7 @@ void rx_cmd_ricnu_rr(uint8_t *buf, uint8_t *info)
 
 		if(offset == 0)
 		{
+			//Typical Execute variables, + new encoders:
 			rn->ex.gyro.x = (int16_t) REBUILD_UINT16(buf, &index);
 			rn->ex.gyro.y = (int16_t) REBUILD_UINT16(buf, &index);
 			rn->ex.gyro.z = (int16_t) REBUILD_UINT16(buf, &index);
@@ -284,6 +344,7 @@ void rx_cmd_ricnu_rr(uint8_t *buf, uint8_t *info)
 		}
 		else if(offset == 1)
 		{
+			//Strain amplifier:
 			rn->st.compressedBytes[0] = buf[index++];
 			rn->st.compressedBytes[1] = buf[index++];
 			rn->st.compressedBytes[2] = buf[index++];
@@ -294,7 +355,25 @@ void rx_cmd_ricnu_rr(uint8_t *buf, uint8_t *info)
 			rn->st.compressedBytes[7] = buf[index++];
 			rn->st.compressedBytes[8] = buf[index++];
 
-			//Include other variables here (ToDo)
+			//Battery board:
+			batt1.rawBytes[0] = buf[index++];
+			batt1.rawBytes[1] = buf[index++];
+			batt1.rawBytes[2] = buf[index++];
+			batt1.rawBytes[3] = buf[index++];
+			batt1.rawBytes[4] = buf[index++];
+			batt1.rawBytes[5] = buf[index++];
+			batt1.rawBytes[6] = buf[index++];
+			batt1.rawBytes[7] = buf[index++];
+		}
+		else if(offset == 2)
+		{
+			//User variables:
+			rn->gen_var[0] = (int16_t) REBUILD_UINT16(buf, &index);
+			rn->gen_var[1] = (int16_t) REBUILD_UINT16(buf, &index);
+			rn->gen_var[2] = (int16_t) REBUILD_UINT16(buf, &index);
+			rn->gen_var[3] = (int16_t) REBUILD_UINT16(buf, &index);
+			rn->gen_var[4] = (int16_t) REBUILD_UINT16(buf, &index);
+			rn->gen_var[5] = (int16_t) REBUILD_UINT16(buf, &index);
 		}
 		else
 		{
