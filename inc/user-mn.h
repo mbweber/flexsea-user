@@ -118,13 +118,17 @@ void user_fsm_2(void);
 	#define USE_RS485
 	#define USE_USB
 	#define USE_COMM			//Requires USE_RS485 and/or USE_USB
-	//#define USE_I2C_1			//3V3, IMU & Digital pot
-	//#define USE_I2C_2			//3V3, Expansion
-	//#define USE_IMU			//Requires USE_I2C_1
+	#define USE_I2C_1			//3V3, IMU & Digital pot
+	#define USE_I2C_2			//3V3, Expansion
+	#define USE_IMU				//Requires USE_I2C_1
+	#define USE_BATTBOARD		//Battery Board, requires USE_I2C_1
 
 	//Runtime finite state machine (FSM):
-	#define RUNTIME_FSM1		ENABLED
-	#define RUNTIME_FSM2		ENABLED
+	//Disable both FSM to use manage as a passthru
+	#define RUNTIME_FSM1		ENABLED // Control
+	#define RUNTIME_FSM2		ENABLED // 
+	//FSM2: Communication, we enabled this state machine to send data 
+	//back to the GUI.  Manage will now control execute, rather than the GUI.
 
 	//Project specific definitions:
 	//...
