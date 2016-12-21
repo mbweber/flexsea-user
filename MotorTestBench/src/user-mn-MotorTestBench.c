@@ -92,7 +92,19 @@ void MotorTestBench_fsm_1(void)
 
     if (user_data_1.w[2] == 1)
     {
+    	if (mtb_state != 20)
+    	{
+    		state_t = 0;
+    	}
     	mtb_state = 20;
+    }
+    else if (user_data_1.w[2] == 2)
+    {
+    	if (mtb_state != 30)
+    	{
+    		state_t = 0;
+    	}
+    	mtb_state = 30;
     }
 	//Nothing programmed yet...
 	switch(mtb_state)
@@ -226,8 +238,10 @@ void MotorTestBench_fsm_1(void)
 			break;
 		case 20:
 			mtb_my_control = 6;
-			mtb_my_pwm[0] = 0;
-			mtb_my_pwm[1] = 0;
+			mtb_my_pwm[0] = user_data_1.w[3];
+			mtb_my_pwm[1] = user_data_1.w[3]/2;
+			//applies .481 volts
+			//motor current becomes twice the current flowing through the motor
 
 			if (user_data_1.w[2] != 1)
 			{
@@ -236,6 +250,11 @@ void MotorTestBench_fsm_1(void)
 				exec_1_pwm_counter = 2;
 				mtb_state = 10;
 			}
+			break;
+		case 30:
+			mtb_my_control = CTRL_OPEN;
+			mtb_my_pwm[0] = user_data_1.w[3];
+			mtb_my_pwm[1] = 0;
 			break;
         default:
 			//Handle exceptions here
@@ -326,6 +345,7 @@ void MotorTestBench_fsm_2(void)
 static void MotorTestBench_refresh_values(void)
 {
 	motortb.mn1[0] = mtb_state;
+	motortb.mn1[1] = (int16_t)(((int32_t)motortb.ex1[1]*(int32_t)motortb.ex1[4])/955);
 
 	if ((exec1.current>max_curr || exec1.current<-max_curr) && mtb_state != 3)
 	{
