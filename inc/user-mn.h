@@ -125,8 +125,8 @@ void user_fsm_2(void);
 
 	//Runtime finite state machine (FSM):
 	//Disable both FSM to use manage as a passthru
-	#define RUNTIME_FSM1		ENABLED // Control
-	#define RUNTIME_FSM2		ENABLED //
+	#define RUNTIME_FSM1		DISABLED 	// Control
+	#define RUNTIME_FSM2		ENABLED 	//
 	//FSM2: Communication, we enabled this state machine to send data
 	//back to the GUI.  Manage will now control execute, rather than the GUI.
 
