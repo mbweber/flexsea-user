@@ -136,7 +136,8 @@ void tx_cmd_ricnu_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 			SPLIT_32((uint32_t)exec1.enc_motor, shBuf, &index);
 			SPLIT_32((uint32_t)exec1.enc_joint, shBuf, &index);
 			SPLIT_16((uint16_t)ctrl.current.actual_val, shBuf, &index);
-			//(22 bytes)
+			SPLIT_16((uint16_t)exec1.sine_commut_pwm, shBuf, &index);
+			//(24 bytes)
 		}
 		else if(offset == 1)
 		{
@@ -166,12 +167,12 @@ void tx_cmd_ricnu_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 		else if(offset == 2)
 		{
 			//User variables:
-			SPLIT_16((uint16_t)rn->gen_var[0], shBuf, &index);
-			SPLIT_16((uint16_t)rn->gen_var[1], shBuf, &index);
-			SPLIT_16((uint16_t)rn->gen_var[2], shBuf, &index);
-			SPLIT_16((uint16_t)rn->gen_var[3], shBuf, &index);
-			SPLIT_16((uint16_t)rn->gen_var[4], shBuf, &index);
-			SPLIT_16((uint16_t)rn->gen_var[5], shBuf, &index);
+			SPLIT_16((uint16_t)ricnu_1.gen_var[0], shBuf, &index);
+			SPLIT_16((uint16_t)ricnu_1.gen_var[1], shBuf, &index);
+			SPLIT_16((uint16_t)ricnu_1.gen_var[2], shBuf, &index);
+			SPLIT_16((uint16_t)ricnu_1.gen_var[3], shBuf, &index);
+			SPLIT_16((uint16_t)ricnu_1.gen_var[4], shBuf, &index);
+			SPLIT_16((uint16_t)ricnu_1.gen_var[5], shBuf, &index);
 			//(12 bytes, we could add more variables here)
 		}
 		else
@@ -199,7 +200,8 @@ void tx_cmd_ricnu_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 			SPLIT_32((uint32_t)rn->ex.enc_motor, shBuf, &index);
 			SPLIT_32((uint32_t)rn->ex.enc_joint, shBuf, &index);
 			SPLIT_16((uint16_t)rn->ex.current, shBuf, &index);
-			//(22 bytes)
+			SPLIT_16((uint16_t)rn->ex.sine_commut_pwm, shBuf, &index);
+			//(24 bytes)
 		}
 		else if(offset == 1)
 		{
@@ -341,6 +343,7 @@ void rx_cmd_ricnu_rr(uint8_t *buf, uint8_t *info)
 			rn->ex.enc_motor = (int32_t) REBUILD_UINT32(buf, &index);
 			rn->ex.enc_joint = (int32_t) REBUILD_UINT32(buf, &index);
 			rn->ex.current = (int16_t) REBUILD_UINT16(buf, &index);
+			rn->ex.sine_commut_pwm = (int16_t) REBUILD_UINT16(buf, &index);
 		}
 		else if(offset == 1)
 		{
@@ -426,6 +429,7 @@ void rx_cmd_ricnu_Action1(uint8_t controller, int32_t setpoint, uint8_t setGains
 		{
 			ctrl.position.gain.g0 = g0;
 			ctrl.position.gain.g1 = g1;
+            ctrl.position.gain.g2 = g2;
 		}
 	}
 	else if (ctrl.active_ctrl == CTRL_IMPEDANCE)
