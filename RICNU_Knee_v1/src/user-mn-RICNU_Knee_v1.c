@@ -62,7 +62,9 @@ static void ricnu_knee_refresh_values(void);
 //Call this function once in main.c, just before the while()
 void init_ricnu_knee(void)
 {
-
+	//Default init state:
+	my_ricnu_control = CTRL_NONE;
+	my_ricnu_pwm = 0;
 }
 
 //Knee Finite State Machine.
