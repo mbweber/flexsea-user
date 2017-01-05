@@ -98,13 +98,13 @@ void user_fsm(void);
 //Step 1) Select active project (from list):
 //==========================================
 
-#define ACTIVE_PROJECT			PROJECT_RICNU_KNEE
+#define ACTIVE_PROJECT			PROJECT_BAREBONE
 #define ACTIVE_SUBPROJECT		SUBPROJECT_NONE
 
 //Step 2) Customize the enabled/disabled sub-modules:
 //===================================================
 
-//Barebone FlexSEA-Execute project - no external peripherals.
+//Barebone FlexSEA-Execute project - no external peripherals (and no motor)
 #if(ACTIVE_PROJECT == PROJECT_BAREBONE)
 
 	//Enable/Disable sub-modules:
@@ -117,27 +117,30 @@ void user_fsm(void);
 	#define USE_I2C_1			//5V, Safety-CoP & strain gauge pot.
 	#define USE_IMU				//Requires USE_I2C_0
 	#define USE_STRAIN			//Requires USE_I2C_1
+	#define USE_EEPROM			//
+	#define USE_FLASH			//
+	//#define USE_BLUETOOTH		//
 	#define USE_I2T_LIMIT		//I2t current limit
 	
-	//Motor type, direction and commutation:
-	#define MOTOR_TYPE		MOTOR_BRUSHLESS
-	#define PWM_SIGN		1
-	#define MOTOR_COMMUT 	COMMUT_NONE
-	#define CURRENT_ZERO	((int32)2048)
+	#define RUNTIME_FSM	 DISABLED
 	
-	//Runtime finite state machine (FSM):
-	#define RUNTIME_FSM		DISABLED
+	//Motor type, direction and commutation:
+	#define MOTOR_TYPE			MOTOR_BRUSHLESS
+	#define MOTOR_COMMUT 		COMMUT_NONE
+	#define CURRENT_ZERO		((int32)2048)
 	
 	//Encoders:
-	#define ENC_CONTROL		ENC_NONE
-	#define ENC_COMMUT		ENC_NONE
-	#define ENC_DISPLAY		ENC_NONE
+	#define ENC_CONTROL			ENC_NONE
+	#define ENC_COMMUT			ENC_NONE
+	#define ENC_DISPLAY			ENC_NONE
 	
 	//Control encoder function:
-	#define CTRL_ENC_FCT(x) (x)
+	#define PWM_SIGN			1
+	#define CTRL_ENC_FCT(x) 	(x)
+	#define CTRL_ENC_VEL_FCT(x) (x)
 
 	//Slave ID:
-	#define SLAVE_ID		FLEXSEA_EXECUTE_1
+	#define SLAVE_ID			FLEXSEA_EXECUTE_1
 
 	//Project specific definitions:
 	//...
