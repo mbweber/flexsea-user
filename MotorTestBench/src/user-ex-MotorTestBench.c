@@ -27,11 +27,11 @@
 	* 2016-12-06 | jfduval | New release
 	*
 ****************************************************************************/
- 
+
 #include "main.h"
 
 #ifdef BOARD_TYPE_FLEXSEA_EXECUTE
-
+    
 //****************************************************************************
 // Include(s)
 //****************************************************************************
@@ -43,7 +43,16 @@
 //****************************************************************************
  
 struct motortb_s my_motortb;
-
+volatile uint8_t motortb_startCycleFlag = 0;
+    
+// define a 100 long array, defining the position profile for the motor controlled by ex1
+// static float positionProfile[] = { .. }; 
+#include "../resources/motorPositionProfile.c.resource"
+    
+// define a 100 long array, defining the torque profile for the motor controlled by ex2 
+// static float torqueProfile[] = { .. };  
+#include "../resources/motorTorqueProfile.c.resource"
+    
 //****************************************************************************
 // Private Function Prototype(s):
 //****************************************************************************  
@@ -57,17 +66,26 @@ void initMotorTestBench(void)
 {   
 	board_id = SLAVE_ID;
 	
-    //Controller setup:
-    ctrl.active_ctrl = CTRL_OPEN;   //Position controller
-    motor_open_speed_1(0);              //0% PWM
 	#if(MOTOR_COMMUT == COMMUT_BLOCK)
     Coast_Brake_Write(1);               //Brake (regen)
 	#endif
+    
+    #if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
+        // initialization code specific to ex 2
+        ctrl.active_ctrl = CTRL_POSITION;   //Position controller
+        motor_open_speed_1(0);              //0% PWM
         
-    //Position PID gains - initially 0
-    ctrl.position.gain.P_KP = 0;
-    ctrl.position.gain.P_KI = 0;
-	
+        //Position PID gains - initially 0
+        ctrl.position.gain.P_KP = 0;
+        ctrl.position.gain.P_KI = 0;
+        ctrl.position.gain.P_KD = 0;
+    #endif
+    
+    #if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
+        // initialization code specific to ex 1
+    #endif
+
+    /*
 	//User variables:
 	motortb.ex1[0] = 0;
 	motortb.ex1[1] = 0;
@@ -75,22 +93,69 @@ void initMotorTestBench(void)
 	motortb.ex1[3] = 0;
 	motortb.ex1[4] = 0;
 	motortb.ex1[5] = 0;
+    */
 }
- 
-//Knee Finite State Machine.
-//Call this function in one of the main while time slots.
+
+// User finite state machine, implements a tight controller 
+// Called at 1 kHz
+// Call this function in one of the main while time slots.
 void MotorTestBench_fsm(void)
 {
-    static int state = 0;
-     
-    switch (state)
+    static unsigned int ticks = 0;
+    static uint8_t state = 0;
+    /* State represents whether we are running or not 
+     * 0 - not running
+     * 1 - gait cycle just started / starting
+     * 2 - gait cycle in progress
+    */
+    
+    if(ctrl.active_ctrl == CTRL_POSITION) 
     {
-        case 0:
-			//...
+        unsigned int percentOfGaitCycle;
+        switch(state) 
+        {
+        case 1:
+            // set PID gains to non zero, ie we are actually traversing through the position profile now
+            ctrl.position.setp = positionProfile[0];
+            ticks = 1;
+            ctrl.position.gain.P_KP = 90;
+            ctrl.position.gain.P_KI = 5;
+            ctrl.position.gain.P_KD = 5;
+            
+            state = 2;
             break;
-	}
-	
-	//Code does nothing, everything is happening on Manage
+            
+        case 2:
+             // using the conversion ticks/30 % 100 means that we complete 1 cycle every 3000 ticks.
+             // note the modulo is redundant, ticks should always be less than 3000
+            if(ticks < 3000) 
+            {
+                percentOfGaitCycle = (ticks / 30) % 100;
+                ctrl.position.setp = positionProfile[percentOfGaitCycle];
+                ticks++;
+            }
+            else
+            {
+                state = 0;
+            }
+            //no break, we transition directly into state 0, as opposed to waiting for another cycle (1ms)
+            
+        case 0:
+            ctrl.position.gain.g0 = 0;
+            ctrl.position.gain.g1 = 0;
+            ctrl.position.gain.g2 = 0;            
+            ticks = 0;
+            
+            //check the flag sent by manage
+            if(motortb_startCycleFlag)
+            {
+                motortb_startCycleFlag = 0;
+                state = 1;
+            }
+            
+            break;
+        }
+    }    
 }
 
 //Here's an example function:

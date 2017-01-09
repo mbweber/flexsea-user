@@ -49,6 +49,7 @@ extern "C" {
 //****************************************************************************
 // Variable(s)
 //****************************************************************************
+extern uint8_t motortb_startCycleFlag;
 
 //****************************************************************************
 // Function(s)
@@ -185,7 +186,7 @@ void rx_cmd_motortb_rw(uint8_t *buf, uint8_t *info)
 
 	#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 
-		int16_t tmp_wanted_current = 0, tmp_open_spd = 0;
+		int16_t tmp_wanted_current = 0, tmp_open_spd = 0, tmp_start_gait_cycle = 0;
 		uint16_t index = P_DATA1;
 		offset = buf[index++];
 
@@ -203,7 +204,9 @@ void rx_cmd_motortb_rw(uint8_t *buf, uint8_t *info)
 	#endif	//BOARD_TYPE_FLEXSEA_EXECUTE
 
 	#ifdef BOARD_TYPE_FLEXSEA_MANAGE
+
 		//using user variables for now
+
 	#endif	//BOARD_TYPE_FLEXSEA_MANAGE
 
 	//Reply:
