@@ -159,8 +159,8 @@ void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 }
 
 void tx_cmd_motortb_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
-							uint16_t *len, uint8_t offset, uint8_t controller, \
-							int16_t ctrl_i, int16_t ctrl_o)
+							uint16_t *len, uint8_t offset, \
+							uint16_t startCycle)
 {
 	//Variable(s) & command:
 	uint16_t index = 0;
@@ -171,9 +171,7 @@ void tx_cmd_motortb_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 	shBuf[index++] = offset;
 	if(offset == 0 || offset == 1)
 	{
-		shBuf[index++] = controller;
-		SPLIT_16((uint16_t)ctrl_i, shBuf, &index);
-		SPLIT_16((uint16_t)ctrl_o, shBuf, &index);
+		shBuf[index++] = startCycle;
 	}
 
 	//Payload length:
@@ -194,34 +192,18 @@ void rx_cmd_motortb_rw(uint8_t *buf, uint8_t *info)
 		if(offset == 0 || offset == 1)
 		{
 			//Update controller:
-			control_strategy(buf[index++]);
-
-			//Only change the setpoint if we are in current control mode:
-			if(ctrl.active_ctrl == CTRL_CURRENT)
-			{
-				index = P_DATA1+2;
-				tmp_wanted_current = (int16_t) REBUILD_UINT16(buf, &index);
-				ctrl.current.setpoint_val = tmp_wanted_current;
-			}
-			else if(ctrl.active_ctrl == CTRL_OPEN)
-			{
-				index = P_DATA1+4;
-				tmp_open_spd = (int16_t) REBUILD_UINT16(buf, &index);;
-				motor_open_speed_1(tmp_open_spd);
-			}
-            else if(ctrl.active_ctrl == CTRL_MEASRES)
-			{
-				index = P_DATA1+4;
-				tmp_open_spd = (int16_t) REBUILD_UINT16(buf, &index);;
-				motor_open_speed_1(tmp_open_spd);
-			}
+			// controller info should be here, but we can ignore it since we are running sort of autonomously
+			// control_strategy(buf[index++]);
+			// instead we just increment index
+			index++;
+			tmp_start_gait_cycle = (int16_t) REBUILD_UINT16(buf, &index);
+			motortb_startCycleFlag = (tmp_start_gait_cycle > 0);
 		}
-		
 
 	#endif	//BOARD_TYPE_FLEXSEA_EXECUTE
 
 	#ifdef BOARD_TYPE_FLEXSEA_MANAGE
-
+		//using user variables for now
 	#endif	//BOARD_TYPE_FLEXSEA_MANAGE
 
 	//Reply:
