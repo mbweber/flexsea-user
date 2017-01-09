@@ -111,7 +111,7 @@ void user_fsm_2(void)
 
 	//Motor Test Bench
 	#if(ACTIVE_PROJECT == PROJECT_MOTORTB)
-	MotorTestBench_fsm_2();
+	//MotorTestBench_fsm_2();
 	#endif	//PROJECT_MOTORTB
 }
 

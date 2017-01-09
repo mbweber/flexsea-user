@@ -45,7 +45,7 @@
 
 void init_MotorTestBench(void);
 void MotorTestBench_fsm_1(void);
-void MotorTestBench_fsm_2(void);
+//void MotorTestBench_fsm_2(void);
 
 //****************************************************************************
 // Definition(s):

@@ -75,11 +75,17 @@ void init_MotorTestBench(void)
 	mtb_state = -5;
 }
 
-//Ankle 2-DoF Finite State Machine.
+
+/* FSM - Finite State Machines
+ * 	executed at 1 kHz
+ * */
+
+//Motor Test Bench Finite State Machine.
 //Call this function in one of the main while time slots.
 void MotorTestBench_fsm_1(void)
 {
-	#if(ACTIVE_PROJECT == PROJECT_MOTORTB)
+	//#if(ACTIVE_PROJECT == PROJECT_MOTORTB)
+	#if(0)
 
     static uint32_t time = 0, state_t = 0;
 
@@ -153,6 +159,7 @@ void MotorTestBench_fsm_1(void)
 			}
 
             break;
+
 		case 2:
 			mtb_my_control = CTRL_OPEN;
 			if (mtb_my_pwm[0]>0)
@@ -214,6 +221,7 @@ void MotorTestBench_fsm_1(void)
 				mtb_state = 10;
 			}
 			break;
+
 		case 10:
 			mtb_my_control = CTRL_OPEN;
 			mtb_my_pwm[0] = 0;
@@ -225,6 +233,7 @@ void MotorTestBench_fsm_1(void)
 				exec_1_pwm_counter = 2;
 			}
 			break;
+
 		case 11:
 			mtb_my_control = CTRL_OPEN;
 			mtb_my_pwm[0] = 0;
@@ -236,6 +245,7 @@ void MotorTestBench_fsm_1(void)
 				exec_1_pwm_counter = 2;
 			}
 			break;
+
 		case 20:
 			mtb_my_control = 6;
 			mtb_my_pwm[0] = user_data_1.w[3];
@@ -265,9 +275,10 @@ void MotorTestBench_fsm_1(void)
 	#endif	//ACTIVE_PROJECT == PROJECT_MOTORTB
 }
 
-//Second state machine for the Ankle project
-//Deals with the communication between Manage and 2x Execute, on the same RS-485 bus
-//This function is called at 1kHz
+#if(0)
+// Second state machine for the motor test bench project
+// Deals with the communication between Manage and 2x Execute, on the same RS-485 bus
+// This function is called at 1kHz
 void MotorTestBench_fsm_2(void)
 {
 	#if(ACTIVE_PROJECT == PROJECT_MOTORTB)
@@ -334,6 +345,66 @@ void MotorTestBench_fsm_2(void)
 	#endif	//ACTIVE_PROJECT == PROJECT_MOTORTESTBENCH
 }
 
+#endif // removed for debugging
+
+// State machine which tracks which stage of testing we are in (ready / testing / finished)
+void MotorTestBench_fsm_1(void)
+{
+#if(ACTIVE_PROJECT == PROJECT_MOTORTB)
+	static uint8_t state = 0;
+	/*	States:
+	 * 	0 - ready - test has not started yet, wait for plan to signal start of test
+	 * 	1 - testing - test has started
+	 * 	2 - finished - test has ended
+	 * 	other - error codes? TBD
+	 * */
+
+	const uint16_t MS_PER_GAIT = 3000; //3000 ms per gait cycle?
+	static uint8_t info[2] = {PORT_485_1, PORT_485_1};
+	static uint8_t ticks = 0;
+
+	uint8_t startGaitCycle = 0;
+	switch(state)
+	{
+	case 0:
+		// Check a flag that is set by plan in an interrupt
+		// 'user data' value at index 0
+		if(user_data_1.r[0])
+		{
+			ticks = 0;
+			user_data_1.r[0] = 0;
+			state = 1;
+		}
+
+		// break not needed
+		// since we may have just changed to state 1, in which case we can signal starting right away
+
+		break;
+	case 1:
+		if(!ticks)
+		{
+			//if ticks is 0, we send a signal to each execute to start a gait cycle.
+			startGaitCycle = 1;
+		}
+		ticks++;
+		ticks %= MS_PER_GAIT;
+		state = 0;
+		break;
+
+	default:
+		break;
+
+	}
+
+	//Send message to execute 1
+	info[0] = PORT_485_2;
+	tx_cmd_motortb_r(TX_N_DEFAULT, 0, startGaitCycle);
+	packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_1, info, SEND_TO_SLAVE);
+	slaves_485_1.xmit.listen = 1;
+
+#endif //PROJECT_MOTORTB
+}
+
 //****************************************************************************
 // Private Function(s)
 //****************************************************************************
@@ -341,7 +412,8 @@ void MotorTestBench_fsm_2(void)
 //Note: 'static' makes them private; they can only called from functions in this
 //file. It's safer than making everything global.
 
-//
+/*
+ *
 static void MotorTestBench_refresh_values(void)
 {
 	motortb.mn1[0] = mtb_state;
@@ -357,6 +429,6 @@ static void MotorTestBench_refresh_values(void)
 	}
 }
 //That function can be called from the FSM.
-
+*/
 
 #endif 	//BOARD_TYPE_FLEXSEA_MANAGE
