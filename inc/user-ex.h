@@ -60,6 +60,7 @@
 
 void init_user(void);
 void user_fsm(void);
+void user_fsm2(void);
 
 //****************************************************************************
 // Definition(s):
@@ -331,8 +332,24 @@ void user_fsm(void);
 	#define ENC_COMMUT			ENC_AS5047
 	#define ENC_DISPLAY			ENC_CONTROL
 
-	//Subproject A: No torque sensor, execute 2
+	//Subproject A: Has the torque sensor, Execute 1
 	#if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
+
+		//Control encoder function:
+		#define PWM_SIGN		 -1
+		#define CTRL_ENC_FCT(x) (x)
+		#define CTRL_ENC_VEL_FCT(x) (x)
+		//...
+        
+        #define CURRENT_ZERO		((int32)2123)
+
+		//Slave ID:
+		#define SLAVE_ID		FLEXSEA_EXECUTE_1
+
+	#endif  //SUBPROJECT_A
+
+	//Subproject B: No torque sensor, execute 2
+	#if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
 
 		//Control encoder function:
 
@@ -345,22 +362,6 @@ void user_fsm(void);
 
 		//Slave ID:
 		#define SLAVE_ID		FLEXSEA_EXECUTE_2
-
-	#endif  //SUBPROJECT_A
-
-	//Subproject B: Has the torque sensor, Execute 1
-	#if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
-
-		//Control encoder function:
-		#define PWM_SIGN		 -1
-		#define CTRL_ENC_FCT(x) (x)
-		#define CTRL_ENC_VEL_FCT(x) (x)
-		//...
-        
-        #define CURRENT_ZERO		((int32)2123)
-        
-		//Slave ID:
-		#define SLAVE_ID		FLEXSEA_EXECUTE_1
 
 	#endif  //SUBPROJECT_B
 

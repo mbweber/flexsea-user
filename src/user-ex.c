@@ -93,6 +93,12 @@ void user_fsm(void)
 	#endif	//PROJECT_MOTORTB
 }
 
+//Call this function in one of the main while time slots.
+void user_fsm2(void)
+{
+	MotorTestBench_fsm2();
+}
+
 //****************************************************************************
 // Private Function(s)
 //****************************************************************************

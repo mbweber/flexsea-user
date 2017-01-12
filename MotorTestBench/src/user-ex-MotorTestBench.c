@@ -37,21 +37,31 @@
 //****************************************************************************
  
 #include "../inc/user-ex-MotorTestBench.h"
- 
+#include "flexsea_pid_controller.h"
+
 //****************************************************************************
 // Variable(s)
 //****************************************************************************
  
 struct motortb_s my_motortb;
-volatile uint8_t motortb_startCycleFlag = 0;
-    
+
+#if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
+
+// define a 100 long array, defining the torque profile for the motor controlled by ex2
+// static float torqueProfile[] = { .. };
+#include "../resources/motorTorqueProfile.c.resource"
+pid_controller torqueController;
+//pid_controller velocityController;
+#endif
+
+#if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
+
 // define a 100 long array, defining the position profile for the motor controlled by ex1
 // static float positionProfile[] = { .. }; 
 #include "../resources/motorPositionProfile.c.resource"
-    
-// define a 100 long array, defining the torque profile for the motor controlled by ex2 
-// static float torqueProfile[] = { .. };  
-#include "../resources/motorTorqueProfile.c.resource"
+pid_controller positionController;
+
+#endif
     
 //****************************************************************************
 // Private Function Prototype(s):
@@ -67,33 +77,23 @@ void initMotorTestBench(void)
 	board_id = SLAVE_ID;
 	
 	#if(MOTOR_COMMUT == COMMUT_BLOCK)
-    Coast_Brake_Write(1);               //Brake (regen)
+        Coast_Brake_Write(1);               //Brake (regen)
 	#endif
     
     #if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
-        // initialization code specific to ex 2
-        ctrl.active_ctrl = CTRL_POSITION;   //Position controller
-        motor_open_speed_1(0);              //0% PWM
-        
-        //Position PID gains - initially 0
-        ctrl.position.gain.P_KP = 0;
-        ctrl.position.gain.P_KI = 0;
-        ctrl.position.gain.P_KD = 0;
+        // initialization code specific to ex 1
+        pid_controller_initialize(&torqueController, 1024, 5000, 90, 4000);
     #endif
     
     #if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
-        // initialization code specific to ex 1
+        // initialization code specific to ex 2
+        pid_controller_initialize(&positionController, 1024, 10000, 90, 2000);
     #endif
-
-    /*
-	//User variables:
-	motortb.ex1[0] = 0;
-	motortb.ex1[1] = 0;
-	motortb.ex1[2] = 0;
-	motortb.ex1[3] = 0;
-	motortb.ex1[4] = 0;
-	motortb.ex1[5] = 0;
-    */
+    
+    for(int i = 0; i < 6; i++)
+    {
+        motortb.ex1[i] = 0;
+    }
 }
 
 // User finite state machine, implements a tight controller 
@@ -102,30 +102,65 @@ void initMotorTestBench(void)
 void MotorTestBench_fsm(void)
 {
     static unsigned int ticks = 0;
-    static uint8_t state = 0;
+    static uint8_t state = 4;
     /* State represents whether we are running or not 
      * 0 - not running
      * 1 - gait cycle just started / starting
      * 2 - gait cycle in progress
     */
     
-    if(ctrl.active_ctrl == CTRL_POSITION) 
-    {
-        unsigned int percentOfGaitCycle;
+    unsigned int percentOfGaitCycle;
+    static int32_t initialPosition = 0;
+
         switch(state) 
         {
+
+        case 4:
+            ticks++;
+            if(ticks > 1000)
+            {
+                ticks = 0;
+                state = 3;
+                #if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
+                    pid_controller_setGains(&torqueController, 0, 5, 0, 7);
+                #endif
+                #if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
+                    initialPosition = exec1.enc_control_ang;
+                    pid_controller_setGains(&positionController, 10, 3, 0, 7);
+                #endif
+            }
+            break;
+        case 3:
+            #if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
+                if(ticks < 4000)
+                {
+                    torqueController.setpoint = 0;
+                }
+                else
+                {
+                   torqueController.setpoint = 500;
+                }
+                ticks++;
+                ticks %= 5000;
+            #endif
+
+            #if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
+                positionController.setpoint = initialPosition;
+            #endif
+
+            break;
+
         case 1:
             // set PID gains to non zero, ie we are actually traversing through the position profile now
-            ctrl.position.setp = positionProfile[0];
-            ticks = 1;
-            ctrl.position.gain.P_KP = 90;
-            ctrl.position.gain.P_KI = 5;
-            ctrl.position.gain.P_KD = 5;
+            #if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
+
+            #endif
             
             state = 2;
             break;
             
         case 2:
+            #if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
              // using the conversion ticks/30 % 100 means that we complete 1 cycle every 3000 ticks.
              // note the modulo is redundant, ticks should always be less than 3000
             if(ticks < 3000) 
@@ -139,7 +174,7 @@ void MotorTestBench_fsm(void)
                 state = 0;
             }
             //no break, we transition directly into state 0, as opposed to waiting for another cycle (1ms)
-            
+            #endif
         case 0:
             ctrl.position.gain.g0 = 0;
             ctrl.position.gain.g1 = 0;
@@ -155,7 +190,25 @@ void MotorTestBench_fsm(void)
             
             break;
         }
-    }    
+}
+
+// User fsm controlling motors
+void MotorTestBench_fsm2(void)
+{
+    int32_t pwm = 0;
+    static int64_t upwm = 0;
+    #if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
+        //velocityController.controlValue = exec1.enc_control_ang;
+        torqueController.controlValue = (((int32_t)(strain_read())-31937)*1831)>>13;
+        pwm = pid_controller_compute(&torqueController);
+    #endif
+
+    #if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
+        positionController.controlValue = exec1.enc_control_ang;
+        pwm = pid_controller_compute(&positionController);
+    #endif
+
+    motor_open_speed_1(pwm);
 }
 
 //Here's an example function:
@@ -164,7 +217,7 @@ void MotorTestBench_refresh_values(void)
 	motortb.ex1[1] = as5047.filt.vel_rpm;
     motortb.ex1[2] = as5047.raw.ang_clks;
     motortb.ex1[3] = exec1.sine_commut_pwm;
-    motortb.ex1[4] = ((strain_read()-31937)*1831)>>13;   
+    motortb.ex1[4] = ((strain_read()-31937)*1831)>>13;
 }
 
 //****************************************************************************
