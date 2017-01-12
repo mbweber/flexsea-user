@@ -300,7 +300,8 @@ void MotorTestBench_fsm_2(void)
 			tx_cmd_motortb_r(TX_N_DEFAULT, 0, mtb_my_control, mtb_my_cur[0], mtb_my_pwm[0]);
 			packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_1, info, SEND_TO_SLAVE);
 
-			slaves_485_1.xmit.listen = 1;
+			//slaves_485_1.xmit.listen = 1;	//Legacy - remove once tested
+			slaves_485_1.xmit.willListenSoon = 1;	//New version
 			ex_refresh_fsm_state++;
 
 			break;
@@ -318,7 +319,8 @@ void MotorTestBench_fsm_2(void)
 			tx_cmd_motortb_r(TX_N_DEFAULT, 1, mtb_my_control, mtb_my_cur[1], mtb_my_pwm[1]);
 			packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_2, info, SEND_TO_SLAVE);
 
-			slaves_485_2.xmit.listen = 1;
+			//slaves_485_2.xmit.listen = 1;	//Legacy - remove once tested
+			slaves_485_2.xmit.willListenSoon = 1;	//New version
 			ex_refresh_fsm_state++;
 
 			break;
