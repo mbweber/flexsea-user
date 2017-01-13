@@ -46,11 +46,12 @@ extern "C" {
 #include "main.h"
 #endif	//BOARD_TYPE_FLEXSEA_EXECUTE
 
+#include "flexsea_pid_controller.h"
+
 //****************************************************************************
 // Variable(s)
 //****************************************************************************
-extern uint8_t motortb_startCycleFlag;
-
+extern pid_controller positionController;
 //****************************************************************************
 // Function(s)
 //****************************************************************************
@@ -141,6 +142,7 @@ void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 		SPLIT_16((uint16_t)motortb.ex1[5], shBuf, &index);
 
 		SPLIT_16(strain_read(), shBuf, &index);
+
 		SPLIT_16(read_analog(0), shBuf, &index);
 		SPLIT_16(read_analog(1), shBuf, &index);
 
@@ -161,18 +163,25 @@ void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 
 void tx_cmd_motortb_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 							uint16_t *len, uint8_t offset, \
-							uint16_t startCycle)
+							motor_dto* dto)
 {
 	//Variable(s) & command:
 	uint16_t index = 0;
 	(*cmd) = CMD_MOTORTB;
 	(*cmdType) = CMD_READ;
 
+    unsigned char* data = (unsigned char*) dto;
+    uint16_t lengthInBytes = sizeof(*dto);
+    
 	//Data:
 	shBuf[index++] = offset;
 	if(offset == 0 || offset == 1)
 	{
-		shBuf[index++] = startCycle;
+		int i;
+		for(i = 0; i < lengthInBytes; i++)
+		{
+			shBuf[index++] = data[i];
+		}
 	}
 
 	//Payload length:
@@ -186,20 +195,28 @@ void rx_cmd_motortb_rw(uint8_t *buf, uint8_t *info)
 
 	#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 
-		int16_t tmp_wanted_current = 0, tmp_open_spd = 0, tmp_start_gait_cycle = 0;
 		uint16_t index = P_DATA1;
 		offset = buf[index++];
 
+		motor_dto dto;
+        //decode the DTO (data transfer object)
+        //this belongs in system code and can be done without knowing what dto is being sent
+		uint16_t lengthInBytes = sizeof(dto);
+		unsigned char* data = (unsigned char*) &dto;
 		if(offset == 0 || offset == 1)
 		{
-			//Update controller:
-			// controller info should be here, but we can ignore it since we are running sort of autonomously
-			// control_strategy(buf[index++]);
-			// instead we just increment index
-			index++;
-			tmp_start_gait_cycle = (int16_t) REBUILD_UINT16(buf, &index);
-			motortb_startCycleFlag = (tmp_start_gait_cycle > 0);
+			int i;
+			for(i = 0; i < lengthInBytes; i++)
+			{
+				data[i] = buf[index + i];
+			}
+			//update index, not that we will use it again..
+			index+=lengthInBytes;
+			//motortb_startCycleFlag = (((int16_t) REBUILD_UINT16(buf, &index)) > 0);
 		}
+
+		//user code then does as it pleases with the dto
+		motortb_startCycleFlag = dto.startGaitCycle;
 
 	#endif	//BOARD_TYPE_FLEXSEA_EXECUTE
 
