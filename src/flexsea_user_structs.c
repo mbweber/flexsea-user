@@ -38,6 +38,7 @@
 
 //Data structures:
 struct motortb_s motortb;
+uint8_t motortb_startCycleFlag;
 
 //****************************************************************************
 // Function(s)

@@ -62,5 +62,6 @@ struct motortb_s
 //****************************************************************************
 
 extern struct motortb_s motortb;
+extern uint8_t motortb_startCycleFlag;
 
 #endif	//INC_FLEXSEA_GLOBAL_STRUCT_H
