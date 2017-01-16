@@ -37,6 +37,7 @@
 
 #include "../inc/user-mn-MotorTestBench.h"
 #include <math.h>
+#include "cmd_motor_dto.h"
 
 //****************************************************************************
 // Variable(s)
@@ -62,7 +63,7 @@ int16_t max_curr = 8000;
 // Private Function Prototype(s):
 //****************************************************************************
 
-static void MotorTestBench_refresh_values(void);
+//static void MotorTestBench_refresh_values(void);
 
 //****************************************************************************
 // Public Function(s)
@@ -80,6 +81,7 @@ void init_MotorTestBench(void)
  * 	executed at 1 kHz
  * */
 
+#if(0)
 //Motor Test Bench Finite State Machine.
 //Call this function in one of the main while time slots.
 void MotorTestBench_fsm_1(void)
@@ -275,7 +277,7 @@ void MotorTestBench_fsm_1(void)
 	#endif	//ACTIVE_PROJECT == PROJECT_MOTORTB
 }
 
-#if(0)
+
 // Second state machine for the motor test bench project
 // Deals with the communication between Manage and 2x Execute, on the same RS-485 bus
 // This function is called at 1kHz
@@ -361,34 +363,47 @@ void MotorTestBench_fsm_1(void)
 
 	const uint16_t MS_PER_GAIT = 3000; //3000 ms per gait cycle?
 	static uint8_t info[2] = {PORT_485_1, PORT_485_1};
-	static uint8_t ticks = 0;
+	static uint32_t ticks = 0;
 
-	uint8_t startGaitCycle = 0;
+	static uint8_t commCounter = 0;
+
+	static uint8_t startGaitCycle = 0;
+
 	switch(state)
 	{
 	case 0:
 		// Check a flag that is set by plan in an interrupt
 		// 'user data' value at index 0
-		if(user_data_1.r[0])
+		if(user_data_1.w[0])
 		{
 			ticks = 0;
-			user_data_1.r[0] = 0;
+			user_data_1.r[0] = user_data_1.w[0];
+			user_data_1.w[0] = 0;
+
+			user_data_1.w[3] = 0;
+			user_data_1.r[1] = 1;
+
 			state = 1;
 		}
-
-		// break not needed
-		// since we may have just changed to state 1, in which case we can signal starting right away
-
 		break;
+
 	case 1:
-		if(!ticks)
+		if(ticks == 0)
 		{
 			//if ticks is 0, we send a signal to each execute to start a gait cycle.
 			startGaitCycle = 1;
 		}
+
 		ticks++;
 		ticks %= MS_PER_GAIT;
-		state = 0;
+
+		if(user_data_1.w[3])
+		{
+			user_data_1.r[3] = user_data_1.w[3];
+			user_data_1.w[3] = 0;
+			user_data_1.r[1] = 0;
+			state = 0;
+		}
 		break;
 
 	default:
@@ -396,11 +411,28 @@ void MotorTestBench_fsm_1(void)
 
 	}
 
-	//Send message to execute 1
-	info[0] = PORT_485_2;
-	tx_cmd_motortb_r(TX_N_DEFAULT, 0, startGaitCycle);
-	packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_1, info, SEND_TO_SLAVE);
-	slaves_485_1.xmit.listen = 1;
+	if(!commCounter)
+	{
+		motor_dto dto;
+		dto.startGaitCycle = startGaitCycle;
+
+		//Send message to execute 1
+		info[0] = PORT_485_1;
+		tx_cmd_motortb_r(TX_N_DEFAULT, 0, &dto);
+		packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_1, info, SEND_TO_SLAVE);
+		slaves_485_1.xmit.listen = 1;
+
+		//Send message to execute 2
+		info[0] = PORT_485_2;
+		tx_cmd_motortb_r(TX_N_DEFAULT, 1, &dto);
+		packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_2, info, SEND_TO_SLAVE);
+		slaves_485_2.xmit.listen = 1;
+
+		startGaitCycle = 0;
+	}
+	commCounter++;
+	commCounter %= 10;
+
 
 #endif //PROJECT_MOTORTB
 }

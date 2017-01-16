@@ -44,14 +44,18 @@ extern "C" {
 //Execute boards only:
 #ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 #include "main.h"
+#include "flexsea_pid_controller.h"
 #endif	//BOARD_TYPE_FLEXSEA_EXECUTE
 
-#include "flexsea_pid_controller.h"
+//
 
 //****************************************************************************
 // Variable(s)
 //****************************************************************************
+#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 extern pid_controller positionController;
+#endif	//BOARD_TYPE_FLEXSEA_EXECUTE
+
 //****************************************************************************
 // Function(s)
 //****************************************************************************
