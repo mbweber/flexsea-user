@@ -87,7 +87,7 @@ void initMotorTestBench(void)
         // initialization code specific to ex 2
         pid_controller_initialize(&velocityController, 1024, 100000, 90, 40000);
         pid_controller_settings(&velocityController, 1, 1, 1);
-		pid_controller_setGains(&velocityController, 1, 15, 0, 8);
+		pid_controller_setGains(&velocityController, 2, 15, 0, 9);
     //#endif
     
     int i;
@@ -115,7 +115,9 @@ void MotorTestBench_fsm(void)
     	static int32_t initialPosition = 0;
     //#endif
 
-	int32_t maxspeed = 462;
+	//ctrl.active_ctrl
+	
+	int32_t maxspeed = 4000;
 	int32_t minspeed = -1 * maxspeed;
 	
 	if(ctrl.active_ctrl != CTRL_CUSTOM)
@@ -140,7 +142,7 @@ void MotorTestBench_fsm(void)
 	    else if(x == 3)
 	      setpoint = (500 - r) * minspeed / 500;
 		
-		velocityController.setpoint = setpoint;
+		velocityController.setpoint = setpoint * sin(4 * PI * ticks / 1000);
 		
 		ticks++;
 		ticks%=2000;
