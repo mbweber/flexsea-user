@@ -47,13 +47,17 @@ extern "C" {
 #include "flexsea_pid_controller.h"
 #endif	//BOARD_TYPE_FLEXSEA_EXECUTE
 
-//
-
 //****************************************************************************
 // Variable(s)
 //****************************************************************************
 #ifdef BOARD_TYPE_FLEXSEA_EXECUTE
-extern pid_controller positionController;
+
+	#if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
+	extern pid_controller torqueController;
+	#elif(ACTIVE_SUBPROJECT == SUBPROJECT_B)
+	extern pid_controller positionController;
+	#endif
+
 #endif	//BOARD_TYPE_FLEXSEA_EXECUTE
 
 //****************************************************************************
@@ -145,10 +149,19 @@ void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 		SPLIT_16((uint16_t)motortb.ex1[4], shBuf, &index);
 		SPLIT_16((uint16_t)motortb.ex1[5], shBuf, &index);
 
-		SPLIT_16(strain_read(), shBuf, &index);
-
-		SPLIT_16(read_analog(0), shBuf, &index);
-		SPLIT_16(read_analog(1), shBuf, &index);
+		#if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
+			SPLIT_16((uint16_t)torqueController.setpoint, shBuf, &index);
+			SPLIT_16((uint16_t)torqueController.controlValue, shBuf, &index);	
+			SPLIT_16((uint16_t)torqueController.controlValue - torqueController.setpoint, shBuf, &index);	
+		#elif(ACTIVE_SUBPROJECT == SUBPROJECT_B)
+			SPLIT_16((uint16_t)(positionController.setpoint >> 3), shBuf, &index);
+			SPLIT_16((uint16_t)(positionController.controlValue >> 3), shBuf, &index);
+			SPLIT_16((uint16_t)((positionController.setpoint - positionController.controlValue) >> 3), shBuf, &index);
+		#else
+			SPLIT_16(strain_read(), shBuf, &index);
+			SPLIT_16(read_analog(0), shBuf, &index);
+			SPLIT_16(read_analog(1), shBuf, &index);
+		#endif		
 
 		SPLIT_32((uint32_t)refresh_enc_display(), shBuf, &index);
 		SPLIT_16((uint16_t)ctrl.current.actual_val, shBuf, &index);
@@ -174,8 +187,8 @@ void tx_cmd_motortb_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 	(*cmd) = CMD_MOTORTB;
 	(*cmdType) = CMD_READ;
 
-    unsigned char* data = (unsigned char*) dto;
-    uint16_t lengthInBytes = sizeof(*dto);
+    uint8_t* data = (uint8_t*) dto;
+    uint16_t lengthInBytes = sizeof(motor_dto);
     
 	//Data:
 	shBuf[index++] = offset;
@@ -184,8 +197,9 @@ void tx_cmd_motortb_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 		int i;
 		for(i = 0; i < lengthInBytes; i++)
 		{
-			shBuf[index++] = data[i];
+			shBuf[index+i] = data[i];
 		}
+		index+=lengthInBytes;
 	}
 
 	//Payload length:
@@ -218,10 +232,14 @@ void rx_cmd_motortb_rw(uint8_t *buf, uint8_t *info)
 			index+=lengthInBytes;
 			//motortb_startCycleFlag = (((int16_t) REBUILD_UINT16(buf, &index)) > 0);
 		}
-
-		//user code then does as it pleases with the dto
+		
+		volatile int x = 0;
+		if(dto.startGaitCycle)
+			x = 2;
+		x--;
+		
 		motortb_startCycleFlag = dto.startGaitCycle;
-
+		
 	#endif	//BOARD_TYPE_FLEXSEA_EXECUTE
 
 	#ifdef BOARD_TYPE_FLEXSEA_MANAGE
