@@ -64,7 +64,13 @@ struct motortb_s
 //****************************************************************************
 
 extern struct motortb_s motortb;
-extern uint8_t motortb_startCycleFlag;
+
+#define GAIT_FLAG 0x01
+#define CURRENT_FLAG 0x02
+#define CURRENT_UNDER_TEST_FLAG 0x04
+
+extern uint8_t motortb_flagsIn;
+extern uint8_t motortb_flagsOut;
 
 #ifdef BOARD_TYPE_FLEXSEA_MANAGE
 

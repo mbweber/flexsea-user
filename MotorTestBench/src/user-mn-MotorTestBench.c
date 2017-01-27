@@ -71,6 +71,8 @@ enum TEST_STATE motortb_state = WAITING_PLAN;
 // Private Function Prototype(s):
 //****************************************************************************
 
+static void MotorTestBench_refresh_values(void);
+
 void init_testState(void)
 {
 	motorTbTestFailed = 0;
@@ -310,7 +312,7 @@ void MotorTestBench_fsm_2(void)
 
 	const int32_t CURRENT_THRESH_UPPER = 3000;
 	const int32_t CURRENT_THRESH_LOWER = -1*CURRENT_THRESH_UPPER;
-
+/*
 	if(exec1CtrlStateReady)
 	{
 		exec1CtrlStateReady = 0;
@@ -323,7 +325,7 @@ void MotorTestBench_fsm_2(void)
 			newTorqueCurrentRatio = (float)(exec1ControllerState.actual) / (float)(exec1.current);
 		}
 	}
-
+*/
 	if(!motorTbTestFailed && exec1CtrlStateReady)
 	{
 		exec1CtrlStateReady = 0;

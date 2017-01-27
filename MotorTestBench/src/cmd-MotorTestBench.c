@@ -94,12 +94,57 @@ inline void handleMotorTbReply(motor_dto_reply response, struct execute_s* exec_
 
 }
 
+#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
+
+inline motor_dto_reply generateMotorDtoReply()
+{
+	motor_dto_reply result;
+
+	result.encoder = refresh_enc_display();
+
+#if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
+	result.ctrlSetpoint = torqueController.setpoint;
+	result.ctrlActual = torqueController.controlValue;
+#elif(ACTIVE_SUBPROJECT == SUBPROJECT_B)
+	result.ctrlSetpoint = positionController.setpoint;
+	result.ctrlActual = positionController.controlValue;
+#endif
+
+	result.strain = strain_read();
+	result.analog0 = read_analog(0);
+	result.analog1 = read_analog(1);
+	result.v_vb = safety_cop.v_vb;
+	result.v_vg = safety_cop.v_vg;
+	result.temperature = safety_cop.temperature;
+	result.status1 = safety_cop.status1;
+	result.status2 = safety_cop.status2;
+
+	result.testFlag = motortb_flagsOut;
+
+	motortb_flagsOut = 0;
+
+	return result;
+}
+#endif
+
+void fillBufferData(uint8_t *shBuf, uint16_t *index, void* data, uint16_t lengthInBytes)
+{
+	uint8_t* unsignedDataPointer = (uint8_t*)(data);
+	int i;
+	for(i = 0; i < lengthInBytes; i++)
+	{
+		shBuf[(*index)+i] = unsignedDataPointer[i];
+	}
+	(*index)+=lengthInBytes;
+
+}
+
 void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 							uint16_t *len, uint8_t slave)
 {
 	//Variable(s) & command:
 	uint16_t index = 0;
-	int16_t *execDataPtr;
+	int32_t *execDataPtr;
 	(*cmd) = CMD_MOTORTB;
 	(*cmdType) = CMD_WRITE;
 
@@ -164,33 +209,14 @@ void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 
 	#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 
-		SPLIT_16((uint16_t)motortb.ex1[0], shBuf, &index);
-		SPLIT_16((uint16_t)motortb.ex1[1], shBuf, &index);
-		SPLIT_16((uint16_t)motortb.ex1[2], shBuf, &index);
-		SPLIT_16((uint16_t)motortb.ex1[3], shBuf, &index);
-
-		#if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
-			SPLIT_16((uint16_t)torqueController.setpoint, shBuf, &index);
-			SPLIT_16((uint16_t)torqueController.controlValue, shBuf, &index);	
-			SPLIT_16((uint16_t)torqueController.controlValue - torqueController.setpoint, shBuf, &index);	
-		#elif(ACTIVE_SUBPROJECT == SUBPROJECT_B)
-			SPLIT_16((uint16_t)(positionController.setpoint >> 3), shBuf, &index);
-			SPLIT_16((uint16_t)(positionController.controlValue >> 3), shBuf, &index);
-			SPLIT_16((uint16_t)((positionController.setpoint - positionController.controlValue) >> 3), shBuf, &index);
-		#else
-			SPLIT_16(strain_read(), shBuf, &index);
-			SPLIT_16(read_analog(0), shBuf, &index);
-			SPLIT_16(read_analog(1), shBuf, &index);
-		#endif		
-
-		SPLIT_32((uint32_t)refresh_enc_display(), shBuf, &index);
-		SPLIT_16((uint16_t)ctrl.current.actual_val, shBuf, &index);
-
-		shBuf[index++] = safety_cop.v_vb;
-		shBuf[index++] = safety_cop.v_vg;
-		shBuf[index++] = safety_cop.temperature;
-		shBuf[index++] = safety_cop.status1;
-		shBuf[index++] = safety_cop.status2;
+		volatile int temp = 0;
+		if(motortb_flagsOut & 0x02)
+		{
+			temp = motortb_flagsOut*20;
+		}
+		motor_dto_reply response = generateMotorDtoReply();
+		uint16_t lengthInBytes = sizeof(motor_dto_reply);
+		fillBufferData(shBuf, &index, &response, lengthInBytes);
 
 	#endif	//BOARD_TYPE_FLEXSEA_EXECUTE
 
@@ -207,20 +233,10 @@ void tx_cmd_motortb_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 	(*cmd) = CMD_MOTORTB;
 	(*cmdType) = CMD_READ;
 
-    uint8_t* data = (uint8_t*) dto;
-    uint16_t lengthInBytes = sizeof(motor_dto);
-    
-	//Data:
 	shBuf[index++] = offset;
-	if(offset == 0 || offset == 1)
-	{
-		int i;
-		for(i = 0; i < lengthInBytes; i++)
-		{
-			shBuf[index+i] = data[i];
-		}
-		index+=lengthInBytes;
-	}
+
+	uint16_t lengthInBytes = sizeof(motor_dto);
+    fillBufferData(shBuf, &index, dto, lengthInBytes);
 
 	//Payload length:
 	(*len) = index;
@@ -237,28 +253,20 @@ void rx_cmd_motortb_rw(uint8_t *buf, uint8_t *info)
 		offset = buf[index++];
 
 		motor_dto dto;
-        //decode the DTO (data transfer object)
-        //this belongs in system code and can be done without knowing what dto is being sent
 		uint16_t lengthInBytes = sizeof(dto);
-		unsigned char* data = (unsigned char*) &dto;
+
 		if(offset == 0 || offset == 1)
 		{
-			int i;
-			for(i = 0; i < lengthInBytes; i++)
-			{
-				data[i] = buf[index + i];
-			}
-			//update index, not that we will use it again..
-			index+=lengthInBytes;
-			//motortb_startCycleFlag = (((int16_t) REBUILD_UINT16(buf, &index)) > 0);
+			unpackResponse(&dto, buf, &index, lengthInBytes);
 		}
 		
 		volatile int x = 0;
-		if(dto.startGaitCycle)
+		if(dto.gaitCycleFlag)
 			x = 2;
-		x--;
+		if(dto.gaitCycleFlag == 0x02)
+			x--;
 		
-		motortb_startCycleFlag = dto.startGaitCycle;
+		motortb_flagsIn = dto.gaitCycleFlag;
 		
 	#endif	//BOARD_TYPE_FLEXSEA_EXECUTE
 
@@ -282,7 +290,7 @@ void rx_cmd_motortb_rr(uint8_t *buf, uint8_t *info)
 		uint8_t offset = 0, slave = 0;
 		uint16_t index = 0;
 		struct execute_s *exec_s_ptr = &exec1;
-		int16_t *execDataPtr;
+		int32_t *execDataPtr;
 
 		execControllerState_t* testState_ptr = &exec1ControllerState;
 

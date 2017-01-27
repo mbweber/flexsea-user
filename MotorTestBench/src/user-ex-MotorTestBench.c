@@ -31,7 +31,7 @@
 #include "main.h"
 
 #ifdef BOARD_TYPE_FLEXSEA_EXECUTE
-    
+
 //****************************************************************************
 // Include(s)
 //****************************************************************************
@@ -59,7 +59,7 @@ pid_controller torqueController;
 
 #if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
 //#define P_CONTROLGAINS 37,1,0,9
-#define P_CONTROLGAINS 77,3,0,10
+#define P_CONTROLGAINS 75,2,0,10
 // define a 1000 long array, defining the position profile for the motor controlled by ex1
 // static int32_t positionProfile[] = { .. }; 
 #include "../resources/motorPositionProfile.c.resource"
@@ -88,10 +88,7 @@ void initMotorTestBench(void)
         // initialization code specific to ex 1
         pid_controller_initialize(&torqueController, 1024, 5000, 90, 8000);
 		pid_controller_settings(&torqueController, 0, 1, 1);
-		
-//		int j;
-//		for(j=0; j<LENGTH_GAIT_CYCLE_IN_MS; j++)
-//			torqueProfile[j] = torqueProfile[j] / 8;
+
     #endif
     
     #if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
@@ -99,9 +96,6 @@ void initMotorTestBench(void)
         pid_controller_initialize(&positionController, 1024, 50000, 90, 16000);
         pid_controller_settings(&positionController, 0, 1, 1);
 		
-//		int j;
-//		for(j=0; j<LENGTH_GAIT_CYCLE_IN_MS; j++)
-//			positionProfile[j] = positionProfile[j] / 8;
     #endif
     
     int i;
@@ -111,13 +105,15 @@ void initMotorTestBench(void)
     }
 }
 
+enum TEST_FSM_STATE { INITIALIZING, WAITING, CYCLE_START, CYCLING, CURR_MEASURE_ACTIVE, CURR_MEASURE_PASSIVE };
+
 // User finite state machine, implements a tight controller 
 // Called at 1 kHz
 // Call this function in one of the main while time slots.
 void MotorTestBench_fsm(void)
 {
     static unsigned int ticks = 0;
-    static uint8_t state = 4;
+    static enum TEST_FSM_STATE state = INITIALIZING;
     /* State represents whether we are running or not 
      * 0 - not running
      * 1 - gait cycle just started / starting
@@ -133,89 +129,145 @@ void MotorTestBench_fsm(void)
 		initialPosition = exec1.enc_control_ang;
 		state = 4;
 	}
-	else
-	{
-		switch(state) 
-	    {
+	
+	switch(state) 
+    {
 
-	    case 4:
-	        ticks++;
-			//Wait 1 second for things to initialize
-	        if(ticks > 1000)
-	        {
-	            ticks = 0;
-	            state = 0;
-				
-	            #if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
-					pid_controller_setGains(&torqueController, T_CONTROLGAINS);
-	                torqueController.setpoint = torqueProfile[0];		
-					torqueController.errorSum = 0;
-	            #endif
+    case INITIALIZING:
+        ticks++;
+		//Wait 1 second for things to initialize
+        if(ticks > 1000)
+        {
+            ticks = 0;
+            state = WAITING;
 
-	            #if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
-	                initialPosition = exec1.enc_control_ang;
-	                positionController.setpoint = initialPosition + positionProfile[0];
-	                pid_controller_setGains(&positionController, P_CONTROLGAINS);
-	            #endif
-	        }
-	        break;
-	        
-	    case 1:
-	        // set PID gains to non zero, ie we are actually traversing through the position profile now
-	        #if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
-	            torqueController.setpoint = torqueProfile[0];
-	            pid_controller_setGains(&torqueController, T_CONTROLGAINS);
-	        #endif
-	        #if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
-	            positionController.setpoint = initialPosition + positionProfile[0];
-	            pid_controller_setGains(&positionController, P_CONTROLGAINS);
-	        #endif
-	        ticks = 1;
-	        state = 2;
-	        break;
-	        
-	    case 2:
-			if(ticks < LENGTH_GAIT_CYCLE_IN_MS)
-			{
-				#if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
-		            torqueController.setpoint = torqueProfile[ticks];
-				#endif
-		        #if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
-		            positionController.setpoint = (initialPosition + positionProfile[ticks]);
-				#endif
-				ticks++;
-			}
-			else
-			{
-			    state = 0;
-	            ticks = 0;
-			}
+            #if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
+				pid_controller_setGains(&torqueController, T_CONTROLGAINS);
+                torqueController.setpoint = torqueProfile[0];
+				torqueController.errorSum = 0;
+            #endif
 
-	        break;
+            #if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
+                initialPosition = exec1.enc_control_ang;
+                positionController.setpoint = initialPosition + positionProfile[0];
+                pid_controller_setGains(&positionController, P_CONTROLGAINS);
+            #endif
+        }
+        break;
 
-	    case 0:            
-	        //check the flag sent by manage
-	        if(motortb_startCycleFlag)
-	        {
-	            motortb_startCycleFlag = 0;
-	            state = 1;
+    case CYCLE_START:
+        // set PID gains to non zero, ie we are actually traversing through the position profile now
+        #if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
+            torqueController.setpoint = torqueProfile[0];
+            pid_controller_setGains(&torqueController, T_CONTROLGAINS);
+        #endif
+		
+        #if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
+            positionController.setpoint = initialPosition + positionProfile[0];
+            pid_controller_setGains(&positionController, P_CONTROLGAINS);
+        #endif
+		
+        ticks = 1;
+        state = CYCLING;
+        break;
 
-	        }
+    case CYCLING:
+		if(ticks < LENGTH_GAIT_CYCLE_IN_MS)
+		{
 			#if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
-				//torqueController.errorSum = 0;
-				torqueController.setpoint = 0;
-				torqueController.errorSum = torqueController.errorSum*9/10;
-			#endif			
+	            torqueController.setpoint = torqueProfile[ticks];
+			#endif
+	        #if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
+	            positionController.setpoint = (initialPosition + positionProfile[ticks]);
+			#endif
+			ticks++;
+		}
+		else
+		{
+            ticks = 0;
+		    state = WAITING;
+			motortb_flagsOut = GAIT_FLAG;
+		}
 
-	        break;
-	    }	
-	}
+        break;
+		
+	case CURR_MEASURE_PASSIVE:
+		if(ticks == 0)
+		{
+			ctrl.active_ctrl = CTRL_NONE;
+			measure_motor_resistance = 0;
+		}
+		if(ticks > 20)
+		{
+			measure_motor_resistance = 0;
+		}
+		if(ticks > 50)
+		{
+			ctrl.active_ctrl = CTRL_CUSTOM;
+			ticks = 0;
+			state = WAITING;
+			motortb_flagsOut = CURRENT_FLAG;	
+		}
+		ticks++;
+		break;
+
+	case CURR_MEASURE_ACTIVE:
+		if(ticks == 0)
+		{
+			ctrl.active_ctrl = CTRL_NONE;
+			measure_motor_resistance = 1;
+		}
+		if(ticks > 20)
+		{
+			measure_motor_resistance = 0;
+		}
+		if(ticks > 50)
+		{
+			ctrl.active_ctrl = CTRL_CUSTOM;
+			ticks = 0;
+			state = WAITING;
+			motortb_flagsOut = CURRENT_FLAG;
+		}
+		ticks++;
+		break;
+
+    case WAITING:
+        //check the flag sent by manage
+        if(motortb_flagsIn & GAIT_FLAG)
+        {
+			ticks = 0;
+            state = CYCLE_START;
+			motortb_flagsIn = 0;
+        }
+		else if(motortb_flagsIn & CURRENT_FLAG)
+		{
+			ticks = 0;
+			state = (motortb_flagsIn & CURRENT_UNDER_TEST_FLAG) ? 
+						CURR_MEASURE_ACTIVE : 
+						CURR_MEASURE_PASSIVE;
+		
+			motortb_flagsIn = 0;
+		}
+
+
+		#if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
+			torqueController.setpoint = 0;
+			torqueController.errorSum = torqueController.errorSum*9/10;
+		#endif			
+
+        break;
+
+	default:
+		break;
+    }
+
 }
 
 void user_ctrl(void)
 {
 	static int32_t enc_vel_prev = 0;
 	int32_t encVel = 0;
+	
 	if(ctrl.active_ctrl == CTRL_CUSTOM) 
 	{		
 	    int32_t pwm = 0;
@@ -231,7 +283,7 @@ void user_ctrl(void)
 			//(goal_voltage * 1000/1024 / bat_volt) * 1024 / 1 = pwm 
 			volatile int32_t ff = goal_voltage*1000/bat_volt;
 			ff = goal_voltage*1000/24000;
-			
+
 	        torqueController.controlValue = (((int32_t)(strain_read())-31937)*1831)>>13;
 			pwm = pid_controller_compute(&torqueController) - ff;
 			
@@ -244,13 +296,14 @@ void user_ctrl(void)
 
 	    motor_open_speed_1(pwm);	
 	}
-	
+
 	enc_vel_prev = encVel;
 }
 
 // User fsm controlling motors
 void MotorTestBench_fsm2(void)
 {
+
 }
 
 //Here's an example function:

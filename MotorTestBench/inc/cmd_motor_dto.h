@@ -18,13 +18,12 @@
 
 typedef struct motor_dto_s {
 
+    int16_t ctrl_i __attribute__((packed));
+    int16_t ctrl_o __attribute__((packed));
     uint8_t controller;
-    int16_t ctrl_i;
-    int16_t ctrl_o;
     uint8_t gaitCycleFlag;
 
-} motor_dto;
-
+} __attribute__((packed)) motor_dto;
 
 /* IMPORTANT NOTE FOR USING THIS DTO
 	never use the following pattern of:
@@ -42,27 +41,26 @@ typedef struct motor_dto_s {
 */
 typedef struct motor_dto_reply_s {
 	
-	int16_t strain;
-	int16_t analog0;
-	int16_t analog1;
-	int32_t encoder;
-	int16_t current;
+	int32_t encoder __attribute__((packed));
+	int32_t ctrlSetpoint __attribute__((packed));
+	int32_t ctrlActual __attribute__((packed));
+
+	int16_t strain __attribute__((packed));
+	int16_t analog0 __attribute__((packed));
+
+	int16_t analog1 __attribute__((packed));
+	int16_t current __attribute__((packed));
 	
-	int16_t v_vb;
-	int16_t v_vg;
+	int16_t v_vb __attribute__((packed));
+	int16_t v_vg __attribute__((packed));
 	
 	int8_t temperature;
 	int8_t status1;
 	int8_t status2;
-	/*
-    uint8_t gaitCycleFlag;
-	int16_t motorTemp;
-	int32_t ctrlSetpoint;
-	int32_t ctrlActual;
-    */
+	uint8_t testFlag;
 	
 	//packed attribute enforces that no padding bytes are used.
 	//
-} motor_dto_reply;
+} __attribute__((packed)) motor_dto_reply;
 
 #endif
