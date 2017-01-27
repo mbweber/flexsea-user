@@ -75,6 +75,8 @@ void unpackResponse(void* result, uint8_t* buf, uint16_t* index, uint16_t length
 	(*index) += lengthInBytes;
 }
 
+#ifdef BOARD_TYPE_FLEXSEA_MANAGE
+
 inline void handleMotorTbReply(motor_dto_reply response, struct execute_s* exec_ptr, execControllerState_t* controllerState_ptr)
 {
 	exec_ptr->strain = response.strain;
@@ -93,6 +95,8 @@ inline void handleMotorTbReply(motor_dto_reply response, struct execute_s* exec_
 	controllerState_ptr->actual = response.ctrlActual;
 
 }
+
+#endif
 
 #ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 
