@@ -52,9 +52,11 @@
 
 struct motortb_s
 {
-	int16_t ex1[6];
-	int16_t ex2[6];
-	int16_t mn1[4];
+	int16_t mnRunning;
+	int16_t mnTestState;
+	int16_t batt[4];
+	int32_t ex1[4];
+	int32_t ex2[4];
 };
 
 //****************************************************************************
@@ -63,5 +65,29 @@ struct motortb_s
 
 extern struct motortb_s motortb;
 extern uint8_t motortb_startCycleFlag;
+
+#ifdef BOARD_TYPE_FLEXSEA_MANAGE
+
+#define GAIT_FLAG 0x01
+#define CURRENT_FLAG 0x02
+#define CURRENT_UNDER_TEST_FLAG 0x04
+
+typedef struct execControllerState
+{
+	int32_t setpoint;
+	int32_t actual;
+} execControllerState_t;
+
+enum EXEC_TEST_STATE { NONE, GAIT, CURRENT};
+extern enum EXEC_TEST_STATE exec1TestState;
+extern enum EXEC_TEST_STATE exec2TestState;
+
+extern execControllerState_t exec1ControllerState;
+extern execControllerState_t exec2ControllerState;
+
+extern uint8_t exec1CtrlStateReady;
+extern uint8_t exec2CtrlStateReady;
+
+#endif //flexsea manage
 
 #endif	//INC_FLEXSEA_GLOBAL_STRUCT_H

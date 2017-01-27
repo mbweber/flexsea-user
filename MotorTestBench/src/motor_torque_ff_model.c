@@ -1,3 +1,7 @@
+#include "user-ex.h"
+
+#ifdef FLEXSEA_EXECUTE
+
 // k = 0.12
 // R = 0.186
 
@@ -25,3 +29,6 @@ int32_t torqueToVoltage(int32_t torque, int32_t theta_dot)
 
 	return (11*torque + 785*theta_dot) / 400;
 }
+
+
+#endif

@@ -64,14 +64,46 @@ extern "C" {
 // Function(s)
 //****************************************************************************
 
+void unpackResponse(void* result, uint8_t* buf, uint16_t* index, uint16_t lengthInBytes)
+{
+	uint8_t* output = (uint8_t*) result;
+	int i;
+	for(i = 0; i < lengthInBytes; i++)
+	{
+		output[i] = buf[(*index) + i];
+	}
+	(*index) += lengthInBytes;
+}
+
+inline void handleMotorTbReply(motor_dto_reply response, struct execute_s* exec_ptr, execControllerState_t* controllerState_ptr)
+{
+	exec_ptr->strain = response.strain;
+	exec_ptr->analog[0] = response.analog0;
+	exec_ptr->analog[1] = response.analog1;
+	exec_ptr->enc_display = response.encoder;
+	exec_ptr->current = response.current;
+
+	exec_ptr->volt_batt = response.v_vb;
+	exec_ptr->volt_int = response.v_vg;
+	exec_ptr->temp = response.temperature;
+	exec_ptr->status1 = response.status1;
+	exec_ptr->status2 = response.status2;
+
+	controllerState_ptr->setpoint = response.ctrlSetpoint;
+	controllerState_ptr->actual = response.ctrlActual;
+
+}
+
 void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 							uint16_t *len, uint8_t slave)
 {
 	//Variable(s) & command:
 	uint16_t index = 0;
-	int16_t *motortbPtr;
+	int16_t *execDataPtr;
 	(*cmd) = CMD_MOTORTB;
 	(*cmdType) = CMD_WRITE;
+
+	int i;
 
 	//Data:
 	shBuf[index++] = slave;
@@ -88,21 +120,18 @@ void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 
 			if(slave == 0)
 			{
-				motortbPtr = motortb.ex1;
+				execDataPtr = motortb.ex1;
 				exec_s_ptr = &exec1;
 			}
 			else
 			{
-				motortbPtr = motortb.ex2;
+				execDataPtr = motortb.ex2;
 				exec_s_ptr = &exec2;
 			}
 
-			SPLIT_16((uint16_t)motortbPtr[0], shBuf, &index);
-			SPLIT_16((uint16_t)motortbPtr[1], shBuf, &index);
-			SPLIT_16((uint16_t)motortbPtr[2], shBuf, &index);
-			SPLIT_16((uint16_t)motortbPtr[3], shBuf, &index);
-			SPLIT_16((uint16_t)motortbPtr[4], shBuf, &index);
-			SPLIT_16((uint16_t)motortbPtr[5], shBuf, &index);
+
+			for(i=0; i<4; i++)
+				SPLIT_16((uint16_t)execDataPtr[0], shBuf, &index);
 
 			SPLIT_16(exec_s_ptr->strain, shBuf, &index);
 			SPLIT_16(exec_s_ptr->analog[0], shBuf, &index);
@@ -122,20 +151,13 @@ void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 			//Offset 2: Battery board and Manage status
 
 			//Battery:
-			shBuf[index++] = batt1.rawBytes[0];
-			shBuf[index++] = batt1.rawBytes[1];
-			shBuf[index++] = batt1.rawBytes[2];
-			shBuf[index++] = batt1.rawBytes[3];
-			shBuf[index++] = batt1.rawBytes[4];
-			shBuf[index++] = batt1.rawBytes[5];
-			shBuf[index++] = batt1.rawBytes[6];
-			shBuf[index++] = batt1.rawBytes[7];
+			for(i=0; i<8; i++)
+				shBuf[index++] = batt1.rawBytes[i];
 
 			//Manage:
-			SPLIT_16((uint16_t)motortb.mn1[0], shBuf, &index);
-			SPLIT_16((uint16_t)motortb.mn1[1], shBuf, &index);
-			SPLIT_16((uint16_t)motortb.mn1[2], shBuf, &index);
-			SPLIT_16((uint16_t)motortb.mn1[3], shBuf, &index);
+			for(i=0; i<4; i++)
+				SPLIT_16((uint16_t)motortb.batt[i], shBuf, &index);
+
 		}
 
 	#endif	//BOARD_TYPE_FLEXSEA_MANAGE
@@ -146,8 +168,6 @@ void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 		SPLIT_16((uint16_t)motortb.ex1[1], shBuf, &index);
 		SPLIT_16((uint16_t)motortb.ex1[2], shBuf, &index);
 		SPLIT_16((uint16_t)motortb.ex1[3], shBuf, &index);
-		SPLIT_16((uint16_t)motortb.ex1[4], shBuf, &index);
-		SPLIT_16((uint16_t)motortb.ex1[5], shBuf, &index);
 
 		#if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
 			SPLIT_16((uint16_t)torqueController.setpoint, shBuf, &index);
@@ -262,7 +282,9 @@ void rx_cmd_motortb_rr(uint8_t *buf, uint8_t *info)
 		uint8_t offset = 0, slave = 0;
 		uint16_t index = 0;
 		struct execute_s *exec_s_ptr = &exec1;
-		int16_t *motortbPtr;
+		int16_t *execDataPtr;
+
+		execControllerState_t* testState_ptr = &exec1ControllerState;
 
 		#if((defined BOARD_TYPE_FLEXSEA_MANAGE))
 
@@ -271,14 +293,16 @@ void rx_cmd_motortb_rr(uint8_t *buf, uint8_t *info)
 		if(slave == FLEXSEA_EXECUTE_1)
 		{
 			offset = 0;
-			motortbPtr = motortb.ex1;
+			execDataPtr = motortb.ex1;
 			exec_s_ptr = &exec1;
+			testState_ptr = &exec1ControllerState;
 		}
 		else
 		{
 			offset = 1;
-			motortbPtr = motortb.ex2;
+			execDataPtr = motortb.ex2;
 			exec_s_ptr = &exec2;
+			testState_ptr = &exec2ControllerState;
 		}
 
 		#endif	//((defined BOARD_TYPE_FLEXSEA_MANAGE))
@@ -289,12 +313,12 @@ void rx_cmd_motortb_rr(uint8_t *buf, uint8_t *info)
 			//Assign data structure based on slave:
 			if(offset == 0)
 			{
-				motortbPtr = motortb.ex1;
+				execDataPtr = motortb.ex1;
 				exec_s_ptr = &exec1;
 			}
 			else if(offset == 1)
 			{
-				motortbPtr = motortb.ex2;
+				execDataPtr = motortb.ex2;
 				exec_s_ptr = &exec2;
 			}
 
@@ -303,26 +327,24 @@ void rx_cmd_motortb_rr(uint8_t *buf, uint8_t *info)
 		#if((defined BOARD_TYPE_FLEXSEA_MANAGE) || (defined BOARD_TYPE_FLEXSEA_PLAN))
 
 			index = P_DATA1+1;
+			motor_dto_reply response;
 			if(offset == 0 || offset == 1)
 			{
-				motortbPtr[0] = (int16_t) REBUILD_UINT16(buf, &index);
-				motortbPtr[1] = (int16_t) REBUILD_UINT16(buf, &index);
-				motortbPtr[2] = (int16_t) REBUILD_UINT16(buf, &index);
-				motortbPtr[3] = (int16_t) REBUILD_UINT16(buf, &index);
-				motortbPtr[4] = (int16_t) REBUILD_UINT16(buf, &index);
-				motortbPtr[5] = (int16_t) REBUILD_UINT16(buf, &index);
-
-				exec_s_ptr->strain = (int16_t) REBUILD_UINT16(buf, &index);
-				exec_s_ptr->analog[0] = (int16_t) REBUILD_UINT16(buf, &index);
-				exec_s_ptr->analog[1] = (int16_t) REBUILD_UINT16(buf, &index);
-				exec_s_ptr->enc_display = (int32_t) REBUILD_UINT32(buf, &index);
-				exec_s_ptr->current = (int16_t) REBUILD_UINT16(buf, &index);
-
-				exec_s_ptr->volt_batt = buf[index++];
-				exec_s_ptr->volt_int = buf[index++];
-				exec_s_ptr->temp = buf[index++];
-				exec_s_ptr->status1 = buf[index++];
-				exec_s_ptr->status2 = buf[index++];
+				uint16_t lengthInBytes = sizeof(motor_dto_reply);
+				unpackResponse(&response, buf, &index, lengthInBytes);
+				handleMotorTbReply(response, exec_s_ptr, testState_ptr);
+			}
+			if(offset == 0)
+			{
+				exec1CtrlStateReady = 1;
+				if(response.testFlag)
+					exec1TestState = NONE;
+			}
+			else if(offset == 1)
+			{
+				exec2CtrlStateReady = 1;
+				if(response.testFlag)
+					exec2TestState = NONE;
 			}
 			else if(offset == 2)
 			{
@@ -336,10 +358,10 @@ void rx_cmd_motortb_rr(uint8_t *buf, uint8_t *info)
 				batt1.rawBytes[7] = buf[index++];
 
 				//Manage:
-				motortb.mn1[0] = (int16_t) REBUILD_UINT16(buf, &index);
-				motortb.mn1[1] = (int16_t) REBUILD_UINT16(buf, &index);
-				motortb.mn1[2] = (int16_t) REBUILD_UINT16(buf, &index);
-				motortb.mn1[3] = (int16_t) REBUILD_UINT16(buf, &index);
+				motortb.batt[0] = (int16_t) REBUILD_UINT16(buf, &index);
+				motortb.batt[1] = (int16_t) REBUILD_UINT16(buf, &index);
+				motortb.batt[2] = (int16_t) REBUILD_UINT16(buf, &index);
+				motortb.batt[3] = (int16_t) REBUILD_UINT16(buf, &index);
 			}
 
 		#endif	//BOARD_TYPE_FLEXSEA_PLAN

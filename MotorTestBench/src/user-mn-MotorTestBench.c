@@ -43,7 +43,7 @@
 // Variable(s)
 //****************************************************************************
 
-int mtb_state = -5;
+//int mtb_state = -5;
 
 uint8_t mtb_my_control;
 int16_t mtb_my_pwm[2] = {0,0};
@@ -59,9 +59,29 @@ int16_t exec_1_pwm_counter = 2;
 int16_t max_curr_counter = 0;
 int16_t max_curr = 8000;
 
+uint8_t motorTbTestFailed = 0;
+float exec1ControllerErrorSum = 0;
+float exec2ControllerErrorSum = 0;
+float torqueCurrentRatio = 0.12;
+
+enum TEST_STATE { WAITING_PLAN, RUNNING_GAIT, RUNNING_CURRENT, FAILED };
+enum TEST_STATE motortb_state = WAITING_PLAN;
+
 //****************************************************************************
 // Private Function Prototype(s):
 //****************************************************************************
+
+void init_testState(void)
+{
+	motorTbTestFailed = 0;
+	motortb_state = WAITING_PLAN;
+	exec1ControllerErrorSum = 0;
+	exec2ControllerErrorSum = 0;
+	torqueCurrentRatio = 0.12;
+	int i;
+	for(i=0;i<4;i++)
+		user_data_1.r[i]=0;
+}
 
 //static void MotorTestBench_refresh_values(void);
 
@@ -73,7 +93,8 @@ int16_t max_curr = 8000;
 void init_MotorTestBench(void)
 {
 	mtb_my_control = CTRL_NONE;
-	mtb_state = -5;
+	init_testState();
+	//mtb_state = -5;
 }
 
 
@@ -81,279 +102,11 @@ void init_MotorTestBench(void)
  * 	executed at 1 kHz
  * */
 
-#if(0)
-//Motor Test Bench Finite State Machine.
-//Call this function in one of the main while time slots.
-void MotorTestBench_fsm_1(void)
-{
-	//#if(ACTIVE_PROJECT == PROJECT_MOTORTB)
-	#if(0)
-
-    static uint32_t time = 0, state_t = 0;
-
-    //Increment time (1 tick = 1ms)
-    time++;
-    state_t++;
-
-	//Before going to a state we refresh values:
-    MotorTestBench_refresh_values();
-
-    if (user_data_1.w[2] == 1)
-    {
-    	if (mtb_state != 20)
-    	{
-    		state_t = 0;
-    	}
-    	mtb_state = 20;
-    }
-    else if (user_data_1.w[2] == 2)
-    {
-    	if (mtb_state != 30)
-    	{
-    		state_t = 0;
-    	}
-    	mtb_state = 30;
-    }
-	//Nothing programmed yet...
-	switch(mtb_state)
-	{
-
-		case -5://Wait for 10 seconds to let everything load
-
-			mtb_my_control = CTRL_OPEN;
-			mtb_my_pwm[0] = 0;
-			mtb_my_pwm[1] = 0;
-			if (state_t>10000 && user_data_1.w[0] != 0)
-			{
-				mtb_state = 0;
-				state_t = 0;
-			}
-
-			break;
-
-		case 0:
-			mtb_my_control = CTRL_OPEN;
-			mtb_my_pwm[0] = state_t/10;
-			mtb_my_pwm[1] = state_t/10;
-
-			if (mtb_my_pwm[0]>= exec_1_pwm_counter*exec_1_pwm_step)
-			{
-				state_t = 0;
-				mtb_state = 1;
-			}
-			break;
-		case 1:	//PWM = 100 for 5s
-
-			mtb_my_control = CTRL_OPEN;
-			mtb_my_pwm[0] = exec_1_pwm_counter*exec_1_pwm_step;
-			mtb_my_pwm[1] = exec_1_pwm_counter*exec_1_pwm_step-state_t/10;
-
-			if (mtb_my_pwm[1]<-mtb_my_pwm[0] || max_curr_counter>10)
-			{
-				state_t = 0;
-				mtb_state = 2;
-			}
-
-			if (user_data_1.w[0] == 0)
-			{
-				state_t = 0;
-				mtb_state = 10;
-			}
-
-            break;
-
-		case 2:
-			mtb_my_control = CTRL_OPEN;
-			if (mtb_my_pwm[0]>0)
-			{
-				mtb_my_pwm[0]--;
-			}
-			else if (mtb_my_pwm[0]<0)
-			{
-				mtb_my_pwm[0]++;
-			}
-
-			if (mtb_my_pwm[1]>0)
-			{
-				mtb_my_pwm[1]--;
-			}
-			else if (mtb_my_pwm[1]<0)
-			{
-				mtb_my_pwm[1]++;
-			}
-
-			if (mtb_my_pwm[0] == 0 && mtb_my_pwm[1] == 0)
-			{
-				mtb_state = 3;
-				state_t = 0;
-			}
-
-			break;
-
-		case 3: //measure motor resistance
-			mtb_my_control = 6;
-			mtb_my_pwm[0] = 0;
-			mtb_my_pwm[1] = 0;
-
-			if (state_t>1000)
-			{
-
-				state_t = 0;
-				if ((exec_1_pwm_counter+1)*exec_1_pwm_step<=exec_1_pwm_max)
-				{
-					exec_1_pwm_counter++;
-				}
-				else
-				{
-					exec_1_pwm_counter = 2;
-				}
-				if ((exec1.current>-5000 && exec1.current<0)||(exec1.current<5000 && exec1.current>0))
-				{
-					mtb_state = 11;
-				}
-				else
-				{
-					mtb_state = 0;
-				}
-			}
-
-			if (user_data_1.w[0] == 0)
-			{
-				state_t = 0;
-				mtb_state = 10;
-			}
-			break;
-
-		case 10:
-			mtb_my_control = CTRL_OPEN;
-			mtb_my_pwm[0] = 0;
-			mtb_my_pwm[1] = 0;
-			if (user_data_1.w[0] != 0)
-			{
-				state_t = 0;
-				mtb_state = 0;
-				exec_1_pwm_counter = 2;
-			}
-			break;
-
-		case 11:
-			mtb_my_control = CTRL_OPEN;
-			mtb_my_pwm[0] = 0;
-			mtb_my_pwm[1] = 0;
-			if (user_data_1.w[0] == 2)
-			{
-				state_t = 0;
-				mtb_state = 0;
-				exec_1_pwm_counter = 2;
-			}
-			break;
-
-		case 20:
-			mtb_my_control = 6;
-			mtb_my_pwm[0] = user_data_1.w[3];
-			mtb_my_pwm[1] = user_data_1.w[3]/2;
-			//applies .481 volts
-			//motor current becomes twice the current flowing through the motor
-
-			if (user_data_1.w[2] != 1)
-			{
-
-				state_t = 0;
-				exec_1_pwm_counter = 2;
-				mtb_state = 10;
-			}
-			break;
-		case 30:
-			mtb_my_control = CTRL_OPEN;
-			mtb_my_pwm[0] = user_data_1.w[3];
-			mtb_my_pwm[1] = 0;
-			break;
-        default:
-			//Handle exceptions here
-			break;
-
-	}
-
-	#endif	//ACTIVE_PROJECT == PROJECT_MOTORTB
-}
-
-
-// Second state machine for the motor test bench project
-// Deals with the communication between Manage and 2x Execute, on the same RS-485 bus
-// This function is called at 1kHz
-void MotorTestBench_fsm_2(void)
-{
-	#if(ACTIVE_PROJECT == PROJECT_MOTORTB)
-
-	static uint8_t ex_refresh_fsm_state = 0;
-	static uint32_t timer = 0;
-	uint8_t info[2] = {PORT_485_1, PORT_485_1};
-
-	//This FSM talks to the slaves at 250Hz each
-	switch(ex_refresh_fsm_state)
-	{
-		case 0:		//Power-up
-
-			if(timer < 7000)
-			{
-				//We wait 7s before sending the first commands
-				timer++;
-			}
-			else
-			{
-				//Ready to start transmitting
-				ex_refresh_fsm_state = 1;
-			}
-
-			break;
-
-		case 1:	//Communicating with Execute #1
-
-			info[0] = PORT_485_1;
-			tx_cmd_motortb_r(TX_N_DEFAULT, 0, mtb_my_control, mtb_my_cur[0], mtb_my_pwm[0]);
-			packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_1, info, SEND_TO_SLAVE);
-
-			slaves_485_1.xmit.listen = 1;
-			ex_refresh_fsm_state++;
-
-			break;
-
-		case 2:
-
-			//Skipping one cycle
-			ex_refresh_fsm_state++;
-
-			break;
-
-		case 3:	//Communicating with Execute #2
-
-			info[0] = PORT_485_2;
-			tx_cmd_motortb_r(TX_N_DEFAULT, 1, mtb_my_control, mtb_my_cur[1], mtb_my_pwm[1]);
-			packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_2, info, SEND_TO_SLAVE);
-
-			slaves_485_2.xmit.listen = 1;
-			ex_refresh_fsm_state++;
-
-			break;
-
-		case 4:
-
-			//Skipping one cycle
-			ex_refresh_fsm_state = 1;
-
-			break;
-	}
-
-	#endif	//ACTIVE_PROJECT == PROJECT_MOTORTESTBENCH
-}
-
-#endif // removed for debugging
-
 // State machine which tracks which stage of testing we are in (ready / testing / finished)
 void MotorTestBench_fsm_1(void)
 {
 #if(ACTIVE_PROJECT == PROJECT_MOTORTB)
-	static uint8_t state = 0;
+
 	/*	States:
 	 * 	0 - ready - test has not started yet, wait for plan to signal start of test
 	 * 	1 - testing - test has started
@@ -361,20 +114,28 @@ void MotorTestBench_fsm_1(void)
 	 * 	other - error codes? TBD
 	 * */
 
-	const uint16_t MS_PER_GAIT = 3000; //3000 ms per gait cycle?
+	const uint16_t MS_PER_GAIT = 1177; //3000 ms per gait cycle?
+	const uint16_t MS_PER_CYCLE = 3000;
 	static uint8_t info[2] = {PORT_485_1, PORT_485_1};
 	static uint32_t ticks = 0;
 
 	static uint8_t commCounter = 0;
+	static uint8_t currentTestCounter = 0;
 
 	static uint8_t startGaitCycle = 0;
+	static uint8_t testEx1Current = 0;
+	static uint8_t testEx2Current = 0;
 
-	switch(state)
+	switch(motortb_state)
 	{
-	case 0:
+	case WAITING_PLAN:
 		// Check a flag that is set by plan in an interrupt
 		// 'user data' value at index 0
-		if(user_data_1.w[0])
+		if(motorTbTestFailed)
+		{
+			motortb_state = FAILED;
+		}
+		else if(user_data_1.w[0])
 		{
 			ticks = 0;
 			user_data_1.r[0] = user_data_1.w[0];
@@ -383,27 +144,92 @@ void MotorTestBench_fsm_1(void)
 			user_data_1.w[3] = 0;
 			user_data_1.r[1] = 1;
 
-			state = 1;
+			motortb_state = RUNNING_GAIT;
 		}
 		break;
 
-	case 1:
+	case RUNNING_GAIT:
+		if(motorTbTestFailed)
+		{
+			motortb_state = FAILED;
+			break;
+		}
+
 		if(ticks == 0)
 		{
 			//if ticks is 0, we send a signal to each execute to start a gait cycle.
-			startGaitCycle = 1;
+			startGaitCycle = GAIT_FLAG;
+			exec1TestState = GAIT;
+			exec2TestState = GAIT;
 		}
 
 		ticks++;
-		ticks %= MS_PER_GAIT;
+
+		if(ticks > MS_PER_GAIT && exec1TestState == NONE && exec2TestState == NONE)
+		{
+			exec1ControllerErrorSum = 0;
+			exec2ControllerErrorSum = 0;
+			torqueCurrentRatio = 0.12;
+			motortb_state = RUNNING_CURRENT;
+			ticks = 0;
+		}
 
 		if(user_data_1.w[3])
 		{
 			user_data_1.r[3] = user_data_1.w[3];
 			user_data_1.w[3] = 0;
 			user_data_1.r[1] = 0;
-			state = 0;
+			user_data_1.w[0] = 0;
+			motortb_state = WAITING_PLAN;
+			ticks = 0;
 		}
+		break;
+
+	case RUNNING_CURRENT:
+
+		if(ticks == 500)
+		{
+			testEx1Current = CURRENT_FLAG;
+			testEx2Current = CURRENT_FLAG;
+
+			if(currentTestCounter == 0)
+			{
+				testEx1Current |= CURRENT_UNDER_TEST_FLAG;
+				exec1TestState = CURRENT;
+			}
+			else
+			{
+				testEx2Current |= CURRENT_UNDER_TEST_FLAG;
+				exec2TestState = CURRENT;
+			}
+
+			currentTestCounter++;
+			currentTestCounter%=2;
+		}
+
+		if(ticks > (MS_PER_CYCLE - MS_PER_GAIT))
+			if(exec1TestState == NONE && exec2TestState == NONE)
+			{
+				motortb_state = RUNNING_GAIT;
+				ticks = -1; //ticks is unsigned but the point is for it to roll over to 0
+			}
+
+		if(user_data_1.w[3])
+		{
+			user_data_1.r[3] = user_data_1.w[3];
+			user_data_1.w[3] = 0;
+			user_data_1.r[1] = 0;
+			user_data_1.w[0] = 0;
+			motortb_state = WAITING_PLAN;
+			ticks = 0;
+		}
+
+		ticks++;
+		break;
+
+	case FAILED:
+		user_data_1.r[2] = 666;
+
 		break;
 
 	default:
@@ -414,7 +240,15 @@ void MotorTestBench_fsm_1(void)
 	if(!commCounter)
 	{
 		motor_dto dto;
-		dto.startGaitCycle = startGaitCycle;
+		dto.ctrl_i = 0;
+		dto.ctrl_o = 0;
+		dto.gaitCycleFlag = 0;
+
+		dto.controller = 0xFA;
+		if(startGaitCycle || testEx1Current || testEx2Current)
+		{
+			dto.gaitCycleFlag = startGaitCycle | testEx1Current;
+		}
 
 		//Send message to execute 1
 		info[0] = PORT_485_1;
@@ -422,6 +256,7 @@ void MotorTestBench_fsm_1(void)
 		packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_1, info, SEND_TO_SLAVE);
 		slaves_485_1.xmit.listen = 1;
 
+		dto.gaitCycleFlag = startGaitCycle | testEx2Current;
 		//Send message to execute 2
 		info[0] = PORT_485_2;
 		tx_cmd_motortb_r(TX_N_DEFAULT, 1, &dto);
@@ -429,11 +264,127 @@ void MotorTestBench_fsm_1(void)
 		slaves_485_2.xmit.listen = 1;
 
 		startGaitCycle = 0;
+		testEx1Current = 0;
+		testEx2Current = 0;
 	}
 	commCounter++;
-	commCounter %= 10;
+	commCounter %= 5;
 
+	if(user_data_1.w[2])
+	{
+		user_data_1.w[2] = 0;
+		init_testState();
+	}
 
+#endif //PROJECT_MOTORTB
+}
+
+uint8_t checkForControlFailure(execControllerState_t ctrlState, float* errorSum, float scale)
+{
+	const float ERROR_SUM_THRESHOLD = 1000;
+
+	float error = (float)(ctrlState.setpoint - ctrlState.actual) / scale;
+	error = error > 0 ? error : -1*error;
+	(*errorSum) += error;
+
+	if(*errorSum > ERROR_SUM_THRESHOLD) return 1;
+
+	return 0;
+}
+
+uint8_t isBatteryBoardInfoValid()
+{
+	int i;
+	for(i = 0; i < 8; i++)
+	{
+		if(batt1.rawBytes[i] != 0)
+			return 1;
+
+	}
+	return 0;
+}
+
+void MotorTestBench_fsm_2(void)
+{
+#if(ACTIVE_PROJECT == PROJECT_MOTORTB)
+
+	const int32_t CURRENT_THRESH_UPPER = 3000;
+	const int32_t CURRENT_THRESH_LOWER = -1*CURRENT_THRESH_UPPER;
+
+	if(exec1CtrlStateReady)
+	{
+		exec1CtrlStateReady = 0;
+
+		uint8_t errorSumFailure = checkForControlFailure(exec1ControllerState, &exec1ControllerErrorSum, 8150);
+		float newTorqueCurrentRatio = 0.12;
+
+		if(exec1.current != 0 && exec1.current > 100)
+		{
+			newTorqueCurrentRatio = (float)(exec1ControllerState.actual) / (float)(exec1.current);
+		}
+	}
+
+	if(!motorTbTestFailed && exec1CtrlStateReady)
+	{
+		exec1CtrlStateReady = 0;
+		if(exec1TestState == GAIT)
+		{
+			motorTbTestFailed = checkForControlFailure(exec1ControllerState, &exec1ControllerErrorSum, 8150);
+			if(motorTbTestFailed)
+			{
+				motorTbTestFailed *= 2;
+				return;
+			}
+
+			if(exec1.current != 0 && exec1.current > 100)
+			{
+				float newRatio = (float)(exec1ControllerState.actual) / (float)(exec1.current);
+				torqueCurrentRatio = (95*torqueCurrentRatio + 5*(newRatio))/100;
+				motorTbTestFailed = motorTbTestFailed | (torqueCurrentRatio > 0.18 || torqueCurrentRatio < 0.05);
+			}
+			if(motorTbTestFailed)
+			{
+				motorTbTestFailed *= 2;
+				return;
+			}
+		}
+		else if(exec1TestState == CURRENT)
+		{
+			motorTbTestFailed = exec1.current > CURRENT_THRESH_UPPER || exec1.current < CURRENT_THRESH_LOWER;
+		}
+
+	}
+	if(!motorTbTestFailed && exec2CtrlStateReady)
+	{
+		exec2CtrlStateReady = 0;
+		if(exec2TestState == GAIT)
+		{
+			motorTbTestFailed = checkForControlFailure(exec2ControllerState, &exec2ControllerErrorSum, 1000);
+			if(motorTbTestFailed)
+			{
+				motorTbTestFailed *= 2;
+				return;
+			}
+		}
+
+		else if(exec2TestState == CURRENT)
+		{
+			motorTbTestFailed = exec2.current > CURRENT_THRESH_UPPER || exec2.current < CURRENT_THRESH_LOWER;
+		}
+	}
+
+	//check battery voltage
+	if(!motorTbTestFailed)
+	{
+		motorTbTestFailed = isBatteryBoardInfoValid() && (batt1.voltage > 32000 || batt1.voltage < 28000);
+	}
+
+	if(motorTbTestFailed)
+	{
+		motorTbTestFailed *= 20;
+	}
+
+	MotorTestBench_refresh_values();
 #endif //PROJECT_MOTORTB
 }
 
@@ -444,23 +395,22 @@ void MotorTestBench_fsm_1(void)
 //Note: 'static' makes them private; they can only called from functions in this
 //file. It's safer than making everything global.
 
-/*
- *
 static void MotorTestBench_refresh_values(void)
 {
-	motortb.mn1[0] = mtb_state;
-	motortb.mn1[1] = (int16_t)(((int32_t)motortb.ex1[1]*(int32_t)motortb.ex1[4])/955);
+	motortb.mnRunning = user_data_1.r[0];
+	motortb.mnTestState = motortb_state;
+	//motortb.mn1[1] = (int16_t)(((int32_t)motortb.ex1[1]*(int32_t)motortb.ex1[4])/955);
 
-	if ((exec1.current>max_curr || exec1.current<-max_curr) && mtb_state != 3)
-	{
-		max_curr_counter++;
-	}
-	else
-	{
-		max_curr_counter = 0;
-	}
+	motortb.ex1[0] = exec1ControllerState.setpoint;
+	motortb.ex1[1] = exec1ControllerState.actual;
+	motortb.ex1[2] = exec1.current;
+	motortb.ex1[3] = exec1.temp;
+
+	motortb.ex2[0] = exec2ControllerState.setpoint;
+	motortb.ex2[1] = exec2ControllerState.actual;
+	motortb.ex2[2] = exec2.current;
+	motortb.ex2[3] = exec2.temp;
 }
 //That function can be called from the FSM.
-*/
 
 #endif 	//BOARD_TYPE_FLEXSEA_MANAGE
