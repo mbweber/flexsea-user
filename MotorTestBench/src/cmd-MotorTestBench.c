@@ -140,7 +140,6 @@ void fillBufferData(uint8_t *shBuf, uint16_t *index, void* data, uint16_t length
 		shBuf[(*index)+i] = unsignedDataPointer[i];
 	}
 	(*index)+=lengthInBytes;
-
 }
 
 void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
@@ -178,7 +177,6 @@ void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 				exec_s_ptr = &exec2;
 			}
 
-
 			for(i=0; i<4; i++)
 				SPLIT_16((uint16_t)execDataPtr[0], shBuf, &index);
 
@@ -195,10 +193,8 @@ void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 			shBuf[index++] = exec_s_ptr->status1;
 			shBuf[index++] = exec_s_ptr->status2;
 		}
-		else if(slave == 2)
+		else if(slave == 2) //Offset 2: Battery board and Manage status
 		{
-			//Offset 2: Battery board and Manage status
-
 			//Battery:
 			for(i=0; i<8; i++)
 				shBuf[index++] = batt1.rawBytes[i];
@@ -206,7 +202,6 @@ void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 			//Manage:
 			for(i=0; i<4; i++)
 				SPLIT_16((uint16_t)motortb.batt[i], shBuf, &index);
-
 		}
 
 	#endif	//BOARD_TYPE_FLEXSEA_MANAGE
@@ -360,20 +355,12 @@ void rx_cmd_motortb_rr(uint8_t *buf, uint8_t *info)
 			}
 			else if(offset == 2)
 			{
-				batt1.rawBytes[0] = buf[index++];
-				batt1.rawBytes[1] = buf[index++];
-				batt1.rawBytes[2] = buf[index++];
-				batt1.rawBytes[3] = buf[index++];
-				batt1.rawBytes[4] = buf[index++];
-				batt1.rawBytes[5] = buf[index++];
-				batt1.rawBytes[6] = buf[index++];
-				batt1.rawBytes[7] = buf[index++];
+				int i;
+				for(i=0; i<8; i++)
+					batt1.rawBytes[i] = buf[index++];
 
-				//Manage:
-				motortb.batt[0] = (int16_t) REBUILD_UINT16(buf, &index);
-				motortb.batt[1] = (int16_t) REBUILD_UINT16(buf, &index);
-				motortb.batt[2] = (int16_t) REBUILD_UINT16(buf, &index);
-				motortb.batt[3] = (int16_t) REBUILD_UINT16(buf, &index);
+				for(i=0; i<4; i++)
+					motortb.batt[0] = (int16_t) REBUILD_UINT16(buf, &index);
 			}
 
 		#endif	//BOARD_TYPE_FLEXSEA_PLAN
