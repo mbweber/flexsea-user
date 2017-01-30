@@ -134,7 +134,7 @@ inline motor_dto_reply generateMotorDtoReply()
 {
     motor_dto_reply result;
 
-    result.encoder = exec1.enc_display;
+    result.encoder = exec1.enc_control_ang;
     result.strain = strain_read();
     result.analog0 = read_analog(0);
     result.analog1 = read_analog(1);
@@ -147,8 +147,6 @@ inline motor_dto_reply generateMotorDtoReply()
     return result;
 }
 #endif
-
-
 
 void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 							uint16_t *len, uint8_t slave)
