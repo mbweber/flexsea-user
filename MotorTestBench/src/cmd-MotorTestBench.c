@@ -106,13 +106,6 @@ inline motor_dto_reply generateMotorDtoReply()
 
 	result.encoder = refresh_enc_display();
 
-#if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
-	result.ctrlSetpoint = torqueController.setpoint;
-	result.ctrlActual = torqueController.controlValue;
-#elif(ACTIVE_SUBPROJECT == SUBPROJECT_B)
-	result.ctrlSetpoint = positionController.setpoint;
-	result.ctrlActual = positionController.controlValue;
-#endif
 
 	result.strain = strain_read();
 	result.analog0 = read_analog(0);

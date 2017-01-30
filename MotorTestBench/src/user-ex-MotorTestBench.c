@@ -47,6 +47,7 @@
 struct motortb_s my_motortb;
 #define CYCLE_LENGTH 1000	
 #define START_TEST_TICK_DIFF 500
+#define WIND_UP_PWM 60
 	
 #if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
 	
@@ -131,7 +132,7 @@ void MotorTestBench_fsm(void)
 
     case WAITING:
         //check the flag sent by manage
-		ticksFromInitial = initialPosition - exec1.enc_display;
+		ticksFromInitial = initialPosition - exec1.enc_control_ang;
 		if(ticksFromInitial > START_TEST_TICK_DIFF || ticksFromInitial < -1*START_TEST_TICK_DIFF)
 		{
 			ticks = 0;
@@ -143,11 +144,11 @@ void MotorTestBench_fsm(void)
 		
     case START_WIND_UP:
         ticks++;
-		if(ticks > 50)
+		if(ticks > 2000)
 		{
 			state = WIND_UP;
 		}
-		motor_open_speed_1(80*PWM_SIGN);
+		motor_open_speed_1(WIND_UP_PWM*PWM_SIGN);
 		ang_vel_lp = (95*ang_vel_lp + 5*as5047.filt.vel_cpms)/100;
         
 		break;
@@ -157,7 +158,7 @@ void MotorTestBench_fsm(void)
 		
 		if(ang_vel_lp < 5 && ang_vel_lp > -5)
 		{
-			positionAtTension = exec1.enc_display;
+			positionAtTension = exec1.enc_control_ang;
 			state = CYCLING;
 			pid_controller_setGains(&positionController, P_CONTROLGAINS);
 			ticks = 0;
@@ -165,7 +166,7 @@ void MotorTestBench_fsm(void)
         break;
 
 	case CYCLING:
-		positionController.setpoint = positionAtTension + positionProfile[ticks]/2;
+		positionController.setpoint = positionAtTension - positionProfile[ticks]*2;
 		ticks++;
 		ticks %= CYCLE_LENGTH;
 		if(0) //check test failure conditions
@@ -184,10 +185,10 @@ void MotorTestBench_fsm(void)
 void user_ctrl(void)
 {	
 	if(ctrl.active_ctrl == CTRL_CUSTOM && state == CYCLING) 
-	{		
-	    int32_t pwm = 0;
+	{
+	    int32_t pwm = WIND_UP_PWM;
         positionController.controlValue = exec1.enc_control_ang;
-        pwm = pid_controller_compute(&positionController);
+        pwm += pid_controller_compute(&positionController);
 	    motor_open_speed_1(pwm);	
 	}
 }
