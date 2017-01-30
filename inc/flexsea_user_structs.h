@@ -46,10 +46,14 @@
 // Definition(s):
 //****************************************************************************
 
+#define GAIT_FLAG 0x01
+#define CURRENT_FLAG 0x02
+#define CURRENT_UNDER_TEST_FLAG 0x04
+	
 //****************************************************************************
 // Structure(s):
 //****************************************************************************
-
+	
 struct motortb_s
 {
 	int16_t mnRunning;
@@ -71,21 +75,21 @@ typedef struct execControllerState
     int32_t actual;
 } execControllerState_t;
 
+#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
+
+extern uint8_t motortb_flagsIn;
+extern uint8_t motortb_flagsOut;
+
+#endif //BOARD_TYPE_FLEXSEA_EXECUTE
+
 #ifdef BOARD_TYPE_FLEXSEA_MANAGE
 
 extern execControllerState_t exec1ControllerState;
 extern execControllerState_t exec2ControllerState;
 
-extern uint8_t motortb_flagsIn;
-extern uint8_t motortb_flagsOut;
-
 enum EXEC_TEST_STATE { NONE, GAIT, CURRENT};
 extern enum EXEC_TEST_STATE exec1TestState;
 extern enum EXEC_TEST_STATE exec2TestState;
-
-#define GAIT_FLAG 0x01
-#define CURRENT_FLAG 0x02
-#define CURRENT_UNDER_TEST_FLAG 0x04
 
 extern uint8_t exec1CtrlStateReady;
 extern uint8_t exec2CtrlStateReady;

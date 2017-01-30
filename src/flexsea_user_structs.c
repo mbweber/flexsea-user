@@ -39,13 +39,17 @@
 //Data structures:
 struct motortb_s motortb;
 
+#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
+
+uint8_t motortb_flagsIn = 0;
+uint8_t motortb_flagsOut = 0;
+
+#endif //BOARD_TYPE_FLEXSEA_EXECUTE
+
 #ifdef BOARD_TYPE_FLEXSEA_MANAGE
 
 execControllerState_t exec1ControllerState;
 execControllerState_t exec2ControllerState;
-
-uint8_t motortb_flagsIn = 0;
-uint8_t motortb_flagsOut = 0;
 
 enum EXEC_TEST_STATE exec1TestState;
 enum EXEC_TEST_STATE exec2TestState;
