@@ -17,12 +17,10 @@
 #include "../../flexsea-user/inc/flexsea_user_structs.h"
 
 typedef struct motor_dto_s {
-
     int16_t ctrl_i __attribute__((packed));
     int16_t ctrl_o __attribute__((packed));
     uint8_t controller;
     uint8_t gaitCycleFlag;
-
 } __attribute__((packed)) motor_dto;
 
 /* IMPORTANT NOTE FOR USING THIS DTO
@@ -42,8 +40,6 @@ typedef struct motor_dto_s {
 typedef struct motor_dto_reply_s {
 	
 	int32_t encoder __attribute__((packed));
-	int32_t ctrlSetpoint __attribute__((packed));
-	int32_t ctrlActual __attribute__((packed));
 
 	int16_t strain __attribute__((packed));
 	int16_t analog0 __attribute__((packed));
@@ -56,8 +52,7 @@ typedef struct motor_dto_reply_s {
 	
 	int8_t temperature;
 	int8_t status1;
-	int8_t status2;
-	uint8_t testFlag;
+    int8_t status2;
 	
 	//packed attribute enforces that no padding bytes are used.
 	//
