@@ -169,7 +169,7 @@ void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 		if(slave == 0 || slave == 1)
 		{
 			//Offsets 0 & 1 are for Execute:
-            struct execute_s *exec_ptr = NULL;
+            struct execute_s *exec_s_ptr = NULL;
 
 			if(slave == 0)
 			{
@@ -181,7 +181,7 @@ void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 				execDataPtr = motortb.ex2;
 				exec_s_ptr = &exec2;
 			}
-            motor_dto_reply dto = generateMotorDtoReply(exec_ptr);
+            motor_dto_reply dto = generateMotorDtoReply(exec_s_ptr);
             uint8_t dtoLengthInBytes = sizeof(motor_dto_reply);
 
             fillBufferData(shBuf, &index, &dto, dtoLengthInBytes);
@@ -198,7 +198,7 @@ void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 
 			//Manage:
 			for(i=0; i<4; i++)
-				SPLIT_16((uint16_t)motortb.batt[i], shBuf, &index);
+				SPLIT_16((uint16_t)motortb.mn1[i], shBuf, &index);
 		}
 
 	#endif	//BOARD_TYPE_FLEXSEA_MANAGE
