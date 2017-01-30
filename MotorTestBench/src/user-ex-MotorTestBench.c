@@ -45,24 +45,15 @@
 //****************************************************************************
  
 struct motortb_s my_motortb;
-#define LENGTH_GAIT_CYCLE_IN_MS 1177	
-
+#define CYCLE_LENGTH 1000	
+#define START_TEST_TICK_DIFF 500
+	
 #if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
 	
-#define T_CONTROLGAINS 0,5,0,5
-//#define T_CONTROLGAINS 0,0,0,7
-	// define a 1000 long array, defining the torque profile for the motor controlled by ex2
-// static float torqueProfile[] = { .. };
-#include "../resources/motorTorqueProfile.c.resource"
-pid_controller torqueController;
-#endif
-
-#if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
-//#define P_CONTROLGAINS 37,1,0,9
 #define P_CONTROLGAINS 75,2,0,10
 // define a 1000 long array, defining the position profile for the motor controlled by ex1
 // static int32_t positionProfile[] = { .. }; 
-#include "../resources/motorPositionProfile.c.resource"
+#include "../resources/winchPositionProfile.c.resource"
 pid_controller positionController;
 #endif
 
@@ -86,34 +77,21 @@ void initMotorTestBench(void)
     
     #if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
         // initialization code specific to ex 1
-        pid_controller_initialize(&torqueController, 1024, 5000, 90, 8000);
-		pid_controller_settings(&torqueController, 0, 1, 1);
-
-    #endif
-    
-    #if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
-        // initialization code specific to ex 2
         pid_controller_initialize(&positionController, 1024, 50000, 90, 16000);
         pid_controller_settings(&positionController, 0, 1, 1);
 		
     #endif
-    
-    int i;
-    for(i = 0; i < 6; i++)
-    {
-        motortb.ex1[i] = 0;
-    }
 }
 
-enum TEST_FSM_STATE { INITIALIZING, WAITING, CYCLE_START, CYCLING, CURR_MEASURE_ACTIVE, CURR_MEASURE_PASSIVE };
+enum TEST_FSM_STATE { INITIALIZING, WAITING, START_WIND_UP, WIND_UP, CYCLING, DONE };
+static enum TEST_FSM_STATE state = INITIALIZING;
 
-// User finite state machine, implements a tight controller 
+// User finite state machine, implements a tight controller
 // Called at 1 kHz
 // Call this function in one of the main while time slots.
 void MotorTestBench_fsm(void)
 {
     static unsigned int ticks = 0;
-    static enum TEST_FSM_STATE state = INITIALIZING;
     /* State represents whether we are running or not 
      * 0 - not running
      * 1 - gait cycle just started / starting
@@ -121,6 +99,9 @@ void MotorTestBench_fsm(void)
     */
     //#if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
     	static int32_t initialPosition = 0;
+		static int32_t positionAtTension = 0;
+		static int32_t ang_vel_lp = 0;
+		int32_t ticksFromInitial = 0;
     //#endif
 
 	if(ctrl.active_ctrl != CTRL_CUSTOM)
@@ -140,123 +121,60 @@ void MotorTestBench_fsm(void)
         {
             ticks = 0;
             state = WAITING;
-
+			
             #if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
-				pid_controller_setGains(&torqueController, T_CONTROLGAINS);
-                torqueController.setpoint = torqueProfile[0];
-				torqueController.errorSum = 0;
-            #endif
-
-            #if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
                 initialPosition = exec1.enc_control_ang;
-                positionController.setpoint = initialPosition + positionProfile[0];
-                pid_controller_setGains(&positionController, P_CONTROLGAINS);
+                pid_controller_setGains(&positionController, 0, 0, 0, 7);
             #endif
         }
         break;
-
-    case CYCLE_START:
-        // set PID gains to non zero, ie we are actually traversing through the position profile now
-        #if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
-            torqueController.setpoint = torqueProfile[0];
-            pid_controller_setGains(&torqueController, T_CONTROLGAINS);
-        #endif
-		
-        #if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
-            positionController.setpoint = initialPosition + positionProfile[0];
-            pid_controller_setGains(&positionController, P_CONTROLGAINS);
-        #endif
-		
-        ticks = 1;
-        state = CYCLING;
-        break;
-
-    case CYCLING:
-		if(ticks < LENGTH_GAIT_CYCLE_IN_MS)
-		{
-			#if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
-	            torqueController.setpoint = torqueProfile[ticks];
-			#endif
-	        #if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
-	            positionController.setpoint = (initialPosition + positionProfile[ticks]);
-			#endif
-			ticks++;
-		}
-		else
-		{
-            ticks = 0;
-		    state = WAITING;
-			motortb_flagsOut = GAIT_FLAG;
-		}
-
-        break;
-		
-	case CURR_MEASURE_PASSIVE:
-		if(ticks == 0)
-		{
-			ctrl.active_ctrl = CTRL_NONE;
-			measure_motor_resistance = 0;
-		}
-		if(ticks > 20)
-		{
-			measure_motor_resistance = 0;
-		}
-		if(ticks > 50)
-		{
-			ctrl.active_ctrl = CTRL_CUSTOM;
-			ticks = 0;
-			state = WAITING;
-			motortb_flagsOut = CURRENT_FLAG;	
-		}
-		ticks++;
-		break;
-
-	case CURR_MEASURE_ACTIVE:
-		if(ticks == 0)
-		{
-			ctrl.active_ctrl = CTRL_NONE;
-			measure_motor_resistance = 1;
-		}
-		if(ticks > 20)
-		{
-			measure_motor_resistance = 0;
-		}
-		if(ticks > 50)
-		{
-			ctrl.active_ctrl = CTRL_CUSTOM;
-			ticks = 0;
-			state = WAITING;
-			motortb_flagsOut = CURRENT_FLAG;
-		}
-		ticks++;
-		break;
 
     case WAITING:
         //check the flag sent by manage
-        if(motortb_flagsIn & GAIT_FLAG)
-        {
-			ticks = 0;
-            state = CYCLE_START;
-			motortb_flagsIn = 0;
-        }
-		else if(motortb_flagsIn & CURRENT_FLAG)
+		ticksFromInitial = initialPosition - exec1.enc_display;
+		if(ticksFromInitial > START_TEST_TICK_DIFF || ticksFromInitial < -1*START_TEST_TICK_DIFF)
 		{
 			ticks = 0;
-			state = (motortb_flagsIn & CURRENT_UNDER_TEST_FLAG) ? 
-						CURR_MEASURE_ACTIVE : 
-						CURR_MEASURE_PASSIVE;
-		
-			motortb_flagsIn = 0;
+			state = START_WIND_UP;
+			ang_vel_lp = as5047.filt.vel_cpms;
 		}
 
+        break;		
+		
+    case START_WIND_UP:
+        ticks++;
+		if(ticks > 50)
+		{
+			state = WIND_UP;
+		}
+		motor_open_speed_1(80*PWM_SIGN);
+		ang_vel_lp = (95*ang_vel_lp + 5*as5047.filt.vel_cpms)/100;
+        
+		break;
 
-		#if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
-			torqueController.setpoint = 0;
-			torqueController.errorSum = torqueController.errorSum*9/10;
-		#endif			
-
+    case WIND_UP:
+		ang_vel_lp = (95*ang_vel_lp + 5*as5047.filt.vel_cpms)/100;
+		
+		if(ang_vel_lp < 5 && ang_vel_lp > -5)
+		{
+			positionAtTension = exec1.enc_display;
+			state = CYCLING;
+			pid_controller_setGains(&positionController, P_CONTROLGAINS);
+			ticks = 0;
+		}
         break;
 
+	case CYCLING:
+		positionController.setpoint = positionAtTension + positionProfile[ticks]/2;
+		ticks++;
+		ticks %= CYCLE_LENGTH;
+		if(0) //check test failure conditions
+		{
+			state = DONE;
+		}
+		
+		break;
+		
 	default:
 		break;
     }
@@ -264,40 +182,14 @@ void MotorTestBench_fsm(void)
 }
 
 void user_ctrl(void)
-{
-	static int32_t enc_vel_prev = 0;
-	int32_t encVel = 0;
-	
-	if(ctrl.active_ctrl == CTRL_CUSTOM) 
+{	
+	if(ctrl.active_ctrl == CTRL_CUSTOM && state == CYCLING) 
 	{		
 	    int32_t pwm = 0;
-		#if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
-			encVel = as5047.filt.vel_ctrl_cpms;
-			int32_t encAccel = encVel - enc_vel_prev;
-			
-			volatile int32_t goal_voltage = torqueToVoltage(torqueController.setpoint, encVel, encAccel);
-			volatile int32_t bat_volt = ((16*safety_cop.v_vb/3+302)*33)>>7; //battery voltage in mV
-			//pwm = duty cycle = goalvoltage / battery voltage
-			//however goal voltage's units are in 1000mV / 1024
-			//and pwm is scaled so 1024 units = 1 = 100% duty cycle, so
-			//(goal_voltage * 1000/1024 / bat_volt) * 1024 / 1 = pwm 
-			volatile int32_t ff = goal_voltage*1000/bat_volt;
-			ff = goal_voltage*1000/24000;
-
-	        torqueController.controlValue = (((int32_t)(strain_read())-31937)*1831)>>13;
-			pwm = pid_controller_compute(&torqueController) - ff;
-			
-	    #endif
-
-	    #if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
-	        positionController.controlValue = exec1.enc_control_ang;
-	        pwm = pid_controller_compute(&positionController);
-	    #endif
-
+        positionController.controlValue = exec1.enc_control_ang;
+        pwm = pid_controller_compute(&positionController);
 	    motor_open_speed_1(pwm);	
 	}
-
-	enc_vel_prev = encVel;
 }
 
 // User fsm controlling motors
@@ -308,12 +200,12 @@ void MotorTestBench_fsm2(void)
 
 //Here's an example function:
 void MotorTestBench_refresh_values(void)
-{
+{/*
 	motortb.ex1[1] = as5047.filt.vel_rpm;
     motortb.ex1[2] = as5047.raw.ang_clks;
     motortb.ex1[3] = exec1.sine_commut_pwm;
     motortb.ex1[4] = ((strain_read()-31937)*1831)>>13;
-}
+*/}
 
 //****************************************************************************
 // Private Function(s)
