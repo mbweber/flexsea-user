@@ -59,8 +59,8 @@ struct motortb_s
 	int16_t mnRunning;
 	int16_t mnTestState;
     int16_t mn1[4];
-	int32_t ex1[4];
-	int32_t ex2[4];
+	int32_t ex1[6];
+	int32_t ex2[6];
 };
 
 //****************************************************************************
