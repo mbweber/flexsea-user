@@ -132,19 +132,20 @@ inline motor_dto_reply generateMotorDtoReply(struct execute_s* execPtr)
 #ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 inline motor_dto_reply generateMotorDtoReply()
 {
-    motor_dto_reply result;
+	motor_dto_reply result;
 
-    result.encoder = exec1.enc_control_ang;
-    result.strain = strain_read();
-    result.analog0 = read_analog(0);
-    result.analog1 = read_analog(1);
-    result.v_vb = safety_cop.v_vb;
-    result.v_vg = safety_cop.v_vg;
-    result.temperature = safety_cop.temperature;
-    result.status1 = safety_cop.status1;
-    result.status2 = safety_cop.status2;
+	result.encoder = exec1.enc_control_ang;
+	result.strain = strain_read();
+	result.analog0 = read_analog(0);
+	result.analog1 = read_analog(1);
+	result.current = ctrl.current.actual_val;
+	result.v_vb = safety_cop.v_vb;
+	result.v_vg = safety_cop.v_vg;
+	result.temperature = safety_cop.temperature;
+	result.status1 = safety_cop.status1;
+	result.status2 = safety_cop.status2;
 
-    return result;
+	return result;
 }
 #endif
 

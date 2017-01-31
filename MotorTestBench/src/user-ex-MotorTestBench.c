@@ -43,13 +43,14 @@
 //****************************************************************************
 // Variable(s)
 //****************************************************************************
- 
+
 struct motortb_s my_motortb;
 #define LENGTH_GAIT_CYCLE_IN_MS 1177	
+#define CURR_MEASURE_TICKS 200
 
 #if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
 	
-#define T_CONTROLGAINS 0,5,0,5
+#define T_CONTROLGAINS 0,11,0,6
 //#define T_CONTROLGAINS 0,0,0,7
 	// define a 1000 long array, defining the torque profile for the motor controlled by ex2
 // static float torqueProfile[] = { .. };
@@ -59,7 +60,7 @@ pid_controller torqueController;
 
 #if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
 //#define P_CONTROLGAINS 37,1,0,9
-#define P_CONTROLGAINS 75,2,0,10
+#define P_CONTROLGAINS 75,1,0,10
 // define a 1000 long array, defining the position profile for the motor controlled by ex1
 // static int32_t positionProfile[] = { .. }; 
 #include "../resources/motorPositionProfile.c.resource"
@@ -197,11 +198,11 @@ void MotorTestBench_fsm(void)
 			ctrl.active_ctrl = CTRL_NONE;
 			measure_motor_resistance = 0;
 		}
-		if(ticks > 20)
+		if(ticks > CURR_MEASURE_TICKS)
 		{
 			measure_motor_resistance = 0;
 		}
-		if(ticks > 50)
+		if(ticks > CURR_MEASURE_TICKS+20)
 		{
 			ctrl.active_ctrl = CTRL_CUSTOM;
 			ticks = 0;
@@ -217,11 +218,11 @@ void MotorTestBench_fsm(void)
 			ctrl.active_ctrl = CTRL_NONE;
 			measure_motor_resistance = 1;
 		}
-		if(ticks > 20)
+		if(ticks > CURR_MEASURE_TICKS)
 		{
 			measure_motor_resistance = 0;
 		}
-		if(ticks > 50)
+		if(ticks > CURR_MEASURE_TICKS+20)
 		{
 			ctrl.active_ctrl = CTRL_CUSTOM;
 			ticks = 0;
