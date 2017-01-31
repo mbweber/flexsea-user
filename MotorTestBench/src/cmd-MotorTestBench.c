@@ -353,6 +353,15 @@ void rx_cmd_motortb_rr(uint8_t *buf, uint8_t *info)
                     ctrlStatePtr->setpoint = REBUILD_UINT32(buf, &index);
                     ctrlStatePtr->actual = REBUILD_UINT32(buf, &index);
             #endif
+
+            exec_s_ptr->enc_control = execDataPtr[3];
+            if(exec_s_ptr->enc_control != 0)
+            {
+                printf("nonZero");
+                exec_s_ptr->enc_control +=1;
+            }
+            exec_s_ptr->enc_commut = execDataPtr[0] - execDataPtr[1];
+
         }
         #ifdef BOARD_TYPE_FLEXSEA_MANAGE
         if(offset == 0)
