@@ -117,7 +117,7 @@ inline motor_dto_reply generateMotorDtoReply(struct execute_s* execPtr)
     result.strain = execPtr->strain;
     result.analog0 = execPtr->analog[0];
     result.analog1 = execPtr->analog[1];
-
+    result.current = execPtr->current;
     result.v_vb = execPtr->volt_batt;
     result.v_vg = execPtr->volt_int;
 
@@ -352,6 +352,12 @@ void rx_cmd_motortb_rr(uint8_t *buf, uint8_t *info)
             #elif(defined BOARD_TYPE_FLEXSEA_MANAGE)
                     ctrlStatePtr->setpoint = REBUILD_UINT32(buf, &index);
                     ctrlStatePtr->actual = REBUILD_UINT32(buf, &index);
+                    testFlag = buf[index++];
+
+                    execDataPtr[0] = ctrlStatePtr->setpoint;
+                    execDataPtr[1] = ctrlStatePtr->actual;
+                    execDataPtr[2] = execDataPtr == motortb.ex1 ? exec1TestState : exec2TestState;
+                    //execDataPtr[3] = response.temperature;
             #endif
 
             exec_s_ptr->enc_control = execDataPtr[3];
@@ -384,7 +390,7 @@ void rx_cmd_motortb_rr(uint8_t *buf, uint8_t *info)
                 batt1.rawBytes[i] = buf[index++];
 
             for(i=0; i<4; i++)
-                motortb.mn1[0] = (int16_t) REBUILD_UINT16(buf, &index);
+                motortb.mn1[i] = (int16_t) REBUILD_UINT16(buf, &index);
         }
     #else
 

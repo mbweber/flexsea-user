@@ -120,6 +120,7 @@ void MotorTestBench_fsm_1(void)
 	const uint16_t MS_PER_CYCLE = 3000;
 	static uint8_t info[2] = {PORT_485_1, PORT_485_1};
 	static uint32_t ticks = 0;
+	static uint32_t ticks2 = 0;
 
 	static uint8_t commCounter = 0;
 	static uint8_t currentTestCounter = 0;
@@ -199,22 +200,27 @@ void MotorTestBench_fsm_1(void)
 				testEx1Current |= CURRENT_UNDER_TEST_FLAG;
 				exec1TestState = CURRENT;
 			}
-			else
+			else if(currentTestCounter == 6)
 			{
 				testEx2Current |= CURRENT_UNDER_TEST_FLAG;
 				exec2TestState = CURRENT;
 			}
 
 			currentTestCounter++;
-			currentTestCounter%=2;
+			currentTestCounter%=10;
 		}
 
-		if(ticks > (MS_PER_CYCLE - MS_PER_GAIT))
-			if(exec1TestState == NONE && exec2TestState == NONE)
+		if( exec1TestState == NONE && exec2TestState == NONE )
+		{
+			ticks2++;
+			if(ticks2 > 200)
 			{
+				ticks2 = 0;
 				motortb_state = RUNNING_GAIT;
 				ticks = -1; //ticks is unsigned but the point is for it to roll over to 0
+
 			}
+		}
 
 		if(user_data_1.w[3])
 		{
@@ -405,13 +411,15 @@ static void MotorTestBench_refresh_values(void)
 
 	motortb.ex1[0] = exec1ControllerState.setpoint;
 	motortb.ex1[1] = exec1ControllerState.actual;
-	motortb.ex1[2] = exec1.current;
-	motortb.ex1[3] = exec1.temp;
+	motortb.ex1[2] = exec1TestState;
+	motortb.ex1[3] = (int32_t)exec1ControllerErrorSum;
 
 	motortb.ex2[0] = exec2ControllerState.setpoint;
 	motortb.ex2[1] = exec2ControllerState.actual;
-	motortb.ex2[2] = exec2.current;
-	motortb.ex2[3] = exec2.temp;
+	motortb.ex2[2] = exec2TestState;
+	motortb.ex2[3] = (int32_t)exec2ControllerErrorSum;
+
+	motortb.mn1[0] = motortb_state;
 }
 //That function can be called from the FSM.
 
