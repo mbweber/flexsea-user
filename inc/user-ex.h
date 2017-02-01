@@ -33,7 +33,7 @@
   to select a different TopDesign file than the one included by default (check
   the folder, there is more than one included) */
 
-#include "main.h"
+#include "flexsea_board.h"
 
 #ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 
@@ -44,6 +44,7 @@
 // Include(s)
 //****************************************************************************
 
+#include "main.h"
 #include "../MIT_2DoF_Ankle_v1/inc/user-ex-MIT_2DoF_Ankle_v1.h"
 #include "../RICNU_Knee_v1/inc/user-ex-RICNU_Knee_v1.h"
 #include "../MotorTestBench/inc/user-ex-MotorTestBench.h"
@@ -84,10 +85,11 @@ void user_fsm(void);
 
 //List of projects:
 #define PROJECT_BAREBONE		0	//Barebone Execute, nothing connected*
-#define PROJECT_SIMPLE_MOTOR	1	//Barebone + Motor
+#define PROJECT_SIMPLE_MOTOR	1	//Barebone + BLDC Motor (sine commut.)
 #define PROJECT_ANKLE_2DOF		2	//Biomechatronics 2-DOF Ankle
 #define PROJECT_RICNU_KNEE		3	//RIC/NU Knee
 #define PROJECT_MOTORTB			4	//Motor TestBench
+#define PROJECT_SIMPLE_MAXON	5	//Demo/test code, Maxon + Hall + QEI
 //*No external sensor, no sinusoidal commutation
 
 //List of sub-projects:
@@ -100,7 +102,7 @@ void user_fsm(void);
 //Step 1) Select active project (from list):
 //==========================================
 
-#define ACTIVE_PROJECT			PROJECT_SIMPLE_MOTOR
+#define ACTIVE_PROJECT			PROJECT_SIMPLE_MAXON
 #define ACTIVE_SUBPROJECT		SUBPROJECT_NONE
 
 //Step 2) Customize the enabled/disabled sub-modules:
@@ -205,7 +207,7 @@ void user_fsm(void);
 	//Project specific definitions:
 	//...
 
-#endif  //PROJECT_MOTORTB
+#endif  //PROJECT_SIMPLE_MOTOR
 
 //MIT 2-DoF Ankle
 #if(ACTIVE_PROJECT == PROJECT_ANKLE_2DOF)
@@ -430,6 +432,53 @@ void user_fsm(void);
 	//...
 
 #endif  //PROJECT_MOTORTB
+
+//Similar to Barebone, but including a Maxon motor and its typical companions:
+//Hall sensors (commutation) and QEI encoder
+#if(ACTIVE_PROJECT == PROJECT_SIMPLE_MAXON)
+
+	//Enable/Disable sub-modules:
+	#define USE_RS485
+	#define USE_USB
+	#define USE_COMM			//Requires USE_RS485 and/or USE_USB
+	#define USE_QEI
+	#define USE_TRAPEZ
+	#define USE_I2C_0			//3V3, IMU & Expansion.
+	#define USE_I2C_1			//5V, Safety-CoP & strain gauge pot.
+	#define USE_IMU				//Requires USE_I2C_0
+	#define USE_STRAIN			//Requires USE_I2C_1
+	//#define USE_AS5047		//16-bit Position Sensor, SPI. Used by Sine Commut.
+	#define USE_EEPROM			//
+	#define USE_FLASH			//
+	#define USE_I2T_LIMIT		//I2t current limit
+
+	//Motor type and commutation:
+	#define MOTOR_COMMUT		COMMUT_BLOCK
+	#define MOTOR_TYPE			MOTOR_BRUSHLESS
+
+	//Runtime finite state machine (FSM):
+	#define RUNTIME_FSM	 DISABLED
+
+	//Encoders:
+	#define ENC_CONTROL			ENC_QUADRATURE
+	#define ENC_COMMUT			ENC_HALL
+	#define ENC_DISPLAY			ENC_QUADRATURE
+
+	//Control encoder function:
+	#define PWM_SIGN			1
+	#define CTRL_ENC_FCT(x) 	(x)
+	#define CTRL_ENC_VEL_FCT(x) (x)
+	//...
+    
+    #define CURRENT_ZERO		((int32)2048)
+
+	//Slave ID:
+	#define SLAVE_ID			FLEXSEA_EXECUTE_1
+
+	//Project specific definitions:
+	//...
+
+#endif  //PROJECT_SIMPLE_MAXON
 
 //****************************************************************************
 // Structure(s)
