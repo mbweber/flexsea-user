@@ -355,9 +355,9 @@ void rx_cmd_motortb_rr(uint8_t *buf, uint8_t *info)
                     ctrlStatePtr->actual = REBUILD_UINT32(buf, &index);
                     testFlag = buf[index++];
 
-                    execDataPtr[0] = ctrlStatePtr->setpoint;
-                    execDataPtr[1] = ctrlStatePtr->actual;
-                    execDataPtr[2] = execDataPtr == motortb.ex1 ? exec1TestState : exec2TestState;
+                    //execDataPtr[0] = ctrlStatePtr->setpoint;
+                    //execDataPtr[1] = ctrlStatePtr->actual;
+                    //execDataPtr[2] = execDataPtr == motortb.ex1 ? exec1TestState : exec2TestState;
                     //execDataPtr[3] = response.temperature;
             #endif
 

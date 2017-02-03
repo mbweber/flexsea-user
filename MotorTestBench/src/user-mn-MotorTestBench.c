@@ -63,6 +63,7 @@ uint8_t motorTbTestFailed = 0;
 float exec1ControllerErrorSum = 0;
 float exec2ControllerErrorSum = 0;
 float torqueCurrentRatio = 0.12;
+static uint32_t numGaitCycles = 0;
 
 enum TEST_STATE { WAITING_PLAN, RUNNING_GAIT, RUNNING_CURRENT, FAILED };
 enum TEST_STATE motortb_state = WAITING_PLAN;
@@ -117,7 +118,7 @@ void MotorTestBench_fsm_1(void)
 	 * */
 
 	const uint16_t MS_PER_GAIT = 1177; //3000 ms per gait cycle?
-	const uint16_t MS_PER_CYCLE = 3000;
+	const uint16_t MS_PER_CYCLE = 1300;
 	static uint8_t info[2] = {PORT_485_1, PORT_485_1};
 	static uint32_t ticks = 0;
 	static uint32_t ticks2 = 0;
@@ -128,6 +129,8 @@ void MotorTestBench_fsm_1(void)
 	static uint8_t startGaitCycle = 0;
 	static uint8_t testEx1Current = 0;
 	static uint8_t testEx2Current = 0;
+
+
 
 	switch(motortb_state)
 	{
@@ -175,11 +178,12 @@ void MotorTestBench_fsm_1(void)
 			torqueCurrentRatio = 0.12;
 			motortb_state = RUNNING_CURRENT;
 			ticks = 0;
+			numGaitCycles++;
 		}
 
 		if(user_data_1.w[3])
 		{
-			user_data_1.r[3] = user_data_1.w[3];
+			//user_data_1.r[3] = user_data_1.w[3];
 			user_data_1.w[3] = 0;
 			user_data_1.r[1] = 0;
 			user_data_1.w[0] = 0;
@@ -190,20 +194,21 @@ void MotorTestBench_fsm_1(void)
 
 	case RUNNING_CURRENT:
 
-		if(ticks == 500)
+		if(ticks == (MS_PER_CYCLE - MS_PER_GAIT))
 		{
-			testEx1Current = CURRENT_FLAG;
-			testEx2Current = CURRENT_FLAG;
-
 			if(currentTestCounter == 0)
 			{
-				testEx1Current |= CURRENT_UNDER_TEST_FLAG;
+				testEx2Current = CURRENT_FLAG;
+				testEx1Current = CURRENT_FLAG | CURRENT_UNDER_TEST_FLAG;
 				exec1TestState = CURRENT;
+				ticks2 = 0;
 			}
-			else if(currentTestCounter == 6)
+			else if(currentTestCounter == 5)
 			{
-				testEx2Current |= CURRENT_UNDER_TEST_FLAG;
+				testEx1Current = CURRENT_FLAG;
+				testEx2Current = CURRENT_FLAG | CURRENT_UNDER_TEST_FLAG;
 				exec2TestState = CURRENT;
+				ticks2 = 0;
 			}
 
 			currentTestCounter++;
@@ -213,18 +218,17 @@ void MotorTestBench_fsm_1(void)
 		if( exec1TestState == NONE && exec2TestState == NONE )
 		{
 			ticks2++;
-			if(ticks2 > 200)
+			if(ticks2 > (MS_PER_CYCLE - MS_PER_GAIT))
 			{
 				ticks2 = 0;
 				motortb_state = RUNNING_GAIT;
 				ticks = -1; //ticks is unsigned but the point is for it to roll over to 0
-
 			}
 		}
 
 		if(user_data_1.w[3])
 		{
-			user_data_1.r[3] = user_data_1.w[3];
+			//user_data_1.r[3] = user_data_1.w[3];
 			user_data_1.w[3] = 0;
 			user_data_1.r[1] = 0;
 			user_data_1.w[0] = 0;
@@ -236,7 +240,7 @@ void MotorTestBench_fsm_1(void)
 		break;
 
 	case FAILED:
-		user_data_1.r[2] = 666;
+		user_data_1.r[2] = motorTbTestFailed;
 
 		break;
 
@@ -284,6 +288,10 @@ void MotorTestBench_fsm_1(void)
 		init_testState();
 	}
 
+	user_data_1.r[3] = numGaitCycles;
+
+	MotorTestBench_refresh_values();
+
 #endif //PROJECT_MOTORTB
 }
 
@@ -291,13 +299,13 @@ uint8_t checkForControlFailure(execControllerState_t ctrlState, float* errorSum,
 {
 	const float ERROR_SUM_THRESHOLD = 1000;
 
+	static int numFailures = 0;
+
 	float error = (float)(ctrlState.setpoint - ctrlState.actual) / scale;
 	error = error > 0 ? error : -1*error;
 	(*errorSum) += error;
 
-	if(*errorSum > ERROR_SUM_THRESHOLD) return 1;
-
-	return 0;
+	return *errorSum > ERROR_SUM_THRESHOLD; // keep in mind this counts for both executes. Could count up twice in one cycle
 }
 
 uint8_t isBatteryBoardInfoValid()
@@ -312,87 +320,127 @@ uint8_t isBatteryBoardInfoValid()
 	return 0;
 }
 
+#define ERROR_SUM_FAILURE 0x01
+#define T_C_RATIO_FAILURE 0x02
+#define MOTOR_RESISTANCE_FAILURE 0x04
+#define BATTERY_FAILURE 0x08
+
 void MotorTestBench_fsm_2(void)
 {
 #if(ACTIVE_PROJECT == PROJECT_MOTORTB)
 
-	const int32_t CURRENT_THRESH_UPPER = 3000;
-	const int32_t CURRENT_THRESH_LOWER = -1*CURRENT_THRESH_UPPER;
-/*
-	if(exec1CtrlStateReady)
-	{
-		exec1CtrlStateReady = 0;
+	const float TORQUE_CURRENT_RATIO_UPPER = 16;
+	const float TORQUE_CURRENT_RATIO_LOWER = -17;
 
-		uint8_t errorSumFailure = checkForControlFailure(exec1ControllerState, &exec1ControllerErrorSum, 8150);
-		float newTorqueCurrentRatio = 0.12;
+	const int32_t RESISTANCE_CURR_1_FAILURE = 6210;
+	const int32_t RESISTANCE_CURR_2_FAILURE = 6210;
+	static int32_t resistanceCurrentMeasurementMaxMag1 = RESISTANCE_CURR_1_FAILURE+1;
+	static int32_t resistanceCurrentMeasurementMaxMag2 = RESISTANCE_CURR_2_FAILURE+1;
+	static uint8_t firstCurrMeasurement1 = 1;
+	static uint8_t firstCurrMeasurement2 = 1;
 
-		if(exec1.current != 0 && exec1.current > 100)
-		{
-			newTorqueCurrentRatio = (float)(exec1ControllerState.actual) / (float)(exec1.current);
-		}
-	}
-*/
+	static uint8_t exec1NumSequentialControllerErrors = 0;
+	static uint8_t exec2NumSequentialControllerErrors = 0;
+	static int32_t gaitCycleOfLastControllerError1 = -1;
+	static int32_t gaitCycleOfLastControllerError2 = -1;
+
+	/* Check Execute 1 Failure conditions
+	 *  - Error sum for controller
+	 *  - Torque to current ratio
+	 *  - current drawn while testing motor current
+	 * */
 	if(!motorTbTestFailed && exec1CtrlStateReady)
 	{
 		exec1CtrlStateReady = 0;
 		if(exec1TestState == GAIT)
 		{
-			motorTbTestFailed = checkForControlFailure(exec1ControllerState, &exec1ControllerErrorSum, 8150);
-			if(motorTbTestFailed)
+			if(checkForControlFailure(exec1ControllerState, &exec1ControllerErrorSum, 33.0f))
 			{
-				motorTbTestFailed *= 2;
-				return;
+				if(gaitCycleOfLastControllerError1 != numGaitCycles)
+				{
+					exec1NumSequentialControllerErrors++;
+					gaitCycleOfLastControllerError1 = numGaitCycles;
+					if(exec1NumSequentialControllerErrors > 2)
+						motorTbTestFailed |= ERROR_SUM_FAILURE;
+				}
+			}
+			else if(numGaitCycles > gaitCycleOfLastControllerError1 + 1)
+			{
+				exec1NumSequentialControllerErrors = 0;
 			}
 
 			if(exec1.current != 0 && exec1.current > 100)
 			{
 				float newRatio = (float)(exec1ControllerState.actual) / (float)(exec1.current);
 				torqueCurrentRatio = (95*torqueCurrentRatio + 5*(newRatio))/100;
-				motorTbTestFailed = motorTbTestFailed | (torqueCurrentRatio > 0.18 || torqueCurrentRatio < 0.05);
+				if((torqueCurrentRatio > TORQUE_CURRENT_RATIO_UPPER || torqueCurrentRatio < TORQUE_CURRENT_RATIO_LOWER))
+					motorTbTestFailed |= T_C_RATIO_FAILURE;
 			}
-			if(motorTbTestFailed)
-			{
-				motorTbTestFailed *= 2;
-				return;
-			}
+
+			if(resistanceCurrentMeasurementMaxMag1 < RESISTANCE_CURR_1_FAILURE)
+				motorTbTestFailed |= MOTOR_RESISTANCE_FAILURE;
+
+			firstCurrMeasurement1 = 1;
 		}
 		else if(exec1TestState == CURRENT)
+			//&& (exec1.current > CURRENT_THRESH_UPPER || exec1.current < CURRENT_THRESH_LOWER))
 		{
-			motorTbTestFailed = exec1.current > CURRENT_THRESH_UPPER || exec1.current < CURRENT_THRESH_LOWER;
-		}
+			int32_t currentMag = exec1.current > 0 ? exec1.current : -1*exec1.current;
+			if(firstCurrMeasurement1 || currentMag > resistanceCurrentMeasurementMaxMag1)
+				resistanceCurrentMeasurementMaxMag1 = currentMag;
 
+			firstCurrMeasurement1 = 0;
+		}
 	}
+	/* Check Execute 2 Failure conditions
+	 *  - Error sum for controller
+	 *  - current drawn while testing motor current
+	 * */
 	if(!motorTbTestFailed && exec2CtrlStateReady)
 	{
 		exec2CtrlStateReady = 0;
 		if(exec2TestState == GAIT)
 		{
-			motorTbTestFailed = checkForControlFailure(exec2ControllerState, &exec2ControllerErrorSum, 1000);
-			if(motorTbTestFailed)
+			if(checkForControlFailure(exec2ControllerState, &exec2ControllerErrorSum, 666.0f))
 			{
-				motorTbTestFailed *= 2;
-				return;
+				if(gaitCycleOfLastControllerError2 != (int64_t)numGaitCycles)
+				{
+					exec2NumSequentialControllerErrors++;
+					gaitCycleOfLastControllerError2 = numGaitCycles;
+					if(exec2NumSequentialControllerErrors > 2)
+						motorTbTestFailed |= ERROR_SUM_FAILURE;
+				}
 			}
+			else if(numGaitCycles > gaitCycleOfLastControllerError2 + 1)
+			{
+				exec2NumSequentialControllerErrors = 0;
+			}
+
+			if(resistanceCurrentMeasurementMaxMag2 < RESISTANCE_CURR_2_FAILURE)
+				motorTbTestFailed |= MOTOR_RESISTANCE_FAILURE;
+
+			firstCurrMeasurement2 = 1;
 		}
 
 		else if(exec2TestState == CURRENT)
 		{
-			motorTbTestFailed = exec2.current > CURRENT_THRESH_UPPER || exec2.current < CURRENT_THRESH_LOWER;
+			int32_t currentMag = exec2.current > 0 ? exec2.current : -1*exec2.current;
+			if(firstCurrMeasurement2 || currentMag > resistanceCurrentMeasurementMaxMag2)
+				resistanceCurrentMeasurementMaxMag2 = currentMag;
+
+			firstCurrMeasurement2 = 0;
+			//if(exec2.current > CURRENT_THRESH_UPPER || exec2.current < CURRENT_THRESH_LOWER)
+			//	motorTbTestFailed |= CURRENT_FAILURE;
 		}
 	}
 
-	//check battery voltage
-	if(!motorTbTestFailed)
+	//Check battery voltage failure condition
+	if(!motorTbTestFailed && isBatteryBoardInfoValid() && (batt1.voltage > 37000 || batt1.voltage < 28000))
 	{
-		motorTbTestFailed = isBatteryBoardInfoValid() && (batt1.voltage > 32000 || batt1.voltage < 28000);
+		motorTbTestFailed |= BATTERY_FAILURE;
 	}
 
-	if(motorTbTestFailed)
-	{
-		motorTbTestFailed *= 20;
-	}
-
-	MotorTestBench_refresh_values();
+	//motorTbTestFailed = 0;
 #endif //PROJECT_MOTORTB
 }
 
@@ -411,15 +459,16 @@ static void MotorTestBench_refresh_values(void)
 
 	motortb.ex1[0] = exec1ControllerState.setpoint;
 	motortb.ex1[1] = exec1ControllerState.actual;
-	motortb.ex1[2] = exec1TestState;
-	motortb.ex1[3] = (int32_t)exec1ControllerErrorSum;
+	motortb.ex1[1] = exec1TestState;
+	motortb.ex1[2] = (int32_t)exec1ControllerErrorSum;
 
 	motortb.ex2[0] = exec2ControllerState.setpoint;
 	motortb.ex2[1] = exec2ControllerState.actual;
-	motortb.ex2[2] = exec2TestState;
-	motortb.ex2[3] = (int32_t)exec2ControllerErrorSum;
+	motortb.ex2[1] = exec2TestState;
+	motortb.ex2[2] = (int32_t)exec2ControllerErrorSum;
 
 	motortb.mn1[0] = motortb_state;
+	motortb.mn1[1] = numGaitCycles;
 }
 //That function can be called from the FSM.
 
