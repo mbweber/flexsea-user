@@ -106,7 +106,7 @@ void user_fsm(void);
 //Step 1) Select active project (from list):
 //==========================================
 
-#define ACTIVE_PROJECT			PROJECT_SIMPLE_MAXON
+#define ACTIVE_PROJECT			PROJECT_SIMPLE_MOTOR
 #define ACTIVE_SUBPROJECT		SUBPROJECT_NONE
 
 //Step 2) Customize the enabled/disabled sub-modules:
