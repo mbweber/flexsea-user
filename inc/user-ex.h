@@ -200,11 +200,6 @@ void user_fsm(void);
 	#define ENC_CONTROL			ENC_AS5047
 	#define ENC_COMMUT			ENC_AS5047
 	#define ENC_DISPLAY			ENC_CONTROL
-
-	//Control encoder function:
-
-	#define PWM_SIGN			1
-	//...
     
     #define CURRENT_ZERO		((int32)2048)
 
