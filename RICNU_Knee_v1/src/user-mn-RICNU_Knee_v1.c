@@ -166,7 +166,8 @@ void ricnu_knee_fsm_2(void)
 			tx_cmd_ricnu_rw(TX_N_DEFAULT, 0, my_ricnu_control, my_ricnu_pwm, KEEP, 0, 0, 0, 0);
 			packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_1, info, SEND_TO_SLAVE);
 
-			slaves_485_1.xmit.listen = 1;
+			//slaves_485_1.xmit.listen = 1;	//Legacy - remove once tested
+			slaves_485_1.xmit.willListenSoon = 1;	//New version
 			ex_refresh_fsm_state++;
 
 			break;
@@ -184,7 +185,8 @@ void ricnu_knee_fsm_2(void)
 			tx_cmd_ricnu_rw(TX_N_DEFAULT, 1, my_ricnu_control, my_ricnu_pwm, KEEP, 0, 0, 0, 0);
 			packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_1, info, SEND_TO_SLAVE);
 
-			slaves_485_1.xmit.listen = 1;
+			//slaves_485_1.xmit.listen = 1;	//Legacy - remove once tested
+			slaves_485_1.xmit.willListenSoon = 1;	//New version
 			ex_refresh_fsm_state++;
 
 			break;
