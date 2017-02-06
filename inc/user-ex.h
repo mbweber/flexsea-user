@@ -39,13 +39,12 @@
 
 #ifndef INC_USER_EX_H
 #define INC_USER_EX_H
-
-#include "main.h"
 	
 //****************************************************************************
 // Include(s)
 //****************************************************************************
 
+#include "main.h"
 #include "../MIT_2DoF_Ankle_v1/inc/user-ex-MIT_2DoF_Ankle_v1.h"
 #include "../RICNU_Knee_v1/inc/user-ex-RICNU_Knee_v1.h"
 #include "../MotorTestBench/inc/user-ex-MotorTestBench.h"
@@ -84,16 +83,21 @@ void user_fsm(void);
 #define COMMUT_SINE				1
 #define COMMUT_NONE				2	//Software test, no motor
 
+//Current sensing strategy:
+#define CS_LEGACY				0
+#define CS_DEFAULT				1
+
 //Types of motor orientation
 #define CLOCKWISE_ORIENTATION 	1
 #define COUNTER_CLOCKWISE_ORIENTATION 	-1
 
 //List of projects:
 #define PROJECT_BAREBONE		0	//Barebone Execute, nothing connected*
-#define PROJECT_SIMPLE_MOTOR	1	//Barebone + Motor
+#define PROJECT_SIMPLE_MOTOR	1	//Barebone + BLDC Motor (sine commut.)
 #define PROJECT_ANKLE_2DOF		2	//Biomechatronics 2-DOF Ankle
 #define PROJECT_RICNU_KNEE		3	//RIC/NU Knee
 #define PROJECT_MOTORTB			4	//Motor TestBench
+#define PROJECT_SIMPLE_MAXON	5	//Demo/test code, Maxon + Hall + QEI
 //*No external sensor, no sinusoidal commutation
 
 //List of sub-projects:
@@ -210,7 +214,7 @@ void user_fsm(void);
 	//Project specific definitions:
 	//...
 
-#endif  //PROJECT_MOTORTB
+#endif  //PROJECT_SIMPLE_MOTOR
 
 //MIT 2-DoF Ankle
 #if(ACTIVE_PROJECT == PROJECT_ANKLE_2DOF)
@@ -436,10 +440,63 @@ void user_fsm(void);
 
 #endif  //PROJECT_MOTORTB
 
+//Similar to Barebone, but including a Maxon motor and its typical companions:
+//Hall sensors (commutation) and QEI encoder
+#if(ACTIVE_PROJECT == PROJECT_SIMPLE_MAXON)
+
+	//Enable/Disable sub-modules:
+	#define USE_RS485
+	#define USE_USB
+	#define USE_COMM			//Requires USE_RS485 and/or USE_USB
+	#define USE_QEI
+	#define USE_TRAPEZ
+	#define USE_I2C_0			//3V3, IMU & Expansion.
+	#define USE_I2C_1			//5V, Safety-CoP & strain gauge pot.
+	#define USE_IMU				//Requires USE_I2C_0
+	#define USE_STRAIN			//Requires USE_I2C_1
+	//#define USE_AS5047		//16-bit Position Sensor, SPI. Used by Sine Commut.
+	#define USE_EEPROM			//
+	#define USE_FLASH			//
+	#define USE_I2T_LIMIT		//I2t current limit
+
+	//Motor type and commutation:
+	#define MOTOR_COMMUT		COMMUT_BLOCK
+	#define MOTOR_TYPE			MOTOR_BRUSHLESS
+	
+	//Current sensing:
+	#define CURRENT_SENSING		CS_DEFAULT
+
+	//Runtime finite state machine (FSM):
+	#define RUNTIME_FSM	 DISABLED
+
+	//Encoders:
+	#define ENC_CONTROL			ENC_QUADRATURE
+	#define ENC_COMMUT			ENC_HALL
+	#define ENC_DISPLAY			ENC_QUADRATURE
+
+	//Control encoder function:
+	#define PWM_SIGN			1
+	#define CTRL_ENC_FCT(x) 	(x)
+	#define CTRL_ENC_VEL_FCT(x) (x)
+	//...
+    
+    #define CURRENT_ZERO		((int32)2091)
+
+	//Slave ID:
+	#define SLAVE_ID			FLEXSEA_EXECUTE_1
+
+	//Project specific definitions:
+	//...
+
+#endif  //PROJECT_SIMPLE_MAXON
+
 //****************************************************************************
 // Structure(s)
 //****************************************************************************
 
+//****************************************************************************
+// Default(s)
+//****************************************************************************
 #ifndef MOTOR_ORIENTATION
 #define MOTOR_ORIENTATION 	CLOCKWISE_ORIENTATION
 #endif
