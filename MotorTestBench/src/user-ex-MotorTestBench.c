@@ -96,9 +96,9 @@ void MotorTestBench_fsm(void)
 //Here's an example function:
 void MotorTestBench_refresh_values(void)
 {
-	motortb.ex1[1] = as5047.filt.vel_rpm;
-    motortb.ex1[2] = as5047.raw.ang_clks;
-    motortb.ex1[3] = exec1.sine_commut_pwm;
+	motortb.ex1[1] = *exec1.enc_ang_vel;
+    motortb.ex1[2] = *exec1.enc_ang;
+    motortb.ex1[3] = MOTOR_ORIENTATION * exec1.sine_commut_pwm;
     motortb.ex1[4] = ((strain_read()-31937)*1831)>>13;   
 }
 

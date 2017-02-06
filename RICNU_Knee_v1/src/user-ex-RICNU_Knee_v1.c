@@ -96,7 +96,7 @@ void ricnu_knee_fsm(void)
     if (time == 0)
     {
         state = 0;
-        tmp_posi = encoder.count;
+        tmp_posi = *exec1.enc_ang;
         tmp_posf = 1000;
         tmp_spdm = 10000;
         tmp_acc = 10000;
@@ -105,7 +105,7 @@ void ricnu_knee_fsm(void)
     if (time == 2000) 
     {
         state = 1;
-        tmp_posi = encoder.count;
+        tmp_posi = *exec1.enc_ang;
         tmp_posf = -2000;
         tmp_spdm = 20000;
         tmp_acc = 20000;

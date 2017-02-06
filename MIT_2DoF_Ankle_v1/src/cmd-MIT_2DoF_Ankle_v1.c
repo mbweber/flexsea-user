@@ -115,7 +115,7 @@ void tx_cmd_ankle2dof_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 		SPLIT_16(read_analog(0), shBuf, &index);
 		SPLIT_16(read_analog(1), shBuf, &index);
 
-		SPLIT_32((uint32_t)refresh_enc_display(), shBuf, &index);
+		SPLIT_32((uint32_t)(*exec1.enc_ang), shBuf, &index);
 		SPLIT_16((uint16_t)ctrl.current.actual_val, shBuf, &index);
 
 		shBuf[index++] = safety_cop.v_vb;

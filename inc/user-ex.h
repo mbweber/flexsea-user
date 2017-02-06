@@ -33,13 +33,15 @@
   to select a different TopDesign file than the one included by default (check
   the folder, there is more than one included) */
 
-#include "main.h"
+#include "flexsea_board.h"
 
 #ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 
 #ifndef INC_USER_EX_H
 #define INC_USER_EX_H
 
+#include "main.h"
+	
 //****************************************************************************
 // Include(s)
 //****************************************************************************
@@ -81,6 +83,10 @@ void user_fsm(void);
 #define COMMUT_BLOCK			0
 #define COMMUT_SINE				1
 #define COMMUT_NONE				2	//Software test, no motor
+
+//Types of motor orientation
+#define CLOCKWISE_ORIENTATION 	1
+#define COUNTER_CLOCKWISE_ORIENTATION 	-1
 
 //List of projects:
 #define PROJECT_BAREBONE		0	//Barebone Execute, nothing connected*
@@ -170,6 +176,7 @@ void user_fsm(void);
 	//Motor type and commutation:
 	#define MOTOR_COMMUT		COMMUT_SINE
 	#define MOTOR_TYPE			MOTOR_BRUSHLESS
+	#define MOTOR_ORIENTATION 	CLOCKWISE_ORIENTATION
 
 	//Runtime finite state machine (FSM):
 
@@ -193,8 +200,6 @@ void user_fsm(void);
 	//Control encoder function:
 
 	#define PWM_SIGN			1
-	#define CTRL_ENC_FCT(x) 	(x)
-	#define CTRL_ENC_VEL_FCT(x) (x)
 	//...
     
     #define CURRENT_ZERO		((int32)2048)
@@ -434,6 +439,10 @@ void user_fsm(void);
 //****************************************************************************
 // Structure(s)
 //****************************************************************************
+
+#ifndef MOTOR_ORIENTATION
+#define MOTOR_ORIENTATION 	CLOCKWISE_ORIENTATION
+#endif
 
 #endif	//INC_USER_EX_H
 
