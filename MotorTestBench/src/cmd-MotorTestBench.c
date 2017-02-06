@@ -97,7 +97,6 @@ void handleMotorTbReply(motor_dto_reply response, struct execute_s* exec_ptr)
         exec_ptr->analog[1] = response.analog1;
         exec_ptr->enc_display = response.encoder;
         exec_ptr->current = response.current;
-
         exec_ptr->volt_batt = response.v_vb;
         exec_ptr->volt_int = response.v_vg;
         exec_ptr->temp = response.temperature;
@@ -117,7 +116,7 @@ inline motor_dto_reply generateMotorDtoReply(struct execute_s* execPtr)
     result.strain = execPtr->strain;
     result.analog0 = execPtr->analog[0];
     result.analog1 = execPtr->analog[1];
-    result.current = execPtr->current;
+
     result.v_vb = execPtr->volt_batt;
     result.v_vg = execPtr->volt_int;
 
@@ -132,20 +131,19 @@ inline motor_dto_reply generateMotorDtoReply(struct execute_s* execPtr)
 #ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 inline motor_dto_reply generateMotorDtoReply()
 {
-	motor_dto_reply result;
+    motor_dto_reply result;
 
-	result.encoder = exec1.enc_control_ang;
-	result.strain = strain_read();
-	result.analog0 = read_analog(0);
-	result.analog1 = read_analog(1);
-	result.current = ctrl.current.actual_val;
-	result.v_vb = safety_cop.v_vb;
-	result.v_vg = safety_cop.v_vg;
-	result.temperature = safety_cop.temperature;
-	result.status1 = safety_cop.status1;
-	result.status2 = safety_cop.status2;
+    result.encoder = exec1.enc_control_ang;
+    result.strain = strain_read();
+    result.analog0 = read_analog(0);
+    result.analog1 = read_analog(1);
+    result.v_vb = safety_cop.v_vb;
+    result.v_vg = safety_cop.v_vg;
+    result.temperature = safety_cop.temperature;
+    result.status1 = safety_cop.status1;
+    result.status2 = safety_cop.status2;
 
-	return result;
+    return result;
 }
 #endif
 
@@ -340,58 +338,49 @@ void rx_cmd_motortb_rr(uint8_t *buf, uint8_t *info)
         index = P_DATA1+1;
         motor_dto_reply response;
         uint8_t testFlag = -1;
-        if(offset == 0 || offset == 1)
-        {
-            uint16_t lengthInBytes = sizeof(motor_dto_reply);
-            unpackResponse(&response, buf, &index, lengthInBytes);
-            handleMotorTbReply(response, exec_s_ptr);
 
-            #if(defined BOARD_TYPE_FLEXSEA_PLAN)
-                int i;
-                for(i=0;i<4;i++)
-                    execDataPtr[i] = REBUILD_UINT32(buf, &index);
-            #elif(defined BOARD_TYPE_FLEXSEA_MANAGE)
-                    ctrlStatePtr->setpoint = REBUILD_UINT32(buf, &index);
-                    ctrlStatePtr->actual = REBUILD_UINT32(buf, &index);
-                    testFlag = buf[index++];
+		if(offset == 0 || offset == 1)
+		{
+			uint16_t lengthInBytes = sizeof(motor_dto_reply);
+			unpackResponse(&response, buf, &index, lengthInBytes);
+			handleMotorTbReply(response, exec_s_ptr);
 
-                    execDataPtr[0] = ctrlStatePtr->setpoint;
-                    execDataPtr[1] = ctrlStatePtr->actual;
-                    execDataPtr[2] = execDataPtr == motortb.ex1 ? exec1TestState : exec2TestState;
-                    //execDataPtr[3] = response.temperature;
-            #endif
+			#if(defined BOARD_TYPE_FLEXSEA_PLAN)
+			int i;
+			for(i=0;i<4;i++)
+				execDataPtr[i] = REBUILD_UINT32(buf, &index);
 
-            exec_s_ptr->enc_control = execDataPtr[3];
-            if(exec_s_ptr->enc_control != 0)
-            {
-                printf("nonZero");
-                exec_s_ptr->enc_control +=1;
-            }
-            exec_s_ptr->enc_commut = execDataPtr[0] - execDataPtr[1];
+			#elif(defined BOARD_TYPE_FLEXSEA_MANAGE)
+				ctrlStatePtr->setpoint = REBUILD_UINT32(buf, &index);
+				ctrlStatePtr->actual = REBUILD_UINT32(buf, &index);
+				testFlag = buf[index++];
+			#endif
+			exec_s_ptr->enc_control = execDataPtr[0] - execDataPtr[1];
+			exec_s_ptr->enc_commut = execDataPtr[2];
+		}
 
-        }
         #ifdef BOARD_TYPE_FLEXSEA_MANAGE
-        if(offset == 0)
-        {
-            exec1CtrlStateReady = 1;
-            if(testFlag)
-                exec1TestState = NONE;
-        }
-        else if(offset == 1)
-        {
-            exec2CtrlStateReady = 1;
-            if(testFlag)
-                exec2TestState = NONE;
-        }
+			if(offset == 0)
+			{
+				exec1CtrlStateReady = 1;
+				if(testFlag)
+					exec1TestState = NONE;
+			}
+			else if(offset == 1)
+			{
+				exec2CtrlStateReady = 1;
+				if(testFlag)
+					exec2TestState = NONE;
+			}
         #endif
         else if(offset == 2)
         {
-            int i;
-            for(i=0; i<8; i++)
-                batt1.rawBytes[i] = buf[index++];
+			int i;
+			for(i=0; i<8; i++)
+				batt1.rawBytes[i] = buf[index++];
 
-            for(i=0; i<4; i++)
-                motortb.mn1[i] = (int16_t) REBUILD_UINT16(buf, &index);
+			for(i=0; i<4; i++)
+				motortb.mn1[i] = (int16_t) REBUILD_UINT16(buf, &index);
         }
     #else
 
