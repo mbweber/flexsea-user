@@ -83,6 +83,10 @@ void user_fsm(void);
 #define COMMUT_SINE				1
 #define COMMUT_NONE				2	//Software test, no motor
 
+//Current sensing strategy:
+#define CS_LEGACY				0
+#define CS_DEFAULT				1
+
 //List of projects:
 #define PROJECT_BAREBONE		0	//Barebone Execute, nothing connected*
 #define PROJECT_SIMPLE_MOTOR	1	//Barebone + BLDC Motor (sine commut.)
@@ -455,6 +459,9 @@ void user_fsm(void);
 	//Motor type and commutation:
 	#define MOTOR_COMMUT		COMMUT_BLOCK
 	#define MOTOR_TYPE			MOTOR_BRUSHLESS
+	
+	//Current sensing:
+	#define CURRENT_SENSING		CS_DEFAULT
 
 	//Runtime finite state machine (FSM):
 	#define RUNTIME_FSM	 DISABLED
@@ -470,7 +477,7 @@ void user_fsm(void);
 	#define CTRL_ENC_VEL_FCT(x) (x)
 	//...
     
-    #define CURRENT_ZERO		((int32)2048)
+    #define CURRENT_ZERO		((int32)2091)
 
 	//Slave ID:
 	#define SLAVE_ID			FLEXSEA_EXECUTE_1
