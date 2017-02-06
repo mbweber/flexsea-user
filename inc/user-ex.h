@@ -341,7 +341,7 @@ void user_fsm2(void);
 		#define CTRL_ENC_VEL_FCT(x) (x)
 		//...
         
-        #define CURRENT_ZERO		((int32)2123)
+		#define CURRENT_ZERO		((int32)2130)
 
 		//Slave ID:
 		#define SLAVE_ID		FLEXSEA_EXECUTE_1
@@ -358,8 +358,8 @@ void user_fsm2(void);
 		#define CTRL_ENC_VEL_FCT(x) (x)
 		//...
         
-        #define CURRENT_ZERO		((int32)1981)
 
+		#define CURRENT_ZERO		((int32)2147)
 		//Slave ID:
 		#define SLAVE_ID		FLEXSEA_EXECUTE_2
 
