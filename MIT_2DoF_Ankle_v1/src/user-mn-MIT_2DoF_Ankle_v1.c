@@ -350,8 +350,8 @@ static void ankle_2dof_refresh_values(void)
 	//motor angle in degrees
 	//exec1.enc_display -> positive in plantarflexion
 	//exec2.enc_display -> positive in dorsiflexion
-	mot_ang_1 = -(exec1.enc_display-angle_zero_1)/46-129; //46 should be 45.5
-	mot_ang_2 = (exec2.enc_display-angle_zero_2)/46-129;  //46 should be 45.5
+	mot_ang_1 = -((*exec1.enc_ang)-angle_zero_1)/46-129; //46 should be 45.5
+	mot_ang_2 = ((*exec2.enc_ang)-angle_zero_2)/46-129;  //46 should be 45.5
 
 	ankle_trans_1 = get_ankle_trans(mot_ang_1);
 	ankle_trans_2 = get_ankle_trans(mot_ang_2);
@@ -387,14 +387,14 @@ static void ankle_2dof_refresh_values(void)
 	mot_angs_1[3] = mot_angs_1[2];
 	mot_angs_1[2] = mot_angs_1[1];
 	mot_angs_1[1] = mot_angs_1[0];
-	mot_angs_1[0] = -exec1.enc_display; //motor angle in degrees
+	mot_angs_1[0] = -(*exec1.enc_ang); //motor angle in degrees
 
 	mot_angs_2[5] = mot_angs_2[4];
 	mot_angs_2[4] = mot_angs_2[3];
 	mot_angs_2[3] = mot_angs_2[2];
 	mot_angs_2[2] = mot_angs_2[1];
 	mot_angs_2[1] = mot_angs_2[0];
-	mot_angs_2[0] = exec2.enc_display; //motor angle in degrees
+	mot_angs_2[0] = (*exec2.enc_ang); //motor angle in degrees
 
 	//ankle velocity in deg/sec x 100
 	ankle_vel_1 = (ank_angs_1[0]-ank_angs_1[5])*250/5;

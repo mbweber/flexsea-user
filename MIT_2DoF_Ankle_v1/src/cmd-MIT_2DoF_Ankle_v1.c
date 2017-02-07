@@ -91,7 +91,7 @@ void tx_cmd_ankle2dof_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 		SPLIT_16(exec_s_ptr->analog[0], shBuf, &index);
 		SPLIT_16(exec_s_ptr->analog[1], shBuf, &index);
 
-		SPLIT_32((uint32_t)exec_s_ptr->enc_display, shBuf, &index);
+		SPLIT_32((uint32_t)(*exec_s_ptr->enc_ang), shBuf, &index);
 		SPLIT_16((uint16_t)exec_s_ptr->current, shBuf, &index);
 
 		shBuf[index++] = exec_s_ptr->volt_batt;
