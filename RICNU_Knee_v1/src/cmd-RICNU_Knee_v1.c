@@ -340,8 +340,8 @@ void rx_cmd_ricnu_rr(uint8_t *buf, uint8_t *info)
 			rn->ex.accel.x = (int16_t) REBUILD_UINT16(buf, &index);
 			rn->ex.accel.y = (int16_t) REBUILD_UINT16(buf, &index);
 			rn->ex.accel.z = (int16_t) REBUILD_UINT16(buf, &index);
-			rn->ex.enc_motor = (int32_t) REBUILD_UINT32(buf, &index);
-			rn->ex.enc_joint = (int32_t) REBUILD_UINT32(buf, &index);
+            rn->enc_motor = (int32_t) REBUILD_UINT32(buf, &index);
+            rn->enc_joint = (int32_t) REBUILD_UINT32(buf, &index);
 			rn->ex.current = (int16_t) REBUILD_UINT16(buf, &index);
 			rn->ex.sine_commut_pwm = (int16_t) REBUILD_UINT16(buf, &index);
 		}
