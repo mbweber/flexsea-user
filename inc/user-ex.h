@@ -88,7 +88,7 @@ void user_fsm(void);
 #define CS_DEFAULT				1
 
 //Types of motor orientation
-#define CLOCKWISE_ORIENTATION 	1
+#define CLOCKWISE_ORIENTATION 			1
 #define COUNTER_CLOCKWISE_ORIENTATION 	-1
 
 //List of projects:
@@ -110,7 +110,7 @@ void user_fsm(void);
 //Step 1) Select active project (from list):
 //==========================================
 
-#define ACTIVE_PROJECT			PROJECT_SIMPLE_MOTOR
+#define ACTIVE_PROJECT			PROJECT_BAREBONE
 #define ACTIVE_SUBPROJECT		SUBPROJECT_NONE
 
 //Step 2) Customize the enabled/disabled sub-modules:
@@ -131,10 +131,10 @@ void user_fsm(void);
 	#define USE_STRAIN			//Requires USE_I2C_1
 	//#define USE_EEPROM		//
 	//#define USE_FLASH			//
-	//#define USE_BLUETOOTH		//
+	#define USE_BLUETOOTH		//
 	#define USE_I2T_LIMIT		//I2t current limit
 	
-	#define RUNTIME_FSM	 DISABLED
+	#define RUNTIME_FSM	 		DISABLED
 	
 	//Motor type, direction and commutation:
 	#define MOTOR_TYPE			MOTOR_BRUSHLESS
