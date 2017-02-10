@@ -42,6 +42,7 @@
 #include "user-mn-RICNU_Knee_v1.h"
 #include "user-mn-MIT_2DoF_Ankle_v1.h"
 #include "user-mn-MotorTestBench.h"
+#include  "flexsea_global_structs.h"
 //Add your project specific user_x.h file here
 
 //****************************************************************************
