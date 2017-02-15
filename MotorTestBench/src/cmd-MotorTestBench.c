@@ -95,7 +95,7 @@ void handleMotorTbReply(motor_dto_reply response, struct execute_s* exec_ptr)
         exec_ptr->strain = response.strain;
         exec_ptr->analog[0] = response.analog0;
         exec_ptr->analog[1] = response.analog1;
-        exec_ptr->enc_display = response.encoder;
+        *(exec_ptr->enc_ang) = response.encoder;
         exec_ptr->current = response.current;
         exec_ptr->volt_batt = response.v_vb;
         exec_ptr->volt_int = response.v_vg;
@@ -112,7 +112,7 @@ inline motor_dto_reply generateMotorDtoReply(struct execute_s* execPtr)
 {
     motor_dto_reply result;
 
-    result.encoder = execPtr->enc_display;
+    result.encoder = *(execPtr->enc_ang);
     result.strain = execPtr->strain;
     result.analog0 = execPtr->analog[0];
     result.analog1 = execPtr->analog[1];
@@ -186,14 +186,6 @@ void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
             for(i=0; i<4; i++)
                 SPLIT_32((uint32_t)execDataPtr[i], shBuf, &index);
 
-			SPLIT_32((uint32_t)(*exec_s_ptr->enc_ang), shBuf, &index);
-			SPLIT_16((uint16_t)exec_s_ptr->current, shBuf, &index);
-
-			shBuf[index++] = exec_s_ptr->volt_batt;
-			shBuf[index++] = exec_s_ptr->volt_int;
-			shBuf[index++] = exec_s_ptr->temp;
-			shBuf[index++] = exec_s_ptr->status1;
-			shBuf[index++] = exec_s_ptr->status2;
 		}
 		else if(slave == 2) //Offset 2: Battery board and Manage status
 		{
@@ -370,8 +362,6 @@ void rx_cmd_motortb_rr(uint8_t *buf, uint8_t *info)
 				ctrlStatePtr->actual = REBUILD_UINT32(buf, &index);
 				testFlag = buf[index++];
 			#endif
-			exec_s_ptr->enc_control = execDataPtr[0] - execDataPtr[1];
-			exec_s_ptr->enc_commut = execDataPtr[2];
 		}
 
         #ifdef BOARD_TYPE_FLEXSEA_MANAGE

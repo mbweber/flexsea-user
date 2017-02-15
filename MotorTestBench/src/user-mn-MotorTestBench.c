@@ -36,6 +36,7 @@
 //****************************************************************************
 
 #include "../inc/user-mn-MotorTestBench.h"
+#include "flexsea_comm.h"
 #include <math.h>
 #include "cmd_motor_dto.h"
 
@@ -101,6 +102,17 @@ void init_MotorTestBench(void)
 }
 
 
+void sendMessageToExecute(int execId, motor_dto* dto)
+{
+
+	static uint8_t info[2] = {PORT_RS485_2, PORT_RS485_2};
+
+	info[0] = (execId == 0 ? PORT_RS485_1 : PORT_RS485_2);
+	tx_cmd_motortb_r(TX_N_DEFAULT, execId, dto);
+	packAndSend(P_AND_S_DEFAULT, (execId == 0 ? FLEXSEA_EXECUTE_1 : FLEXSEA_EXECUTE_2), info, SEND_TO_SLAVE);
+	slaveComm[1].transceiverState = TRANS_STATE_TX_THEN_RX;
+}
+
 /* FSM - Finite State Machines
  * 	executed at 1 kHz
  * */
@@ -119,7 +131,6 @@ void MotorTestBench_fsm_1(void)
 
 	const uint16_t MS_PER_GAIT = 1177; //3000 ms per gait cycle?
 	const uint16_t MS_PER_CYCLE = 1300;
-	static uint8_t info[2] = {PORT_485_1, PORT_485_1};
 	static uint32_t ticks = 0;
 	static uint32_t ticks2 = 0;
 
@@ -262,23 +273,15 @@ void MotorTestBench_fsm_1(void)
 			dto.gaitCycleFlag = startGaitCycle | testEx1Current;
 		}
 
-		//Send message to execute 1
-		info[0] = PORT_485_1;
-		tx_cmd_motortb_r(TX_N_DEFAULT, 0, &dto);
-		packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_1, info, SEND_TO_SLAVE);
-		slaves_485_1.xmit.listen = 1;
-
+		sendMessageToExecute(0, &dto);
 		dto.gaitCycleFlag = startGaitCycle | testEx2Current;
-		//Send message to execute 2
-		info[0] = PORT_485_2;
-		tx_cmd_motortb_r(TX_N_DEFAULT, 1, &dto);
-		packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_2, info, SEND_TO_SLAVE);
-		slaves_485_2.xmit.listen = 1;
+		sendMessageToExecute(1, &dto);
 
 		startGaitCycle = 0;
 		testEx1Current = 0;
 		testEx2Current = 0;
 	}
+
 	commCounter++;
 	commCounter %= 5;
 
