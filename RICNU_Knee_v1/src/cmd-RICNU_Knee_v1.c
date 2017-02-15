@@ -133,8 +133,8 @@ void tx_cmd_ricnu_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 			SPLIT_16((uint16_t)imu.accel.x, shBuf, &index);
 			SPLIT_16((uint16_t)imu.accel.y, shBuf, &index);
 			SPLIT_16((uint16_t)imu.accel.z, shBuf, &index);
-			SPLIT_32((uint32_t)exec1.enc_motor, shBuf, &index);
-			SPLIT_32((uint32_t)exec1.enc_joint, shBuf, &index);
+			SPLIT_32((uint32_t)exec1.enc_ang, shBuf, &index);
+			SPLIT_32((uint32_t)exec1.enc_ang, shBuf, &index);
 			SPLIT_16((uint16_t)ctrl.current.actual_val, shBuf, &index);
 			SPLIT_16((uint16_t)exec1.sine_commut_pwm, shBuf, &index);
 			//(24 bytes)
@@ -197,8 +197,8 @@ void tx_cmd_ricnu_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 			SPLIT_16((uint16_t)rn->ex.accel.x, shBuf, &index);
 			SPLIT_16((uint16_t)rn->ex.accel.y, shBuf, &index);
 			SPLIT_16((uint16_t)rn->ex.accel.z, shBuf, &index);
-			SPLIT_32((uint32_t)rn->ex.enc_motor, shBuf, &index);
-			SPLIT_32((uint32_t)rn->ex.enc_joint, shBuf, &index);
+			SPLIT_32((uint32_t)rn->enc_motor, shBuf, &index);
+			SPLIT_32((uint32_t)rn->enc_joint, shBuf, &index);
 			SPLIT_16((uint16_t)rn->ex.current, shBuf, &index);
 			SPLIT_16((uint16_t)rn->ex.sine_commut_pwm, shBuf, &index);
 			//(24 bytes)
@@ -340,8 +340,8 @@ void rx_cmd_ricnu_rr(uint8_t *buf, uint8_t *info)
 			rn->ex.accel.x = (int16_t) REBUILD_UINT16(buf, &index);
 			rn->ex.accel.y = (int16_t) REBUILD_UINT16(buf, &index);
 			rn->ex.accel.z = (int16_t) REBUILD_UINT16(buf, &index);
-			rn->ex.enc_motor = (int32_t) REBUILD_UINT32(buf, &index);
-			rn->ex.enc_joint = (int32_t) REBUILD_UINT32(buf, &index);
+            rn->enc_motor = (int32_t) REBUILD_UINT32(buf, &index);
+            rn->enc_joint = (int32_t) REBUILD_UINT32(buf, &index);
 			rn->ex.current = (int16_t) REBUILD_UINT16(buf, &index);
 			rn->ex.sine_commut_pwm = (int16_t) REBUILD_UINT16(buf, &index);
 		}

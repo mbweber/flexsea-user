@@ -186,6 +186,14 @@ void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
             for(i=0; i<4; i++)
                 SPLIT_32((uint32_t)execDataPtr[i], shBuf, &index);
 
+			SPLIT_32((uint32_t)(*exec_s_ptr->enc_ang), shBuf, &index);
+			SPLIT_16((uint16_t)exec_s_ptr->current, shBuf, &index);
+
+			shBuf[index++] = exec_s_ptr->volt_batt;
+			shBuf[index++] = exec_s_ptr->volt_int;
+			shBuf[index++] = exec_s_ptr->temp;
+			shBuf[index++] = exec_s_ptr->status1;
+			shBuf[index++] = exec_s_ptr->status2;
 		}
 		else if(slave == 2) //Offset 2: Battery board and Manage status
 		{
@@ -219,6 +227,8 @@ void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
             SPLIT_32((uint32_t)positionController.controlValue, shBuf, &index);
         #endif
 
+		SPLIT_32((uint32_t)(*exec1.enc_ang), shBuf, &index);
+		SPLIT_16((uint16_t)ctrl.current.actual_val, shBuf, &index);
         shBuf[index++] = motortb_flagsOut;
         motortb_flagsOut = 0;
 
@@ -345,6 +355,11 @@ void rx_cmd_motortb_rr(uint8_t *buf, uint8_t *info)
 			unpackResponse(&response, buf, &index, lengthInBytes);
 			handleMotorTbReply(response, exec_s_ptr);
 
+				exec_s_ptr->strain = (int16_t) REBUILD_UINT16(buf, &index);
+				exec_s_ptr->analog[0] = (int16_t) REBUILD_UINT16(buf, &index);
+				exec_s_ptr->analog[1] = (int16_t) REBUILD_UINT16(buf, &index);
+                *(exec_s_ptr->enc_ang) = (int32_t) REBUILD_UINT32(buf, &index);
+				exec_s_ptr->current = (int16_t) REBUILD_UINT16(buf, &index);
 			#if(defined BOARD_TYPE_FLEXSEA_PLAN)
 			int i;
 			for(i=0;i<4;i++)

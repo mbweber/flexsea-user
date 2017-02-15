@@ -89,6 +89,10 @@ void user_fsm2(void);
 #define CS_LEGACY				0
 #define CS_DEFAULT				1
 
+//Types of motor orientation
+#define CLOCKWISE_ORIENTATION 			1
+#define COUNTER_CLOCKWISE_ORIENTATION 	-1
+
 //List of projects:
 #define PROJECT_BAREBONE		0	//Barebone Execute, nothing connected*
 #define PROJECT_SIMPLE_MOTOR	1	//Barebone + BLDC Motor (sine commut.)
@@ -129,10 +133,10 @@ void user_fsm2(void);
 	#define USE_STRAIN			//Requires USE_I2C_1
 	//#define USE_EEPROM		//
 	//#define USE_FLASH			//
-	//#define USE_BLUETOOTH		//
+	#define USE_BLUETOOTH		//
 	#define USE_I2T_LIMIT		//I2t current limit
 	
-	#define RUNTIME_FSM	 DISABLED
+	#define RUNTIME_FSM	 		DISABLED
 	
 	//Motor type, direction and commutation:
 	#define MOTOR_TYPE			MOTOR_BRUSHLESS
@@ -178,6 +182,7 @@ void user_fsm2(void);
 	//Motor type and commutation:
 	#define MOTOR_COMMUT		COMMUT_SINE
 	#define MOTOR_TYPE			MOTOR_BRUSHLESS
+	#define MOTOR_ORIENTATION 	CLOCKWISE_ORIENTATION
 
 	//Runtime finite state machine (FSM):
 
@@ -197,13 +202,6 @@ void user_fsm2(void);
 	#define ENC_CONTROL			ENC_AS5047
 	#define ENC_COMMUT			ENC_AS5047
 	#define ENC_DISPLAY			ENC_CONTROL
-
-	//Control encoder function:
-
-	#define PWM_SIGN			1
-	#define CTRL_ENC_FCT(x) 	(x)
-	#define CTRL_ENC_VEL_FCT(x) (x)
-	//...
     
     #define CURRENT_ZERO		((int32)2048)
 
@@ -492,6 +490,13 @@ void user_fsm2(void);
 //****************************************************************************
 // Structure(s)
 //****************************************************************************
+
+//****************************************************************************
+// Default(s)
+//****************************************************************************
+#ifndef MOTOR_ORIENTATION
+#define MOTOR_ORIENTATION 	CLOCKWISE_ORIENTATION
+#endif
 
 #endif	//INC_USER_EX_H
 
