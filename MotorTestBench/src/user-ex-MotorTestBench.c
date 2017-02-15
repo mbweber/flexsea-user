@@ -127,7 +127,7 @@ void MotorTestBench_fsm(void)
 	if(ctrl.active_ctrl != CTRL_CUSTOM)
 	{
 		//Just read this is so that if we switch bakc to custom we don't f ourselves up
-		initialPosition = exec1.enc_control_ang;
+		initialPosition = *(exec1.enc_ang);
 		state = 4;
 	}
 	
@@ -273,7 +273,7 @@ void user_ctrl(void)
 	{		
 	    int32_t pwm = 0;
 		#if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
-			encVel = as5047.filt.vel_ctrl_cpms;
+			encVel = *(exec1.enc_ang_vel);
 			int32_t encAccel = encVel - enc_vel_prev;
 			
 			volatile int32_t goal_voltage = torqueToVoltage(torqueController.setpoint, encVel, encAccel);
@@ -286,7 +286,7 @@ void user_ctrl(void)
 			ff = goal_voltage*1000/24000;
 
 	        torqueController.controlValue = (((int32_t)(strain_read())-31937)*1831)>>13;
-			pwm = pid_controller_compute(&torqueController) - ff;
+			pwm = pid_controller_compute(&torqueController) + ff;
 			
 	    #endif
 
@@ -310,17 +310,12 @@ void MotorTestBench_fsm2(void)
 //Here's an example function:
 void MotorTestBench_refresh_values(void)
 {
-<<<<<<< HEAD
-	motortb.ex1[1] = as5047.filt.vel_rpm;
-    motortb.ex1[2] = as5047.raw.ang_clks;
-    motortb.ex1[3] = exec1.sine_commut_pwm;
-    motortb.ex1[4] = ((strain_read()-31937)*1831)>>13;
-=======
+
 	motortb.ex1[1] = *exec1.enc_ang_vel;
     motortb.ex1[2] = *exec1.enc_ang;
     motortb.ex1[3] = MOTOR_ORIENTATION * exec1.sine_commut_pwm;
     motortb.ex1[4] = ((strain_read()-31937)*1831)>>13;   
->>>>>>> b488b639f79c3a17acd8312744de746aaf1db36c
+
 }
 
 //****************************************************************************
