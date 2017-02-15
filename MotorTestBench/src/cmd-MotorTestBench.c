@@ -133,7 +133,7 @@ inline motor_dto_reply generateMotorDtoReply()
 {
     motor_dto_reply result;
 
-    result.encoder = exec1.enc_control_ang;
+    result.encoder = *(exec1.enc_ang);
     result.strain = strain_read();
     result.analog0 = read_analog(0);
     result.analog1 = read_analog(1);

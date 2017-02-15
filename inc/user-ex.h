@@ -373,7 +373,7 @@ void user_fsm2(void);
 	//#define USE_SPI_COMMUT	//
 	#define USE_EEPROM			//
 	#define USE_FLASH			//
-	#define USE_BLUETOOTH		//
+	//#define USE_BLUETOOTH		//
 	#define USE_I2T_LIMIT		//I2t current limit
 
 	//Motor type and commutation:
