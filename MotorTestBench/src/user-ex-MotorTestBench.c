@@ -50,7 +50,7 @@ struct motortb_s my_motortb;
 
 #if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
 	
-#define T_CONTROLGAINS 0,11,0,6
+#define T_CONTROLGAINS 0,31,0,6
 //#define T_CONTROLGAINS 0,0,0,7
 	// define a 1000 long array, defining the torque profile for the motor controlled by ex2
 // static float torqueProfile[] = { .. };
@@ -60,7 +60,7 @@ pid_controller torqueController;
 
 #if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
 //#define P_CONTROLGAINS 37,1,0,9
-#define P_CONTROLGAINS 75,1,0,10
+#define P_CONTROLGAINS 75,3,0,7
 // define a 1000 long array, defining the position profile for the motor controlled by ex1
 // static int32_t positionProfile[] = { .. }; 
 #include "../resources/motorPositionProfile.c.resource"
@@ -94,8 +94,8 @@ void initMotorTestBench(void)
     
     #if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
         // initialization code specific to ex 2
-        pid_controller_initialize(&positionController, 1024, 50000, 90, 16000);
-        pid_controller_settings(&positionController, 0, 1, 1);
+        pid_controller_initialize(&positionController, 15000, 50000, 90, 16000);
+        pid_controller_settings(&positionController, 0, 1, 0);
 		
     #endif
     
@@ -128,7 +128,7 @@ void MotorTestBench_fsm(void)
 	{
 		//Just read this is so that if we switch bakc to custom we don't f ourselves up
 		initialPosition = *(exec1.enc_ang);
-		state = 4;
+		state = WAITING;
 	}
 	
 	switch(state) 
@@ -149,7 +149,7 @@ void MotorTestBench_fsm(void)
             #endif
 
             #if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
-                initialPosition = exec1.enc_control_ang;
+                initialPosition = *(exec1.enc_ang);
                 positionController.setpoint = initialPosition + positionProfile[0];
                 pid_controller_setGains(&positionController, P_CONTROLGAINS);
             #endif
@@ -234,6 +234,7 @@ void MotorTestBench_fsm(void)
 
     case WAITING:
         //check the flag sent by manage
+		
         if(motortb_flagsIn & GAIT_FLAG)
         {
 			ticks = 0;
@@ -254,7 +255,8 @@ void MotorTestBench_fsm(void)
 		#if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
 			torqueController.setpoint = 0;
 			torqueController.errorSum = torqueController.errorSum*9/10;
-		#endif			
+		#endif	
+		
 
         break;
 
@@ -283,7 +285,7 @@ void user_ctrl(void)
 			//and pwm is scaled so 1024 units = 1 = 100% duty cycle, so
 			//(goal_voltage * 1000/1024 / bat_volt) * 1024 / 1 = pwm 
 			volatile int32_t ff = goal_voltage*1000/bat_volt;
-			ff = goal_voltage*1000/24000;
+			ff = (goal_voltage * 1000) / 1024;
 
 	        torqueController.controlValue = (((int32_t)(strain_read())-31937)*1831)>>13;
 			pwm = pid_controller_compute(&torqueController) + ff;
@@ -291,7 +293,7 @@ void user_ctrl(void)
 	    #endif
 
 	    #if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
-	        positionController.controlValue = exec1.enc_control_ang;
+	        positionController.controlValue = *(exec1.enc_ang);
 	        pwm = pid_controller_compute(&positionController);
 	    #endif
 

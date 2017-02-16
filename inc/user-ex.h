@@ -402,10 +402,8 @@ void user_fsm2(void);
 	//Subproject A: Has the torque sensor, Execute 1
 	#if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
 
-		//Control encoder function:
-		#define PWM_SIGN		 -1
-		#define CTRL_ENC_FCT(x) (x)
-		#define CTRL_ENC_VEL_FCT(x) (x)
+		#define MOTOR_ORIENTATION 	CLOCKWISE_ORIENTATION
+	
 		//...
         
 		#define CURRENT_ZERO		((int32)2130)
@@ -418,11 +416,7 @@ void user_fsm2(void);
 	//Subproject B: No torque sensor, execute 2
 	#if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
 
-		//Control encoder function:
-
-		#define PWM_SIGN			1
-		#define CTRL_ENC_FCT(x) 	(x)
-		#define CTRL_ENC_VEL_FCT(x) (x)
+		#define MOTOR_ORIENTATION 	COUNTER_CLOCKWISE_ORIENTATION
 		//...
         
 
