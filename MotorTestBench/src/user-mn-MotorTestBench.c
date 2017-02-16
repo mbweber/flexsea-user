@@ -110,7 +110,7 @@ void sendMessageToExecute(int execId, motor_dto* dto)
 	info[0] = (execId == 0 ? PORT_RS485_1 : PORT_RS485_2);
 	tx_cmd_motortb_r(TX_N_DEFAULT, execId, dto);
 	packAndSend(P_AND_S_DEFAULT, (execId == 0 ? FLEXSEA_EXECUTE_1 : FLEXSEA_EXECUTE_2), info, SEND_TO_SLAVE);
-	slaveComm[1].transceiverState = TRANS_STATE_TX_THEN_RX;
+	slaveComm[execId].transceiverState = TRANS_STATE_TX_THEN_RX;
 }
 
 /* FSM - Finite State Machines
