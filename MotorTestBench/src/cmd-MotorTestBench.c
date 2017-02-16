@@ -219,8 +219,6 @@ void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
             SPLIT_32((uint32_t)positionController.controlValue, shBuf, &index);
         #endif
 
-		SPLIT_32((uint32_t)(*exec1.enc_ang), shBuf, &index);
-		SPLIT_16((uint16_t)ctrl.current.actual_val, shBuf, &index);
         shBuf[index++] = motortb_flagsOut;
         motortb_flagsOut = 0;
 
