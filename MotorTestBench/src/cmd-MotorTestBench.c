@@ -347,15 +347,10 @@ void rx_cmd_motortb_rr(uint8_t *buf, uint8_t *info)
 			unpackResponse(&response, buf, &index, lengthInBytes);
 			handleMotorTbReply(response, exec_s_ptr);
 
-				exec_s_ptr->strain = (int16_t) REBUILD_UINT16(buf, &index);
-				exec_s_ptr->analog[0] = (int16_t) REBUILD_UINT16(buf, &index);
-				exec_s_ptr->analog[1] = (int16_t) REBUILD_UINT16(buf, &index);
-                *(exec_s_ptr->enc_ang) = (int32_t) REBUILD_UINT32(buf, &index);
-				exec_s_ptr->current = (int16_t) REBUILD_UINT16(buf, &index);
 			#if(defined BOARD_TYPE_FLEXSEA_PLAN)
-			int i;
-			for(i=0;i<4;i++)
-				execDataPtr[i] = REBUILD_UINT32(buf, &index);
+				int i;
+				for(i=0;i<4;i++)
+					execDataPtr[i] = REBUILD_UINT32(buf, &index);
 
 			#elif(defined BOARD_TYPE_FLEXSEA_MANAGE)
 				ctrlStatePtr->setpoint = REBUILD_UINT32(buf, &index);
