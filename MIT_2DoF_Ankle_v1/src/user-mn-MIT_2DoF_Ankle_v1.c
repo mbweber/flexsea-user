@@ -37,6 +37,7 @@
 //****************************************************************************
 
 #include "../inc/user-ex-MIT_2DoF_Ankle_v1.h"
+#include "flexsea_system.h"
 #include <math.h>
 
 //****************************************************************************
@@ -93,7 +94,7 @@ void ankle_2dof_fsm_1(void)
 {
 	#if(ACTIVE_PROJECT == PROJECT_ANKLE_2DOF)
 
-	uint8_t info[2] = {PORT_485_1, PORT_485_1};
+	uint8_t info[2] = {PORT_RS485_1, PORT_RS485_1};
     static uint32_t time = 0, state_t = 0;
 
     //Increment time (1 tick = 1ms)
@@ -112,7 +113,7 @@ void ankle_2dof_fsm_1(void)
 			my_control = CTRL_OPEN;
 			my_pwm[0] = 0;
 			my_pwm[1] = 0;
-			init_angle = exec1.enc_display;
+			init_angle = *exec1.enc_ang;		//enc_display;
 			if (state_t>10000)
 			{
 				state_t = -1;
@@ -127,7 +128,7 @@ void ankle_2dof_fsm_1(void)
 			my_pwm[0] = 0;
 			my_pwm[1] = 0;
 
-			if (exec1.enc_display > init_angle+10 || exec1.enc_display < init_angle-10)
+			if (*exec1.enc_ang > init_angle+10 || *exec1.enc_ang < init_angle-10)
 			{
 				state = -2;
 				state_t = -1;
@@ -141,8 +142,8 @@ void ankle_2dof_fsm_1(void)
 			{
 				state = -2;
 				state_t = -1;
-				angle_zero_1 = exec1.enc_display;
-				angle_zero_2 = exec2.enc_display;
+				angle_zero_1 = *exec1.enc_ang;
+				angle_zero_2 = *exec2.enc_ang;
 			}
 
 			break;
@@ -157,8 +158,8 @@ void ankle_2dof_fsm_1(void)
 			{
 				state = -1;
 				state_t = -1;
-				angle_zero_1 = exec1.enc_display;
-				angle_zero_2 = exec2.enc_display;
+				angle_zero_1 = *exec1.enc_ang; 	//exec1.enc_display;
+				angle_zero_2 = *exec2.enc_ang;	//exec2.enc_display;
 			}
 
             break;
@@ -185,21 +186,21 @@ void ankle_2dof_fsm_1(void)
 
 				my_control = CTRL_CURRENT;
 
-				info[0] = PORT_485_1;
+				info[0] = PORT_RS485_1;
 				tx_cmd_ctrl_mode_w(TX_N_DEFAULT, CTRL_CURRENT);
 				packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_1, info, SEND_TO_SLAVE);
 
-				info[0] = PORT_485_2;
+				info[0] = PORT_RS485_2;
 				tx_cmd_ctrl_mode_w(TX_N_DEFAULT, CTRL_CURRENT);
 				packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_2, info, SEND_TO_SLAVE);
 
 				HAL_Delay(10);
 
-				info[0] = PORT_485_1;
+				info[0] = PORT_RS485_1;
 				tx_cmd_ctrl_i_g_w(TX_N_DEFAULT, 30, 0, 0);
 				packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_1, info, SEND_TO_SLAVE);
 
-				info[0] = PORT_485_2;
+				info[0] = PORT_RS485_2;
 				tx_cmd_ctrl_i_g_w(TX_N_DEFAULT, 30, 0, 0);
 				packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_2, info, SEND_TO_SLAVE);
 
@@ -275,7 +276,7 @@ void ankle_2dof_fsm_2(void)
 
 	static uint8_t ex_refresh_fsm_state = 0;
 	static uint32_t timer = 0;
-	uint8_t info[2] = {PORT_485_1, PORT_485_1};
+	uint8_t info[2] = {PORT_RS485_1, PORT_RS485_1};
 
 	//This FSM talks to the slaves at 250Hz each
 	switch(ex_refresh_fsm_state)
@@ -297,12 +298,12 @@ void ankle_2dof_fsm_2(void)
 
 		case 1:	//Communicating with Execute #1
 
-			info[0] = PORT_485_1;
+			info[0] = PORT_RS485_1;
 			tx_cmd_ankle2dof_r(TX_N_DEFAULT, 0, my_control, my_cur[0], my_pwm[0]);
 			packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_1, info, SEND_TO_SLAVE);
 
-			//slaves_485_1.xmit.listen = 1;	//Legacy - remove once tested
-			slaves_485_1.xmit.willListenSoon = 1;	//New version
+			//slaves_RS485_1.xmit.listen = 1;	//Legacy - remove once tested
+//			slaves_RS485_1.xmit.willListenSoon = 1;	//New version
 			ex_refresh_fsm_state++;
 
 			break;
@@ -316,12 +317,12 @@ void ankle_2dof_fsm_2(void)
 
 		case 3:	//Communicating with Execute #2
 
-			info[0] = PORT_485_2;
+			info[0] = PORT_RS485_2;
 			tx_cmd_ankle2dof_r(TX_N_DEFAULT, 1, my_control, my_cur[1], my_pwm[1]);
 			packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_2, info, SEND_TO_SLAVE);
 
-			//slaves_485_2.xmit.listen = 1;	//Legacy - remove once tested
-			slaves_485_2.xmit.willListenSoon = 1;	//New version
+			//slaves_RS485_2.xmit.listen = 1;	//Legacy - remove once tested
+//			slaves_485_2.xmit.willListenSoon = 1;	//New version
 			ex_refresh_fsm_state++;
 
 			break;
