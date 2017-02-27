@@ -93,7 +93,7 @@ void ankle_2dof_fsm_1(void)
 {
 	#if(ACTIVE_PROJECT == PROJECT_ANKLE_2DOF)
 
-	uint8_t info[2] = {PORT_485_1, PORT_485_1};
+	uint8_t info[2] = {PORT_RS485_1, PORT_RS485_1};
     static uint32_t time = 0, state_t = 0;
 
     //Increment time (1 tick = 1ms)
@@ -185,21 +185,21 @@ void ankle_2dof_fsm_1(void)
 
 				my_control = CTRL_CURRENT;
 
-				info[0] = PORT_485_1;
+				info[0] = PORT_RS485_1;
 				tx_cmd_ctrl_mode_w(TX_N_DEFAULT, CTRL_CURRENT);
 				packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_1, info, SEND_TO_SLAVE);
 
-				info[0] = PORT_485_2;
+				info[0] = PORT_RS485_2;
 				tx_cmd_ctrl_mode_w(TX_N_DEFAULT, CTRL_CURRENT);
 				packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_2, info, SEND_TO_SLAVE);
 
 				HAL_Delay(10);
 
-				info[0] = PORT_485_1;
+				info[0] = PORT_RS485_1;
 				tx_cmd_ctrl_i_g_w(TX_N_DEFAULT, 30, 0, 0);
 				packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_1, info, SEND_TO_SLAVE);
 
-				info[0] = PORT_485_2;
+				info[0] = PORT_RS485_2;
 				tx_cmd_ctrl_i_g_w(TX_N_DEFAULT, 30, 0, 0);
 				packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_2, info, SEND_TO_SLAVE);
 
@@ -275,7 +275,7 @@ void ankle_2dof_fsm_2(void)
 
 	static uint8_t ex_refresh_fsm_state = 0;
 	static uint32_t timer = 0;
-	uint8_t info[2] = {PORT_485_1, PORT_485_1};
+	uint8_t info[2] = {PORT_RS485_1, PORT_RS485_1};
 
 	//This FSM talks to the slaves at 250Hz each
 	switch(ex_refresh_fsm_state)
@@ -297,7 +297,7 @@ void ankle_2dof_fsm_2(void)
 
 		case 1:	//Communicating with Execute #1
 
-			info[0] = PORT_485_1;
+			info[0] = PORT_RS485_1;
 			tx_cmd_ankle2dof_r(TX_N_DEFAULT, 0, my_control, my_cur[0], my_pwm[0]);
 			packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_1, info, SEND_TO_SLAVE);
 
@@ -316,7 +316,7 @@ void ankle_2dof_fsm_2(void)
 
 		case 3:	//Communicating with Execute #2
 
-			info[0] = PORT_485_2;
+			info[0] = PORT_RS485_2;
 			tx_cmd_ankle2dof_r(TX_N_DEFAULT, 1, my_control, my_cur[1], my_pwm[1]);
 			packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_2, info, SEND_TO_SLAVE);
 
