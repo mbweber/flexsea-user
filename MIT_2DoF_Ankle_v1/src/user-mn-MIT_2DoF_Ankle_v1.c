@@ -112,7 +112,7 @@ void ankle_2dof_fsm_1(void)
 			my_control = CTRL_OPEN;
 			my_pwm[0] = 0;
 			my_pwm[1] = 0;
-			init_angle = exec1.enc_display;
+			init_angle = (*exec1.enc_ang);
 			if (state_t>10000)
 			{
 				state_t = -1;
@@ -127,7 +127,7 @@ void ankle_2dof_fsm_1(void)
 			my_pwm[0] = 0;
 			my_pwm[1] = 0;
 
-			if (exec1.enc_display > init_angle+10 || exec1.enc_display < init_angle-10)
+			if ((*exec1.enc_ang) > init_angle+10 || (*exec1.enc_ang) < init_angle-10)
 			{
 				state = -2;
 				state_t = -1;
@@ -141,8 +141,8 @@ void ankle_2dof_fsm_1(void)
 			{
 				state = -2;
 				state_t = -1;
-				angle_zero_1 = exec1.enc_display;
-				angle_zero_2 = exec2.enc_display;
+				angle_zero_1 = (*exec1.enc_ang);
+				angle_zero_2 = (*exec2.enc_ang);
 			}
 
 			break;
@@ -157,8 +157,8 @@ void ankle_2dof_fsm_1(void)
 			{
 				state = -1;
 				state_t = -1;
-				angle_zero_1 = exec1.enc_display;
-				angle_zero_2 = exec2.enc_display;
+				angle_zero_1 = (*exec1.enc_ang);
+				angle_zero_2 = (*exec2.enc_ang);
 			}
 
             break;
@@ -348,8 +348,8 @@ void ankle_2dof_fsm_2(void)
 static void ankle_2dof_refresh_values(void)
 {
 	//motor angle in degrees
-	//exec1.enc_display -> positive in plantarflexion
-	//exec2.enc_display -> positive in dorsiflexion
+	//(*exec1.enc_ang) -> positive in plantarflexion
+	//(*exec2.enc_ang) -> positive in dorsiflexion
 	mot_ang_1 = -((*exec1.enc_ang)-angle_zero_1)/46-129; //46 should be 45.5
 	mot_ang_2 = ((*exec2.enc_ang)-angle_zero_2)/46-129;  //46 should be 45.5
 
