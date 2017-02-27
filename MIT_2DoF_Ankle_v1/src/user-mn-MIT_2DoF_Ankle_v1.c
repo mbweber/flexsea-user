@@ -37,6 +37,7 @@
 //****************************************************************************
 
 #include "../inc/user-ex-MIT_2DoF_Ankle_v1.h"
+#include <flexsea_comm.h>
 #include <math.h>
 
 //****************************************************************************
@@ -301,8 +302,8 @@ void ankle_2dof_fsm_2(void)
 			tx_cmd_ankle2dof_r(TX_N_DEFAULT, 0, my_control, my_cur[0], my_pwm[0]);
 			packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_1, info, SEND_TO_SLAVE);
 
-			//slaves_485_1.xmit.listen = 1;	//Legacy - remove once tested
-			slaves_485_1.xmit.willListenSoon = 1;	//New version
+			//slaves_485_1.xmit.willListenSoon = 1;	//New version
+			slaveComm[0].transceiverState = TRANS_STATE_TX_THEN_RX;
 			ex_refresh_fsm_state++;
 
 			break;
@@ -320,8 +321,8 @@ void ankle_2dof_fsm_2(void)
 			tx_cmd_ankle2dof_r(TX_N_DEFAULT, 1, my_control, my_cur[1], my_pwm[1]);
 			packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_2, info, SEND_TO_SLAVE);
 
-			//slaves_485_2.xmit.listen = 1;	//Legacy - remove once tested
-			slaves_485_2.xmit.willListenSoon = 1;	//New version
+			//slaves_485_2.xmit.willListenSoon = 1;	//New version
+			slaveComm[1].transceiverState = TRANS_STATE_TX_THEN_RX;
 			ex_refresh_fsm_state++;
 
 			break;
