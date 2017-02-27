@@ -268,7 +268,7 @@ void ankle_2dof_fsm_1(void)
 }
 
 //Second state machine for the Ankle project
-//Deals with the communication between Manage and 2x Execute, on the same RS-485 bus
+//Deals with the communication between Manage and 2x Execute, on different RS-485 busses
 //This function is called at 1kHz
 void ankle_2dof_fsm_2(void)
 {
@@ -303,7 +303,7 @@ void ankle_2dof_fsm_2(void)
 			packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_1, info, SEND_TO_SLAVE);
 
 			//slaves_485_1.xmit.willListenSoon = 1;	//New version
-			slaveComm[0].transceiverState = TRANS_STATE_TX_THEN_RX;
+			//slaveComm[0].transceiverState = TRANS_STATE_TX_THEN_RX;
 			ex_refresh_fsm_state++;
 
 			break;
@@ -322,7 +322,7 @@ void ankle_2dof_fsm_2(void)
 			packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_2, info, SEND_TO_SLAVE);
 
 			//slaves_485_2.xmit.willListenSoon = 1;	//New version
-			slaveComm[1].transceiverState = TRANS_STATE_TX_THEN_RX;
+			//slaveComm[1].transceiverState = TRANS_STATE_TX_THEN_RX;
 			ex_refresh_fsm_state++;
 
 			break;
