@@ -131,7 +131,7 @@ void user_fsm(void);
 	#define USE_STRAIN			//Requires USE_I2C_1
 	//#define USE_EEPROM		//
 	//#define USE_FLASH			//
-	#define USE_BLUETOOTH		//
+	//#define USE_BLUETOOTH		//
 	#define USE_I2T_LIMIT		//I2t current limit
 	
 	#define RUNTIME_FSM	 		DISABLED
