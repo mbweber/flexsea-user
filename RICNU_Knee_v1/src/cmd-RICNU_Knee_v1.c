@@ -319,6 +319,8 @@ void rx_cmd_ricnu_rr(uint8_t *buf, uint8_t *info)
 
 	#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 		(void)buf;
+		(void)index;
+		(void)offset;
 		flexsea_error(SE_CMD_NOT_PROGRAMMED);
 		return;
 	#endif	//BOARD_TYPE_FLEXSEA_EXECUTE
