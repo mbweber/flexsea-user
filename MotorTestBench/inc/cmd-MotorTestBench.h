@@ -32,16 +32,18 @@
 //****************************************************************************
 
 #include "flexsea_system.h"
-
+#include "cmd_motor_dto.h"
 //****************************************************************************
 // Prototype(s):
 //****************************************************************************
 
 void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 							uint16_t *len, uint8_t slave);
+
 void tx_cmd_motortb_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
-							uint16_t *len, uint8_t slave, uint8_t controller, \
-							int16_t ctrl_i, int16_t ctrl_o);
+							uint16_t *len, uint8_t slave, \
+							motor_dto* dto);
+
 void rx_cmd_motortb_rw(uint8_t *buf, uint8_t *info);
 void rx_cmd_motortb_rr(uint8_t *buf, uint8_t *info);
 

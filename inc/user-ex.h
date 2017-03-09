@@ -34,12 +34,13 @@
   the folder, there is more than one included) */
 
 #include "flexsea_board.h"
-
 #ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 
 #ifndef INC_USER_EX_H
 #define INC_USER_EX_H
-	
+    
+#include "main.h"
+    
 //****************************************************************************
 // Include(s)
 //****************************************************************************
@@ -60,6 +61,7 @@
 
 void init_user(void);
 void user_fsm(void);
+void user_fsm2(void);
 
 //****************************************************************************
 // Definition(s):
@@ -110,8 +112,8 @@ void user_fsm(void);
 //Step 1) Select active project (from list):
 //==========================================
 
-#define ACTIVE_PROJECT			PROJECT_BAREBONE
-#define ACTIVE_SUBPROJECT		SUBPROJECT_NONE
+#define ACTIVE_PROJECT			PROJECT_MOTORTB
+#define ACTIVE_SUBPROJECT		SUBPROJECT_A
 
 //Step 2) Customize the enabled/disabled sub-modules:
 //===================================================
@@ -362,7 +364,7 @@ void user_fsm(void);
 	#define USE_USB
 	#define USE_COMM			//Requires USE_RS485 and/or USE_USB
 	//#define USE_QEI
-	#define USE_TRAPEZ
+	//#define USE_TRAPEZ
 	#define USE_I2C_0			//3V3, IMU & Expansion.
 	#define USE_I2C_1			//5V, Safety-CoP & strain gauge pot.
 	#define USE_IMU				//Requires USE_I2C_0
@@ -371,7 +373,7 @@ void user_fsm(void);
 	//#define USE_SPI_COMMUT	//
 	#define USE_EEPROM			//
 	#define USE_FLASH			//
-	#define USE_BLUETOOTH		//
+	//#define USE_BLUETOOTH		//
 	#define USE_I2T_LIMIT		//I2t current limit
 
 	//Motor type and commutation:
@@ -397,36 +399,30 @@ void user_fsm(void);
 	#define ENC_COMMUT			ENC_AS5047
 	#define ENC_DISPLAY			ENC_CONTROL
 
-	//Subproject A: No torque sensor, execute 2
+	//Subproject A: Has the torque sensor, Execute 1
 	#if(ACTIVE_SUBPROJECT == SUBPROJECT_A)
 
-		//Control encoder function:
-
-		#define PWM_SIGN			1
-		#define CTRL_ENC_FCT(x) 	(x)
-		#define CTRL_ENC_VEL_FCT(x) (x)
+		#define MOTOR_ORIENTATION 	CLOCKWISE_ORIENTATION
+	
 		//...
         
-        #define CURRENT_ZERO		((int32)1981)
+		#define CURRENT_ZERO		((int32)2130)
 
 		//Slave ID:
-		#define SLAVE_ID		FLEXSEA_EXECUTE_2
+		#define SLAVE_ID		FLEXSEA_EXECUTE_1
 
 	#endif  //SUBPROJECT_A
 
-	//Subproject B: Has the torque sensor, Execute 1
+	//Subproject B: No torque sensor, execute 2
 	#if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
 
-		//Control encoder function:
-		#define PWM_SIGN		 -1
-		#define CTRL_ENC_FCT(x) (x)
-		#define CTRL_ENC_VEL_FCT(x) (x)
+		#define MOTOR_ORIENTATION 	COUNTER_CLOCKWISE_ORIENTATION
 		//...
         
-        #define CURRENT_ZERO		((int32)2123)
-        
+
+		#define CURRENT_ZERO		((int32)2147)
 		//Slave ID:
-		#define SLAVE_ID		FLEXSEA_EXECUTE_1
+		#define SLAVE_ID		FLEXSEA_EXECUTE_2
 
 	#endif  //SUBPROJECT_B
 
