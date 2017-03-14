@@ -55,10 +55,13 @@ void init_flexsea_payload_ptr_user(void);
 
 #define CMD_A2DOF				100
 #define CMD_RICNU				101
-#define CMD_READ_ALL_RICNU		102
+#define CMD_READ_ALL_RICNU			102
 #define CMD_MOTORTB				103
 
-//****************************************************************************
+#define CMD_USER_DYNAMIC 			127
+
+
+//***************
 // Structure(s):
 //****************************************************************************
 
