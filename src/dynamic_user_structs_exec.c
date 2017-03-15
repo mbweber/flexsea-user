@@ -1,4 +1,5 @@
-#include "dynamic_user_structs.h"
+#include "../inc/dynamic_user_structs.h"
+#include <string.h>
 
 /* This works for Plan - Execute only
     Requirements:
@@ -15,7 +16,9 @@ struct DynamicUserData_s
     int b;
 };
 
-const uint8_t DYNAMIC_USER_NUM_FIELDS = 2;
+DynamicUserData_t dynamicUserData;
+
+#define DYNAMIC_USER_NUM_FIELDS  2
 const uint8_t fieldTypes[DYNAMIC_USER_NUM_FIELDS] = {4, 4};
 static uint8_t fieldSizes[DYNAMIC_USER_NUM_FIELDS] = {0};
 
@@ -50,21 +53,20 @@ void tx_cmd_user_dyn_sendMetaData(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType
     int j;
     for(i = 0; i < DYNAMIC_USER_NUM_FIELDS; i++)
     {
-        label = fieldLabels[i];
         labelLength = strlen(label);
         //label length
         shBuf[index++] = labelLength;
         //label
         for(j = 0; j < labelLength; j++)
         {
-            shBuf[index++] = label[i];
+            shBuf[index++] = fieldLabels[i][j];
         }
     }
 
     *len = index;
 }
 
-void tx_cmd_user_dyn_sendData(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t *len, uint8_t numOffsets, uint8_t* offsets)
+void tx_cmd_user_dyn_sendData(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t *len)
 {
     *cmd = CMD_USER_DYNAMIC;
     *cmdType = CMD_WRITE;
@@ -83,7 +85,7 @@ void tx_cmd_user_dyn_sendData(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, ui
 
 void rx_cmd_user_dyn_r(uint8_t *buf, uint8_t *info)
 {
-    uint16_t index = P_DATA;
+    uint16_t index = P_DATA1;
     uint8_t shouldSendMetaData = buf[index++];
     (void)buf;
 
@@ -99,21 +101,22 @@ void rx_cmd_user_dyn_r(uint8_t *buf, uint8_t *info)
         {
             offsets[i] = buf[index++];
         }
-        tx_cmd_user_dyn_sendData(TX_N_DEFAULT), numOffsets, offsets;
+        tx_cmd_user_dyn_sendData(TX_N_DEFAULT);
         
     }
 
-    packAndSend(P_AND_SEND_DEFAULT);
+    packAndSend(P_AND_S_DEFAULT, buf[P_XID], info, SEND_TO_MASTER);
 }
 
 void rx_cmd_user_dyn_w(uint8_t *buf, uint8_t *info)
 {
-    uint16_t index = P_DATA;
+    uint16_t index = P_DATA1;
     (void)info;
+	(void) buf;
 
     // we need to make sure that in the case they send more offsets than we can allow, 
     // we don't overrun our array. Also we can't accept invalid offsets
-    
+    /*
     uint8_t n = buf[index++];
     numOffsetsToSend = n < DYNAMIC_USER_NUM_FIELDS ? n : DYNAMIC_USER_NUM_FIELDS;
 
@@ -128,60 +131,12 @@ void rx_cmd_user_dyn_w(uint8_t *buf, uint8_t *info)
             n++;
         }
     }
+	*/
 }
 
-// void rx_cmd_user_dyn_rw(uint8_t *buf, uint8_t *info)
-// {
-//     uint16_t index = P_DATA;
-
-//     uint8_t* readInto = (uint8_t*)(&dynamicUserData);
-//     uint8_t length = sizeof(dynamicUserData);
-//     int i;
-//     for(i=0;i<length;i++)
-//         readInto[i] = buf[index++];
-
-//     tx_cmd_user_dyn_sendData();
-// }
-
-void tx_cmd_user_dyn_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t *len, \
-                        uint8_t sendMetaData, uint8_t numOffsets, uint8_t* offsets)
+void init_flexsea_payload_ptr_dynamic()
 {
-    numOffsets = numOffsets > 0 ? numOffsets : 0;
-    
-    *cmd = CMD_USER_DYNAMIC;
-    *cmdType = CMD_READ;
+    flexsea_payload_ptr[CMD_USER_DYNAMIC][RX_PTYPE_READ] = &rx_cmd_user_dyn_r;
+    flexsea_payload_ptr[CMD_USER_DYNAMIC][RX_PTYPE_WRITE] = &rx_cmd_user_dyn_w;
+}    
 
-    uint16_t index = 0;
-    shBuf[index++] = sendMetaData;
-    shBuf[index++] = numOffsets;
-    int i;
-    for(i = 0; i < numOffsets; i++)
-    {
-        shBuf[index++] = offsets[i];
-    }
-
-    *len = index;
-}
-
-// void tx_cmd_user_dyn_rw(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t *len, \
-//                         uint8_t )
-// {
-//     *cmd = CMD_USER_DYNAMIC;
-//     *cmdType = CMD_WRITE;
-
-//     uint16_t index = 0;
-//     shBuf[index++] = sendMetaData;
-//     *len = index;
-// }
-
-void rx_cmd_user_dyn_rr(uint8_t *buf, uint8_t *info)
-{
-    uint16_t index = P_DATA;
-
-    uint8_t sentMetaData = (buf[index++] == SEND_METADATA);
-    if(sentMetaData)
-    {
-
-    }
-
-}
