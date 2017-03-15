@@ -149,6 +149,11 @@ void tx_cmd_user_dyn_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t 
     *len = index;
 }
 
+void init_flexsea_payload_ptr_dynamic()
+{
+    flexsea_payload_ptr[CMD_USER_DYNAMIC][RX_PTYPE_REPLY] = &rx_cmd_user_dyn_rr;
+}    
+
 #ifdef __cplusplus
 	}
 #endif
