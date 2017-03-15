@@ -113,6 +113,7 @@ inline motor_dto_reply generateMotorDtoReply(struct execute_s* execPtr)
     motor_dto_reply result;
 
     result.encoder = *(execPtr->enc_ang);
+	result.current = exec1.current;
     result.strain = execPtr->strain;
     result.analog0 = execPtr->analog[0];
     result.analog1 = execPtr->analog[1];
@@ -134,6 +135,7 @@ inline motor_dto_reply generateMotorDtoReply()
     motor_dto_reply result;
 
     result.encoder = *(exec1.enc_ang);
+	result.current = exec1.current;
     result.strain = strain_read();
     result.analog0 = read_analog(0);
     result.analog1 = read_analog(1);

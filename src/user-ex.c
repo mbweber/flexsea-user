@@ -86,17 +86,19 @@ void user_fsm(void)
 {
 	//Motor Test Bench:
 	#if(ACTIVE_PROJECT == PROJECT_MOTORTB)
-        MotorTestBench_refresh_values();   
-        #if(RUNTIME_FSM == ENABLED)            
-	        MotorTestBench_fsm();
-        #endif
+        MotorTestBench_refresh_values();             
+	    MotorTestBench_fsm();
 	#endif	//PROJECT_MOTORTB
 }
 
 //Call this function in one of the main while time slots.
 void user_fsm2(void)
 {
-	MotorTestBench_fsm2();
+	#if(ACTIVE_PROJECT == PROJECT_MOTORTB)
+        MotorTestBench_fsm2();
+	#endif	//PROJECT_MOTORTB	
+	
+	
 }
 
 //****************************************************************************

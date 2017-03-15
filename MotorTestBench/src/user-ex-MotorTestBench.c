@@ -60,7 +60,7 @@ pid_controller torqueController;
 
 #if(ACTIVE_SUBPROJECT == SUBPROJECT_B)
 //#define P_CONTROLGAINS 37,1,0,9
-#define P_CONTROLGAINS 75,3,0,7
+#define P_CONTROLGAINS 10,1,0,7
 // define a 1000 long array, defining the position profile for the motor controlled by ex1
 // static int32_t positionProfile[] = { .. }; 
 #include "../resources/motorPositionProfile.c.resource"
@@ -237,6 +237,7 @@ void MotorTestBench_fsm(void)
 		
         if(motortb_flagsIn & GAIT_FLAG)
         {
+			ctrl.active_ctrl = CTRL_CUSTOM;
 			ticks = 0;
             state = CYCLE_START;
 			motortb_flagsIn = 0;
