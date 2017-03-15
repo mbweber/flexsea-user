@@ -74,8 +74,7 @@ void init_flexsea_payload_ptr_user(void)
 	flexsea_payload_ptr[CMD_MOTORTB][RX_PTYPE_READ] = &rx_cmd_motortb_rw;
 	flexsea_payload_ptr[CMD_MOTORTB][RX_PTYPE_REPLY] = &rx_cmd_motortb_rr;
 
-//	initFlexseaDynamicUserStructs();
-	flexsea_payload_ptr[CMD_USER_DYNAMIC][RX_PTYPE_REPLY] = &rx_cmd_user_dyn_rr;
+	init_flexsea_payload_ptr_dynamic();
 }
 
 #ifdef __cplusplus

@@ -57,8 +57,12 @@ void rx_cmd_user_dyn_w(uint8_t *buf, uint8_t *info);
 
 void rx_cmd_user_dyn_rr(uint8_t *buf, uint8_t *info);
 
-extern DynamicUserData_t dynamicUserData;
+void init_flexsea_payload_ptr_dynamic();
 
+#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
+extern DynamicUserData_t dynamicUserData;
+#endif
+	
 #ifdef BOARD_TYPE_FLEXSEA_PLAN
 
 //void initFlexseaDynamicUserStructs();
