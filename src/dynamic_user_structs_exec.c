@@ -9,6 +9,23 @@
 
 */
 
+struct DynamicUserData_s
+{
+    int a;
+    int b;
+};
+
+const uint8_t DYNAMIC_USER_NUM_FIELDS = 2;
+const uint8_t fieldTypes[DYNAMIC_USER_NUM_FIELDS] = {4, 4};
+static uint8_t fieldSizes[DYNAMIC_USER_NUM_FIELDS] = {0};
+
+// Keep your label names short, each character is a byte, which takes a lot of memory to send in one packet
+// If label names are too long we may fail to send meta data info to plan.
+const char* fieldLabels[DYNAMIC_USER_NUM_FIELDS] = {"a", "b"}; 
+
+static uint8_t numOffsetsToSend;
+static uint8_t offsetsToSend[DYNAMIC_USER_NUM_FIELDS];
+
 void tx_cmd_user_dyn_sendMetaData(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t *len)
 {
     *cmd = CMD_USER_DYNAMIC;
@@ -20,7 +37,7 @@ void tx_cmd_user_dyn_sendMetaData(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType
     //Number of fields
     shBuf[index++] = DYNAMIC_USER_NUM_FIELDS;
 
-    //format of each field
+    //type of each field
     int i;
     for(i = 0; i < DYNAMIC_USER_NUM_FIELDS; i++)
     {
@@ -35,7 +52,9 @@ void tx_cmd_user_dyn_sendMetaData(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType
     {
         label = fieldLabels[i];
         labelLength = strlen(label);
+        //label length
         shBuf[index++] = labelLength;
+        //label
         for(j = 0; j < labelLength; j++)
         {
             shBuf[index++] = label[i];
@@ -44,6 +63,7 @@ void tx_cmd_user_dyn_sendMetaData(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType
 
     *len = index;
 }
+
 void tx_cmd_user_dyn_sendData(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t *len, uint8_t numOffsets, uint8_t* offsets)
 {
     *cmd = CMD_USER_DYNAMIC;
@@ -69,7 +89,7 @@ void rx_cmd_user_dyn_r(uint8_t *buf, uint8_t *info)
 
     if(shouldSendMetaData == SEND_METADATA)
         tx_cmd_user_dyn_sendMetaData(TX_N_DEFAULT);
-    else if(shouldSendMetaData == SEND_DATA)
+    else
     {
         uint8_t numOffsets = buf[index++];
         int i;
@@ -84,6 +104,30 @@ void rx_cmd_user_dyn_r(uint8_t *buf, uint8_t *info)
     }
 
     packAndSend(P_AND_SEND_DEFAULT);
+}
+
+void rx_cmd_user_dyn_w(uint8_t *buf, uint8_t *info)
+{
+    uint16_t index = P_DATA;
+    (void)info;
+
+    // we need to make sure that in the case they send more offsets than we can allow, 
+    // we don't overrun our array. Also we can't accept invalid offsets
+    
+    uint8_t n = buf[index++];
+    numOffsetsToSend = n < DYNAMIC_USER_NUM_FIELDS ? n : DYNAMIC_USER_NUM_FIELDS;
+
+    int i;
+    n = 0;
+    for(i = 0; i < numOffsets && n < DYNAMIC_USER_NUM_FIELDS; i++)
+    {
+        uint8_t offset = buf[index++];
+        if(offset < DYNAMIC_USER_NUM_FIELDS)
+        {
+            offsetToSend[i] = offset;
+            n++;
+        }
+    }
 }
 
 // void rx_cmd_user_dyn_rw(uint8_t *buf, uint8_t *info)

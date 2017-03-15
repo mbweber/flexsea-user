@@ -1,6 +1,9 @@
 #include "dynamic_user_structs.h"
-#include "stdlib.h"
-
+#include <stdlib.h>
+#include "flexsea_system.h"
+#ifdef __cplusplus
+	extern "C" {
+#endif
 
 /* This works for Plan - Execute only
     Requirements:
@@ -10,6 +13,15 @@
     - keep msg under max size
 
 */
+uint8_t newMetaDataAvailable = 0;
+uint8_t newDataAvailable = 0;
+
+uint8_t dynamicUser_numFields = 0;
+uint8_t* dynamicUser_data = NULL;
+uint8_t* dynamicUser_fieldTypes = NULL;
+uint8_t* dynamicUser_fieldLengths = NULL;
+uint8_t* dynamicUser_labelLengths = NULL;
+char** dynamicUser_labels = NULL;  
 
 void* getMemory(void* ptr, int size)
 {
@@ -26,64 +38,75 @@ uint8_t sizeOfFieldType(uint8_t format)
 }
 
 void rx_metaData(uint8_t *buf, uint16_t index)
-{
-    dynamicUser_numFields = buf[index++];
+{   
+    if(dynamicUser_labels)
+    {
+        int i;
+        for(i=0; i<dynamicUser_numFields;i++)
+        {
+            char* label = dynamicUser_labels[i];
+            if(label) { free(label); }
+            label = NULL;
+        }
+    }
 
+    //parse number of fields
+    dynamicUser_numFields = buf[index++];
     dynamicUser_fieldTypes =    (uint8_t*) getMemory(dynamicUser_fieldTypes, dynamicUser_numFields);
     dynamicUser_fieldLengths =  (uint8_t*) getMemory(dynamicUser_fieldLengths, dynamicUser_numFields);
     dynamicUser_labelLengths =  (uint8_t*) getMemory(dynamicUser_labelLengths, dynamicUser_numFields);
+    dynamicUser_labels =        (char**)   getMemory(dynamicUser_labels, dynamicUser_numFields*sizeof(char*));
 
-    // need to check if dynamicUser_fieldLabels is already an array of allocated memory pointers.
-    // otherwise we might get a memory leak
-    dynamicUser_fieldLabels =   (char**) getMemory(dynamicUser_fieldLabels, dynamicUser_numFields * sizeof(char*) );
-
+    //parse field types
     int i; 
     for(i = 0; i < dynamicUser_numFields; i++)
     {
         uint8_t fieldType = buf[index++];
-
         dynamicUser_fieldTypes[i] = fieldType;
         dynamicUser_fieldLengths[i] = sizeOfFieldType(fieldType);
     }
 
+    //parse label of each field
     int j;
     for(i = 0; i < dynamicUser_numFields; i++)
     {
+        //parse label length
         uint8_t labelLength = buf[index++];
         dynamicUser_labelLengths[i] = labelLength;
-        dynamicUser_fieldLabels[i] = (char*) malloc(labelLength);
-
+        //allocate for label length
+		dynamicUser_labels[i] = (char*) malloc(labelLength);
+        //parse  label
         for(j = 0; j < labelLength; j++)
         {
-            dynamicUser_fieldLabels[i][j] = buf[index++];
+			dynamicUser_labels[i][j] = buf[index++];
         }
     }
+    newMetaDataAvailable = 1;
 }
 void rx_data(uint8_t *shBuf, uint16_t index)
 {
     if(!dynamicUser_fieldTypes) return;
-
-    uint8_t* readIn = (uint8_t*)(&dynamicUserData);
+	if(!dynamicUser_data) return;
 
     uint16_t length = 0;
     int i;
     for(i = 0; i < dynamicUser_numFields; i++)
     {
-        length += dynamicUser_fieldTypes[i];
+        length += sizeOfFieldType(dynamicUser_fieldTypes[i]);
     }
 
+	uint8_t* readIn = (uint8_t*)(dynamicUser_data);
     for(i = 0; i < length; i++)
+    {
+        readIn[i] = shBuf[index++];
+    }
 
-    int i;
-    for(i=0;i<length;i++)
-        shBuf[index++] = writeOut[i];
-
-    *len = index;
+    newDataAvailable = 1;
 }
 
 void rx_cmd_user_dyn_rr(uint8_t *buf, uint8_t *info)
 {
-    uint16_t index = P_DATA;
+	uint16_t index = P_DATA1;
 
     uint8_t sentMetaData = (buf[index++] == SEND_METADATA);
     if(sentMetaData)
@@ -96,46 +119,19 @@ void rx_cmd_user_dyn_rr(uint8_t *buf, uint8_t *info)
     }
 }
 
-void rx_cmd_user_dyn_r(uint8_t *buf, uint8_t *info)
+void tx_cmd_user_dyn_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t *len, \
+                        uint8_t sendMetaData)
 {
-    uint16_t index = P_DATA;
-    uint8_t shouldSendMetaData = buf[index++];
-    (void)buf;
+    *cmd = CMD_USER_DYNAMIC;
+    *cmdType = CMD_READ;
 
-    if(shouldSendMetaData == SEND_METADATA)
-        tx_cmd_user_dyn_sendMetaData(TX_N_DEFAULT);
-    else if(shouldSendMetaData == SEND_DATA)
-    {
-        uint8_t numOffsets = buf[index++];
-        int i;
-        uint8_t offsets[DYNAMIC_USER_NUM_FIELDS];
-
-        for(i = 0; i < numOffsets; i++)
-        {
-            offsets[i] = buf[index++];
-        }
-        tx_cmd_user_dyn_sendData(TX_N_DEFAULT), numOffsets, offsets;
-        
-    }
-
-    packAndSend(P_AND_SEND_DEFAULT);
+    uint16_t index = 0;
+    shBuf[index++] = sendMetaData;
+    *len = index;
 }
 
-// void rx_cmd_user_dyn_rw(uint8_t *buf, uint8_t *info)
-// {
-//     uint16_t index = P_DATA;
-
-//     uint8_t* readInto = (uint8_t*)(&dynamicUserData);
-//     uint8_t length = sizeof(dynamicUserData);
-//     int i;
-//     for(i=0;i<length;i++)
-//         readInto[i] = buf[index++];
-
-//     tx_cmd_user_dyn_sendData();
-// }
-
-void tx_cmd_user_dyn_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t *len, \
-                        uint8_t sendMetaData, uint8_t numOffsets, uint8_t* offsets)
+void tx_cmd_user_dyn_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t *len, \
+                        uint8_t numOffsets, uint8_t* offsets)
 {
     numOffsets = numOffsets > 0 ? numOffsets : 0;
     
@@ -143,7 +139,6 @@ void tx_cmd_user_dyn_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t 
     *cmdType = CMD_READ;
 
     uint16_t index = 0;
-    shBuf[index++] = sendMetaData;
     shBuf[index++] = numOffsets;
     int i;
     for(i = 0; i < numOffsets; i++)
@@ -154,15 +149,6 @@ void tx_cmd_user_dyn_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t 
     *len = index;
 }
 
-// void tx_cmd_user_dyn_rw(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t *len, \
-//                         uint8_t )
-// {
-//     *cmd = CMD_USER_DYNAMIC;
-//     *cmdType = CMD_WRITE;
-
-//     uint16_t index = 0;
-//     shBuf[index++] = sendMetaData;
-//     *len = index;
-// }
-
-
+#ifdef __cplusplus
+	}
+#endif

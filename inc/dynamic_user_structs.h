@@ -36,39 +36,47 @@
     extern "C" {
 #endif
 
+#include <stdint.h>
+#include <flexsea_board.h>
+
 //The following are for the user to define in dynamic_user_structs_common.c
 struct DynamicUserData_s;
-extern const uint8_t DYNAMIC_USER_NUM_FIELDS;
-extern const uint8_t fieldTypes[];
-extern const char* fieldLabels[];
 
 typedef struct DynamicUserData_s DynamicUserData_t;
 // you may also wish to typedef this type to a more convenient name
 // typedef struct DynamicUserData_s YourNameHere_t
 
-void tx_cmd_user_dyn_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
-                            uint16_t *len, uint8_t sendMetaData);
+void tx_cmd_user_dyn_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t *len, \
+                        uint8_t sendMetaData);
 
-// void tx_cmd_user_dyn_rw(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
-//                             uint16_t *len, DynamicUserData_t* write);
+void tx_cmd_user_dyn_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t *len, \
+                        uint8_t numOffsets, uint8_t* offsets);
 
 void rx_cmd_user_dyn_r(uint8_t *buf, uint8_t *info);
-// void rx_cmd_user_dyn_rw(uint8_t *buf, uint8_t *info);
+void rx_cmd_user_dyn_w(uint8_t *buf, uint8_t *info);
+
 void rx_cmd_user_dyn_rr(uint8_t *buf, uint8_t *info);
 
 extern DynamicUserData_t dynamicUserData;
 
 #ifdef BOARD_TYPE_FLEXSEA_PLAN
 
-extern uint8_t dynamicUser_numFields = 0;
-extern uint8_t* dynamicUser_fieldTypes = NULL;
-char* fieldLabels[DYNAMIC_USER_NUM_FIELDS] = {NULL};    
+//void initFlexseaDynamicUserStructs();
+extern uint8_t newMetaDataAvailable;
+extern uint8_t newDataAvailable;
+
+extern uint8_t* dynamicUser_data;
+extern uint8_t dynamicUser_numFields;
+extern uint8_t* dynamicUser_fieldTypes;
+extern uint8_t* dynamicUser_fieldLengths;
+extern uint8_t* dynamicUser_labelLengths;
+extern char** dynamicUser_labels;
 
 #endif
 
 // Flags
-#define SEND_METADATA   0x00
-#define SEND_DATA       0x01
+#define SEND_DATA       0x00
+#define SEND_METADATA   0x01
 
 
 #ifdef __cplusplus
