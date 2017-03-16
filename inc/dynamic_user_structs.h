@@ -69,6 +69,7 @@ extern DynamicUserData_t dynamicUserData;
 extern uint8_t newMetaDataAvailable;
 extern uint8_t newDataAvailable;
 
+extern int dynamicUser_slaveId;
 extern uint8_t* dynamicUser_data;
 extern uint8_t dynamicUser_numFields;
 extern uint8_t* dynamicUser_fieldTypes;

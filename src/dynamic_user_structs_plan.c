@@ -16,6 +16,7 @@
 uint8_t newMetaDataAvailable = 0;
 uint8_t newDataAvailable = 0;
 
+int dynamicUser_slaveId = -1;
 uint8_t dynamicUser_numFields = 0;
 uint8_t* dynamicUser_data = NULL;
 uint8_t* dynamicUser_fieldTypes = NULL;
@@ -39,7 +40,7 @@ uint8_t sizeOfFieldType(uint8_t format)
 
 void rx_metaData(uint8_t *buf, uint16_t index)
 {   
-
+	dynamicUser_slaveId = buf[P_XID];
 
     //parse number of fields
 	uint8_t numFields = buf[index++];
