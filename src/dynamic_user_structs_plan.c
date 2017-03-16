@@ -27,9 +27,10 @@ char** dynamicUser_labels = NULL;
 void* getMemory(void* ptr, int size)
 {
     if(ptr)
-        ptr = realloc(ptr, size);
-    else
-        ptr = malloc(size);
+		realloc(ptr, size);
+	else
+		ptr = malloc(size);
+
     return ptr;
 }
 
@@ -57,26 +58,31 @@ void rx_metaData(uint8_t *buf, uint16_t index)
 			}
 		}
 
-		dynamicUser_fieldTypes =    (uint8_t*) getMemory(dynamicUser_fieldTypes, dynamicUser_numFields);
-		dynamicUser_fieldLengths =  (uint8_t*) getMemory(dynamicUser_fieldLengths, dynamicUser_numFields);
-		dynamicUser_labelLengths =  (uint8_t*) getMemory(dynamicUser_labelLengths, dynamicUser_numFields);
-		dynamicUser_labels =        (char**)   getMemory(dynamicUser_labels, dynamicUser_numFields*sizeof(char*));
+		dynamicUser_fieldTypes =    (uint8_t*) getMemory(dynamicUser_fieldTypes, sizeof(uint8_t)*numFields);
+		dynamicUser_fieldLengths =  (uint8_t*) getMemory(dynamicUser_fieldLengths, sizeof(uint8_t)*numFields);
+		dynamicUser_labelLengths =  (uint8_t*) getMemory(dynamicUser_labelLengths, sizeof(uint8_t)*numFields);
+		dynamicUser_labels =        (char**)   getMemory(dynamicUser_labels, numFields*sizeof(char*));
 	}
 	dynamicUser_numFields = numFields;
 
     //parse field types
     int i; 
-	static int lastLength = -1;
 	int length = 0;
     for(i = 0; i < dynamicUser_numFields; i++)
     {
-        uint8_t fieldType = buf[index++];
-        dynamicUser_fieldTypes[i] = fieldType;
+		uint8_t fieldType = buf[index++];
+		if(dynamicUser_fieldTypes[i] != fieldType)
+		   dynamicUser_fieldTypes[i] = fieldType;
         dynamicUser_fieldLengths[i] = sizeOfFieldType(fieldType);
 		length += dynamicUser_fieldLengths[i];
     }
+
+	static int lastLength = -1;
 	if(length != lastLength)
+	{
 		dynamicUser_data =  (uint8_t*) getMemory(dynamicUser_data, length);
+		lastLength = length;
+	}
 
     //parse label of each field
     int j;
@@ -86,7 +92,7 @@ void rx_metaData(uint8_t *buf, uint16_t index)
         uint8_t labelLength = buf[index++];
         dynamicUser_labelLengths[i] = labelLength;
         //allocate for label length
-		dynamicUser_labels[i] = (char*) malloc(labelLength);
+		dynamicUser_labels[i] = (char*) getMemory(dynamicUser_labels[i], labelLength);
         //parse  label
         for(j = 0; j < labelLength; j++)
         {
