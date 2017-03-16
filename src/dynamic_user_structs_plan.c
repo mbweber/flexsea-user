@@ -39,32 +39,43 @@ uint8_t sizeOfFieldType(uint8_t format)
 
 void rx_metaData(uint8_t *buf, uint16_t index)
 {   
-    if(dynamicUser_labels)
-    {
-        int i;
-        for(i=0; i<dynamicUser_numFields;i++)
-        {
-            char* label = dynamicUser_labels[i];
-            if(label) { free(label); }
-            label = NULL;
-        }
-    }
+
 
     //parse number of fields
-    dynamicUser_numFields = buf[index++];
-    dynamicUser_fieldTypes =    (uint8_t*) getMemory(dynamicUser_fieldTypes, dynamicUser_numFields);
-    dynamicUser_fieldLengths =  (uint8_t*) getMemory(dynamicUser_fieldLengths, dynamicUser_numFields);
-    dynamicUser_labelLengths =  (uint8_t*) getMemory(dynamicUser_labelLengths, dynamicUser_numFields);
-    dynamicUser_labels =        (char**)   getMemory(dynamicUser_labels, dynamicUser_numFields*sizeof(char*));
+	uint8_t numFields = buf[index++];
+	if(numFields != dynamicUser_numFields)
+	{
+		if(dynamicUser_labels)
+		{
+			int i;
+			for(i=0; i<dynamicUser_numFields;i++)
+			{
+				char* label = dynamicUser_labels[i];
+				if(label) { free(label); }
+				label = NULL;
+			}
+		}
+
+		dynamicUser_fieldTypes =    (uint8_t*) getMemory(dynamicUser_fieldTypes, dynamicUser_numFields);
+		dynamicUser_fieldLengths =  (uint8_t*) getMemory(dynamicUser_fieldLengths, dynamicUser_numFields);
+		dynamicUser_labelLengths =  (uint8_t*) getMemory(dynamicUser_labelLengths, dynamicUser_numFields);
+		dynamicUser_labels =        (char**)   getMemory(dynamicUser_labels, dynamicUser_numFields*sizeof(char*));
+	}
+	dynamicUser_numFields = numFields;
 
     //parse field types
     int i; 
+	static int lastLength = -1;
+	int length = 0;
     for(i = 0; i < dynamicUser_numFields; i++)
     {
         uint8_t fieldType = buf[index++];
         dynamicUser_fieldTypes[i] = fieldType;
         dynamicUser_fieldLengths[i] = sizeOfFieldType(fieldType);
+		length += dynamicUser_fieldLengths[i];
     }
+	if(length != lastLength)
+		dynamicUser_data =  (uint8_t*) getMemory(dynamicUser_data, length);
 
     //parse label of each field
     int j;
@@ -80,7 +91,7 @@ void rx_metaData(uint8_t *buf, uint16_t index)
         {
 			dynamicUser_labels[i][j] = buf[index++];
         }
-    }
+	}
     newMetaDataAvailable = 1;
 }
 void rx_data(uint8_t *shBuf, uint16_t index)
