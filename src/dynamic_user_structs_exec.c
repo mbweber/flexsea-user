@@ -19,7 +19,7 @@ struct DynamicUserData_s
 DynamicUserData_t dynamicUserData;
 
 #define DYNAMIC_USER_NUM_FIELDS  2
-const uint8_t fieldTypes[DYNAMIC_USER_NUM_FIELDS] = {4, 4};
+const uint8_t fieldTypes[DYNAMIC_USER_NUM_FIELDS] = {1, 1};
 static uint8_t fieldSizes[DYNAMIC_USER_NUM_FIELDS] = {0};
 
 // Keep your label names short, each character is a byte, which takes a lot of memory to send in one packet
@@ -48,12 +48,11 @@ void tx_cmd_user_dyn_sendMetaData(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType
     }
 
     //label of each field
-    char* label;
     uint16_t labelLength;
     int j;
     for(i = 0; i < DYNAMIC_USER_NUM_FIELDS; i++)
     {
-        labelLength = strlen(label);
+        labelLength = strlen(fieldLabels[i]);
         //label length
         shBuf[index++] = labelLength;
         //label
@@ -71,7 +70,16 @@ void tx_cmd_user_dyn_sendData(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, ui
     *cmd = CMD_USER_DYNAMIC;
     *cmdType = CMD_WRITE;
     uint16_t index = 0;
-
+	
+	static int x = 0;
+	if(!x)
+	{
+	dynamicUserData.a++;
+	dynamicUserData.b--;
+	}
+	//x++;
+	//x %= 10;
+	
     shBuf[index++] = SEND_DATA;
 
     uint8_t* writeOut = (uint8_t*)(&dynamicUserData);
