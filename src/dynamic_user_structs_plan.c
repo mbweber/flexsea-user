@@ -1,6 +1,8 @@
 #include "dynamic_user_structs.h"
 #include <stdlib.h>
 #include "flexsea_system.h"
+#include "flexsea_dataformats.h"
+
 #ifdef __cplusplus
 	extern "C" {
 #endif
@@ -36,7 +38,10 @@ void* getMemory(void* ptr, int size)
 
 uint8_t sizeOfFieldType(uint8_t format)
 {
-    return 4;
+	if(format > FORMAT_8S) //for unknown format we just over allocate I guess
+		return 8;
+
+	return FORMAT_SIZE_MAP[format];
 }
 
 void rx_metaData(uint8_t *buf, uint16_t index)
