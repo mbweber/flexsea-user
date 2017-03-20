@@ -42,6 +42,7 @@ extern "C" {
 #include "../MIT_2DoF_Ankle_v1/inc/cmd-MIT_2DoF_Ankle_v1.h"
 #include "../RICNU_Knee_v1/inc/cmd-RICNU_Knee_v1.h"
 #include "../MotorTestBench/inc/cmd-MotorTestBench.h"
+#include "../inc/dynamic_user_structs.h"
 
 #include "../inc/user-ex.h"
 //****************************************************************************
@@ -72,6 +73,8 @@ void init_flexsea_payload_ptr_user(void)
 	//Motor Test Bench:
 	flexsea_payload_ptr[CMD_MOTORTB][RX_PTYPE_READ] = &rx_cmd_motortb_rw;
 	flexsea_payload_ptr[CMD_MOTORTB][RX_PTYPE_REPLY] = &rx_cmd_motortb_rr;
+
+	init_flexsea_payload_ptr_dynamic();
 }
 
 #ifdef __cplusplus
