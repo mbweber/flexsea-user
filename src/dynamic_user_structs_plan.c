@@ -67,6 +67,9 @@ void rx_metaData(uint8_t *buf, uint16_t index)
 		dynamicUser_fieldLengths =  (uint8_t*) getMemory(dynamicUser_fieldLengths, sizeof(uint8_t)*numFields);
 		dynamicUser_labelLengths =  (uint8_t*) getMemory(dynamicUser_labelLengths, sizeof(uint8_t)*numFields);
 		dynamicUser_labels =        (char**)   getMemory(dynamicUser_labels, numFields*sizeof(char*));
+		int i;
+		for(i=0; i < numFields; i++)
+			dynamicUser_labels[i] = NULL;
 	}
 	dynamicUser_numFields = numFields;
 
@@ -98,11 +101,12 @@ void rx_metaData(uint8_t *buf, uint16_t index)
         dynamicUser_labelLengths[i] = labelLength;
         //allocate for label length
 		dynamicUser_labels[i] = (char*) getMemory(dynamicUser_labels[i], labelLength);
-        //parse  label
-        for(j = 0; j < labelLength; j++)
-        {
+
+		//parse  label
+		for(j = 0; j < labelLength; j++)
+		{
 			dynamicUser_labels[i][j] = buf[index++];
-        }
+		}
 	}
     newMetaDataAvailable = 1;
 }
