@@ -1,13 +1,17 @@
+#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
+
 #include "../inc/dynamic_user_structs.h"
 #include <string.h>
 #include "flexsea_dataformats.h"
+#include "../inc/flexsea_cmd_user.h"
+#include <flexsea_system.h>
 
 /* This works for Plan - Execute only
     Requirements:
 
     - send labels to GUI
     - send data to GUI
-    - keep msg under max size 
+    - keep msg under max size
 
 	- TODO: allow GUI to tell execute which fields it wants set
 	- (one time message in tx_..._w, which would tell us which offsets to send)
@@ -24,7 +28,7 @@ DynamicUserData_t dynamicUserData;
 
 #define DYNAMIC_USER_NUM_FIELDS  2
 const uint8_t fieldTypes[DYNAMIC_USER_NUM_FIELDS] = {FORMAT_32S, FORMAT_32S};
-const char* fieldLabels[DYNAMIC_USER_NUM_FIELDS] = {"a", "b"}; 
+const char* fieldLabels[DYNAMIC_USER_NUM_FIELDS] = {"a", "b"};
 // Keep your label names short, each character is a byte, which takes a lot of memory to send in one packet
 // If label names are too long we may fail to send meta data info to plan.
 
@@ -34,7 +38,7 @@ const char* fieldLabels[DYNAMIC_USER_NUM_FIELDS] = {"a", "b"};
 const uint8_t fieldTypes[DYNAMIC_USER_NUM_FIELDS] = {FORMAT_8U, FORMAT_32S, FORMAT_32S};
 // Keep your label names short, each character is a byte, which takes a lot of memory to send in one packet
 // If label names are too long we may fail to send meta data info to plan.
-const char* fieldLabels[DYNAMIC_USER_NUM_FIELDS] = {"a", "b", "c"}; 
+const char* fieldLabels[DYNAMIC_USER_NUM_FIELDS] = {"a", "b", "c"};
 
 */
 //static uint8_t fieldSizes[DYNAMIC_USER_NUM_FIELDS] = {0};
@@ -48,7 +52,7 @@ const char* fieldLabels[DYNAMIC_USER_NUM_FIELDS] = {"a", "b", "c"};
 void tx_cmd_user_dyn_sendMetaData(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t *len)
 {
     *cmd = CMD_USER_DYNAMIC;
-    *cmdType = CMD_WRITE;    
+    *cmdType = CMD_WRITE;
 
     uint16_t index = 0;
 
@@ -85,14 +89,14 @@ float quickSin(int y)
 {
 	y %= 360;
 	float x = y > 180 ? -360+y : y;
-	
+
 	x = x * 314 / 18000;
-	
+
 	float x3 = x*x*x;
 	float x5 = x3*x*x;
 	float x7 = x5*x*x;
 	float x9 = x7*x*x;
-	
+
 	return x - x3/6 + x5/120 - x7/5040 + x9/362880;
 }
 
@@ -101,12 +105,12 @@ void tx_cmd_user_dyn_sendData(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, ui
     *cmd = CMD_USER_DYNAMIC;
     *cmdType = CMD_WRITE;
     uint16_t index = 0;
-	
+
 	static int x = 0;
 	x++;
 	dynamicUserData.a = 100 * quickSin(x);
 	dynamicUserData.b = 100 * quickSin(x/2);
-	
+
     shBuf[index++] = SEND_DATA;
 
     uint8_t* writeOut = (uint8_t*)(&dynamicUserData);
@@ -137,7 +141,7 @@ void rx_cmd_user_dyn_r(uint8_t *buf, uint8_t *info)
             offsets[i] = buf[index++];
         }
         tx_cmd_user_dyn_sendData(TX_N_DEFAULT);
-        
+
     }
 
     packAndSend(P_AND_S_DEFAULT, buf[P_XID], info, SEND_TO_MASTER);
@@ -149,7 +153,7 @@ void rx_cmd_user_dyn_w(uint8_t *buf, uint8_t *info)
     (void)info;
 	(void) buf;
 
-    // we need to make sure that in the case they send more offsets than we can allow, 
+    // we need to make sure that in the case they send more offsets than we can allow,
     // we don't overrun our array. Also we can't accept invalid offsets
     /*
     uint8_t n = buf[index++];
@@ -173,5 +177,6 @@ void init_flexsea_payload_ptr_dynamic()
 {
     flexsea_payload_ptr[CMD_USER_DYNAMIC][RX_PTYPE_READ] = &rx_cmd_user_dyn_r;
     flexsea_payload_ptr[CMD_USER_DYNAMIC][RX_PTYPE_WRITE] = &rx_cmd_user_dyn_w;
-}    
+}
 
+#endif	//BOARD_TYPE_FLEXSEA_EXECUTE
