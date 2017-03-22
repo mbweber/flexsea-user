@@ -38,6 +38,7 @@ extern "C" {
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <flexsea.h>
 #include "../inc/flexsea_system.h"
 #include "../../inc/flexsea_cmd_user.h"
 
@@ -342,8 +343,8 @@ void rx_cmd_ricnu_rr(uint8_t *buf, uint8_t *info)
 			rn->ex.accel.x = (int16_t) REBUILD_UINT16(buf, &index);
 			rn->ex.accel.y = (int16_t) REBUILD_UINT16(buf, &index);
 			rn->ex.accel.z = (int16_t) REBUILD_UINT16(buf, &index);
-            rn->enc_motor = (int32_t) REBUILD_UINT32(buf, &index);
-            rn->enc_joint = (int32_t) REBUILD_UINT32(buf, &index);
+			rn->enc_motor = (int32_t) REBUILD_UINT32(buf, &index);
+			rn->enc_joint = (int32_t) REBUILD_UINT32(buf, &index);
 			rn->ex.current = (int16_t) REBUILD_UINT16(buf, &index);
 			rn->ex.sine_commut_pwm = (int16_t) REBUILD_UINT16(buf, &index);
 		}
@@ -433,7 +434,7 @@ void rx_cmd_ricnu_Action1(uint8_t controller, int32_t setpoint, uint8_t setGains
 		{
 			ctrl.position.gain.g0 = g0;
 			ctrl.position.gain.g1 = g1;
-            ctrl.position.gain.g2 = g2;
+			ctrl.position.gain.g2 = g2;
 		}
 	}
 	else if (ctrl.active_ctrl == CTRL_IMPEDANCE)

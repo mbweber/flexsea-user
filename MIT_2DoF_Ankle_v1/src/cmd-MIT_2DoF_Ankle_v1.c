@@ -38,6 +38,7 @@ extern "C" {
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <flexsea.h>
 #include "../inc/flexsea_system.h"
 #include "../../inc/flexsea_cmd_user.h"
 
@@ -242,7 +243,7 @@ void rx_cmd_ankle2dof_rr(uint8_t *buf, uint8_t *info)
 			exec_s_ptr->strain = (int16_t) REBUILD_UINT16(buf, &index);
 			exec_s_ptr->analog[0] = (int16_t) REBUILD_UINT16(buf, &index);
 			exec_s_ptr->analog[1] = (int16_t) REBUILD_UINT16(buf, &index);
-            *(exec_s_ptr->enc_ang) = (int32_t) REBUILD_UINT32(buf, &index);
+			*(exec_s_ptr->enc_ang) = (int32_t) REBUILD_UINT32(buf, &index);
 			exec_s_ptr->current = (int16_t) REBUILD_UINT16(buf, &index);
 
 			exec_s_ptr->volt_batt = buf[index++];

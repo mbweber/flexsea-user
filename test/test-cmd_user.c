@@ -3,6 +3,7 @@ extern "C" {
 #endif
 
 #include "flexsea.h"
+#include "flexsea_system.h"
 #include "flexsea-user_test-all.h"
 
 //Definitions and variables used by some/all tests:

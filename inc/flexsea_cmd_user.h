@@ -32,7 +32,7 @@
 // Include(s)
 //****************************************************************************
 
-#include "flexsea_system.h"
+//#include "flexsea_system.h"
 #include "flexsea_user_structs.h"
 
 //Include one or more a user project(s):

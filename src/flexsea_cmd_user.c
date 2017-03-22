@@ -37,7 +37,7 @@ extern "C" {
 // Include(s)
 //****************************************************************************
 
-#include "../inc/flexsea_system.h"
+//#include "../inc/flexsea_system.h"
 #include "../inc/flexsea_cmd_user.h"
 #include "../MIT_2DoF_Ankle_v1/inc/cmd-MIT_2DoF_Ankle_v1.h"
 #include "../RICNU_Knee_v1/inc/cmd-RICNU_Knee_v1.h"
@@ -69,7 +69,7 @@ void init_flexsea_payload_ptr_user(void)
 	flexsea_payload_ptr[CMD_RICNU][RX_PTYPE_WRITE] = &rx_cmd_ricnu_w;
 	flexsea_payload_ptr[CMD_RICNU][RX_PTYPE_REPLY] = &rx_cmd_ricnu_rr;
 	#endif //(ACTIVE_SUBPROJECT == PROJECT_RICNU_KNEE)
-	
+
 	//Motor Test Bench:
 	flexsea_payload_ptr[CMD_MOTORTB][RX_PTYPE_READ] = &rx_cmd_motortb_rw;
 	flexsea_payload_ptr[CMD_MOTORTB][RX_PTYPE_REPLY] = &rx_cmd_motortb_rr;
