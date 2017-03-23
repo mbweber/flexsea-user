@@ -5,6 +5,7 @@ extern "C" {
 #include "flexsea.h"
 #include "flexsea_system.h"
 #include "flexsea-user_test-all.h"
+#include "../MIT_2DoF_Ankle_v1/inc/cmd-MIT_2DoF_Ankle_v1.h"
 
 //Definitions and variables used by some/all tests:
 

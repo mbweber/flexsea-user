@@ -36,11 +36,12 @@ extern "C" {
 // Include(s)
 //****************************************************************************
 
+#include <cmd-MIT_2DoF_Ankle_v1.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <flexsea.h>
-#include "../inc/flexsea_system.h"
-#include "../../inc/flexsea_cmd_user.h"
+#include <flexsea_system.h>
+#include <flexsea_cmd_user.h>
 
 //Execute boards only:
 #ifdef BOARD_TYPE_FLEXSEA_EXECUTE

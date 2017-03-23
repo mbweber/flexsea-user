@@ -1,7 +1,8 @@
 #ifdef BOARD_TYPE_FLEXSEA_PLAN
 
-#include <dynamic_user_structs.h>
 #include <stdlib.h>
+#include <flexsea.h>
+#include <dynamic_user_structs.h>
 #include <flexsea_system.h>
 #include "flexsea_dataformats.h"
 #include <flexsea_cmd_user.h>

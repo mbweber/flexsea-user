@@ -37,14 +37,13 @@ extern "C" {
 // Include(s)
 //****************************************************************************
 
-//#include "../inc/flexsea_system.h"
-#include "../inc/flexsea_cmd_user.h"
+#include <flexsea.h>
+#include <flexsea_cmd_user.h>
+#include <dynamic_user_structs.h>
 #include "../MIT_2DoF_Ankle_v1/inc/cmd-MIT_2DoF_Ankle_v1.h"
 #include "../RICNU_Knee_v1/inc/cmd-RICNU_Knee_v1.h"
 #include "../MotorTestBench/inc/cmd-MotorTestBench.h"
-#include "../inc/dynamic_user_structs.h"
 
-#include "../inc/user-ex.h"
 //****************************************************************************
 // Variable(s)
 //****************************************************************************

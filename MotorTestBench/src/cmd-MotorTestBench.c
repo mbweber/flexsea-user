@@ -41,6 +41,8 @@ extern "C" {
 #include <flexsea.h>
 #include "../inc/flexsea_system.h"
 #include "../../inc/flexsea_cmd_user.h"
+#include "../inc/flexsea_user_structs.h"
+#include "../inc/cmd-MotorTestBench.h"
 
 //Execute boards only:
 #ifdef BOARD_TYPE_FLEXSEA_EXECUTE

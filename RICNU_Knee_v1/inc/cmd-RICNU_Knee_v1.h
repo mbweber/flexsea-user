@@ -27,11 +27,14 @@
 #ifndef INC_FLEXSEA_CMD_RICNU_KNEE_1_H
 #define INC_FLEXSEA_CMD_RICNU_KNEE_1_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //****************************************************************************
 // Include(s)
 //****************************************************************************
 
-//#include "flexsea_system.h"
 #include <stdint.h>
 
 //****************************************************************************
@@ -67,5 +70,8 @@ void rx_cmd_ricnu_Action1(uint8_t controller, int32_t setpoint, uint8_t setGains
 // Shared variable(s)
 //****************************************************************************
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif	//INC_FLEXSEA_CMD_RICNU_KNEE_1_H

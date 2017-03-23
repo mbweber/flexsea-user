@@ -39,8 +39,9 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include <flexsea.h>
-#include "../inc/flexsea_system.h"
-#include "../../inc/flexsea_cmd_user.h"
+#include <flexsea_system.h>
+#include "../inc/cmd-RICNU_Knee_v1.h"
+//#include <flexsea_cmd_user.h>
 
 //Execute & Manage boards only:
 #if (defined BOARD_TYPE_FLEXSEA_EXECUTE || defined BOARD_TYPE_FLEXSEA_MANAGE)
