@@ -99,7 +99,7 @@ static void init_barebone(void)
 {
 	//Barebone:
 	#if(ACTIVE_PROJECT == PROJECT_BAREBONE)
-	board_id = SLAVE_ID;
+	setBoardID(SLAVE_ID);
 	#endif	//PROJECT_BAREBONE
 }
 

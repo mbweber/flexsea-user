@@ -56,7 +56,7 @@ static void ricnu_knee_refresh_values(void);
 //Call this function once in main.c, just before the while()
 void init_ricnu_knee(void)
 {
-	board_id = SLAVE_ID;
+	setBoardID(SLAVE_ID);
 
 	//FlexSEA-Execute setup:
     //Example:	ctrl.active_ctrl = CTRL_OPEN;	//Open controller

@@ -56,7 +56,7 @@ static void ankle_refresh_values(void);
 //Call this function once in main.c, just before the while()
 void init_ankle_2dof(void)
 {
-	board_id = SLAVE_ID;
+	setBoardID(SLAVE_ID);
 
     //Controller setup:
     ctrl.active_ctrl = CTRL_OPEN;   //Position controller

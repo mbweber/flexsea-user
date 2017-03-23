@@ -38,6 +38,7 @@
 //****************************************************************************
 
 #include "../inc/user-ex-MotorTestBench.h"
+#include <flexsea_user_structs.h>
 
 //****************************************************************************
 // Variable(s)
@@ -56,7 +57,7 @@ struct motortb_s my_motortb;
 //Call this function once in main.c, just before the while()
 void initMotorTestBench(void)
 {
-	board_id = SLAVE_ID;
+	setBoardID(SLAVE_ID);
 
     //Controller setup:
     ctrl.active_ctrl = CTRL_OPEN;   //Position controller

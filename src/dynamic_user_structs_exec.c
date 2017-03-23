@@ -1,10 +1,11 @@
 #ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 
-#include "../inc/dynamic_user_structs.h"
 #include <string.h>
+#include <flexsea.h>
+#include <flexsea_system.h>
 #include "flexsea_dataformats.h"
 #include "../inc/flexsea_cmd_user.h"
-#include <flexsea_system.h>
+#include "../inc/dynamic_user_structs.h"
 
 /* This works for Plan - Execute only
     Requirements:
