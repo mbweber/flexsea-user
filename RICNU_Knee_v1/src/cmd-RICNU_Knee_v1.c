@@ -40,6 +40,7 @@ extern "C" {
 #include <stdlib.h>
 #include "../inc/flexsea_system.h"
 #include "../../inc/flexsea_cmd_user.h"
+#include "flexsea.h"
 
 //Execute & Manage boards only:
 #if (defined BOARD_TYPE_FLEXSEA_EXECUTE || defined BOARD_TYPE_FLEXSEA_MANAGE)
