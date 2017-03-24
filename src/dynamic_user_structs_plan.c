@@ -157,10 +157,44 @@ void tx_cmd_user_dyn_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t 
     *len = index;
 }
 
-void tx_cmd_user_dyn_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t *len, \
-                        uint8_t numOffsets, uint8_t* offsets)
+void packFlags(uint8_t* shBuf, uint8_t numFields, uint8_t* fieldFlags)
 {
-    numOffsets = numOffsets > 0 ? numOffsets : 0;
+	//We pack so that the least significant bit is the first flag
+	// Since we are left shifting that means we have to start with the last flag
+
+	uint8_t numBytes = numFields / 8 + (numFields % 8 != 0);
+
+	int fieldIndex, byteIndex, i = 0, bufIndex=0;
+	uint8_t packedByte = 0, shouldSend;
+
+	shBuf[bufIndex++] = numFields;
+
+	for(byteIndex = 0; byteIndex < numBytes; byteIndex++)
+	{
+		for(fieldIndex = (byteIndex+1) * 8 - 1; fieldIndex >= 0 ; fieldIndex--)
+		{
+			if(fieldIndex >= numFields)
+				continue;
+
+			packedByte = packedByte << 1;
+			shouldSend = fieldFlags[fieldIndex] > 0 ? 1 : 0;
+			packedByte |= shouldSend;
+			i++;
+			if(i % 8 == 0)
+			{
+				shBuf[bufIndex++] = packedByte;
+				i=0;
+			}
+		}
+	}
+
+	return bufIndex;
+}
+
+void tx_cmd_user_dyn_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t *len, \
+						uint8_t numFields, uint8_t* fieldFlags)
+{
+	numFields = numFields > 0 ? numFields : 0;
     
     *cmd = CMD_USER_DYNAMIC;
     *cmdType = CMD_READ;
