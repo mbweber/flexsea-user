@@ -28,8 +28,6 @@
 	*
 ****************************************************************************/
 
-#include "main.h"
-
 #ifdef BOARD_TYPE_FLEXSEA_MANAGE
 
 #ifndef INC_USER_H
@@ -39,22 +37,12 @@
 // Include(s)
 //****************************************************************************
 
+#include "main.h"
 #include "user-mn-RICNU_Knee_v1.h"
 #include "user-mn-MIT_2DoF_Ankle_v1.h"
 #include "user-mn-MotorTestBench.h"
 #include  "flexsea_global_structs.h"
 //Add your project specific user_x.h file here
-
-//****************************************************************************
-// Shared variable(s)
-//****************************************************************************
-
-//MIT Ankle 2-DoF:
-#if(ACTIVE_PROJECT == PROJECT_ANKLE_2DOF)
-
-extern struct ankle2dof_s ankle2dof_left, ankle2dof_right;
-
-#endif	//PROJECT_ANKLE_2DOF
 
 //****************************************************************************
 // Public Function Prototype(s):
@@ -214,6 +202,18 @@ struct ankle2dof_s
 	uint8_t ctrl_i;					//Current
 	struct gains_s ctrl_i_gains;	//Current controller gains
 };
+
+//****************************************************************************
+// Shared variable(s)
+//****************************************************************************
+
+//MIT Ankle 2-DoF:
+#if(ACTIVE_PROJECT == PROJECT_ANKLE_2DOF)
+
+extern struct ankle2dof_s ankle2dof_left, ankle2dof_right;
+
+#endif	//PROJECT_ANKLE_2DOF
+
 
 #endif	//INC_USER_H
 
