@@ -28,9 +28,6 @@
 	*
 ****************************************************************************/
 
-//#include "main.h"
-#include <flexsea_board.h>
-
 #ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 
 //****************************************************************************
@@ -38,7 +35,13 @@
 //****************************************************************************
 
 #include "../inc/user-ex-MotorTestBench.h"
+#include <flexsea_board.h>
 #include <flexsea_user_structs.h>
+#include "user-ex.h"
+#include "control.h"
+#include "motor.h"
+#include "strain.h"
+#include "flexsea_sys_def.h"
 
 //****************************************************************************
 // Variable(s)

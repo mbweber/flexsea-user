@@ -45,6 +45,12 @@ extern "C" {
 //Execute & Manage boards only:
 #if (defined BOARD_TYPE_FLEXSEA_EXECUTE || defined BOARD_TYPE_FLEXSEA_MANAGE)
 #include "main.h"
+#include "imu.h"
+#include "strain.h"
+#include "safety.h"
+#include "analog.h"
+#include "motor.h"
+#include "control.h"
 #endif	//BOARD_TYPE_FLEXSEA_EXECUTE
 
 //****************************************************************************

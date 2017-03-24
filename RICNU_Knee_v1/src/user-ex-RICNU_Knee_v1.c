@@ -28,9 +28,6 @@
 	*
 ****************************************************************************/
 
-//#include "main.h"
-#include <flexsea_board.h>
-
 #ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 
 //****************************************************************************
@@ -38,6 +35,13 @@
 //****************************************************************************
 
 #include "../inc/user-ex-RICNU_Knee_v1.h"
+#include <flexsea_board.h>
+#include "user-ex.h"
+#include "control.h"
+#include "motor.h"
+#include "trapez.h"
+#include "main_fsm.h"
+#include "flexsea_sys_def.h"
 
 //****************************************************************************
 // Variable(s)
@@ -82,7 +86,7 @@ void init_ricnu_knee(void)
 void ricnu_knee_fsm(void)
 {
     static uint16 time = 0;
-    static uint8 state = 0;
+    static uint8_t state = 0;
     static uint16 tmp_posi = 0;
 	static uint16 tmp_posf = 0;
 	static uint16 tmp_spdm = 0;

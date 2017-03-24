@@ -28,15 +28,18 @@
 	*
 ****************************************************************************/
 
-#include <flexsea_board.h>
-
 #ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 
 //****************************************************************************
 // Include(s)
 //****************************************************************************
 
+#include <flexsea_board.h>
 #include "../inc/user-ex-MIT_2DoF_Ankle_v1.h"
+#include "user-ex.h"
+#include "control.h"
+#include "motor.h"
+#include "flexsea_sys_def.h"
 
 //****************************************************************************
 // Variable(s)
