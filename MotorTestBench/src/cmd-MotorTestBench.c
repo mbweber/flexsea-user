@@ -38,9 +38,12 @@ extern "C" {
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <flexsea.h>
 #include "../inc/flexsea_system.h"
 #include "../../inc/flexsea_cmd_user.h"
-#include "flexsea.h"
+#include "../inc/flexsea_user_structs.h"
+#include "../inc/cmd-MotorTestBench.h"
+
 //Execute boards only:
 #ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 #include "main.h"
@@ -133,7 +136,7 @@ void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 	#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 
 		(void)motortbPtr;	//Unused for Execute
-		
+
 		SPLIT_16((uint16_t)motortb.ex1[0], shBuf, &index);
 		SPLIT_16((uint16_t)motortb.ex1[1], shBuf, &index);
 		SPLIT_16((uint16_t)motortb.ex1[2], shBuf, &index);
@@ -211,14 +214,14 @@ void rx_cmd_motortb_rw(uint8_t *buf, uint8_t *info)
 				tmp_open_spd = (int16_t) REBUILD_UINT16(buf, &index);;
 				motor_open_speed_1(tmp_open_spd);
 			}
-            else if(ctrl.active_ctrl == CTRL_MEASRES)
+			else if(ctrl.active_ctrl == CTRL_MEASRES)
 			{
 				index = P_DATA1+4;
 				tmp_open_spd = (int16_t) REBUILD_UINT16(buf, &index);;
 				motor_open_speed_1(tmp_open_spd);
 			}
 		}
-		
+
 
 	#endif	//BOARD_TYPE_FLEXSEA_EXECUTE
 
@@ -293,7 +296,7 @@ void rx_cmd_motortb_rr(uint8_t *buf, uint8_t *info)
 				exec_s_ptr->strain = (int16_t) REBUILD_UINT16(buf, &index);
 				exec_s_ptr->analog[0] = (int16_t) REBUILD_UINT16(buf, &index);
 				exec_s_ptr->analog[1] = (int16_t) REBUILD_UINT16(buf, &index);
-                *(exec_s_ptr->enc_ang) = (int32_t) REBUILD_UINT32(buf, &index);
+				*(exec_s_ptr->enc_ang) = (int32_t) REBUILD_UINT32(buf, &index);
 				exec_s_ptr->current = (int16_t) REBUILD_UINT16(buf, &index);
 
 				exec_s_ptr->volt_batt = buf[index++];

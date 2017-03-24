@@ -17,7 +17,7 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *****************************************************************************
 	[Lead developper] Luke Mooney, lmooney at dephy dot com.
-	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab 
+	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab
 	Biomechatronics research group <http://biomech.media.mit.edu/>
 	[Contributors]
 *****************************************************************************
@@ -27,47 +27,49 @@
 	* 2016-12-06 | jfduval | New release
 	*
 ****************************************************************************/
- 
-#include "main.h"
+
+//#include "main.h"
+#include <flexsea_board.h>
 
 #ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 
 //****************************************************************************
 // Include(s)
 //****************************************************************************
- 
+
 #include "../inc/user-ex-MotorTestBench.h"
- 
+#include <flexsea_user_structs.h>
+
 //****************************************************************************
 // Variable(s)
 //****************************************************************************
- 
+
 struct motortb_s my_motortb;
 
 //****************************************************************************
 // Private Function Prototype(s):
-//****************************************************************************  
- 
+//****************************************************************************
+
 //****************************************************************************
 // Public Function(s)
 //****************************************************************************
- 
+
 //Call this function once in main.c, just before the while()
 void initMotorTestBench(void)
-{   
-	board_id = SLAVE_ID;
-	
+{
+	setBoardID(SLAVE_ID);
+
     //Controller setup:
     ctrl.active_ctrl = CTRL_OPEN;   //Position controller
     motor_open_speed_1(0);              //0% PWM
 	#if(MOTOR_COMMUT == COMMUT_BLOCK)
     Coast_Brake_Write(1);               //Brake (regen)
 	#endif
-        
+
     //Position PID gains - initially 0
     ctrl.position.gain.P_KP = 0;
     ctrl.position.gain.P_KI = 0;
-	
+
 	//User variables:
 	motortb.ex1[0] = 0;
 	motortb.ex1[1] = 0;
@@ -76,20 +78,20 @@ void initMotorTestBench(void)
 	motortb.ex1[4] = 0;
 	motortb.ex1[5] = 0;
 }
- 
+
 //Knee Finite State Machine.
 //Call this function in one of the main while time slots.
 void MotorTestBench_fsm(void)
 {
     static int state = 0;
-     
+
     switch (state)
     {
         case 0:
 			//...
             break;
 	}
-	
+
 	//Code does nothing, everything is happening on Manage
 }
 
@@ -99,7 +101,7 @@ void MotorTestBench_refresh_values(void)
 	motortb.ex1[1] = *exec1.enc_ang_vel;
     motortb.ex1[2] = *exec1.enc_ang;
     motortb.ex1[3] = MOTOR_ORIENTATION * exec1.sine_commut_pwm;
-    motortb.ex1[4] = ((strain_read()-31937)*1831)>>13;   
+    motortb.ex1[4] = ((strain_read()-31937)*1831)>>13;
 }
 
 //****************************************************************************

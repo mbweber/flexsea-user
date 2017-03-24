@@ -27,11 +27,15 @@
 #ifndef INC_FLEXSEA_CMD_MOTORTB_H
 #define INC_FLEXSEA_CMD_MOTORTB_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //****************************************************************************
 // Include(s)
 //****************************************************************************
 
-#include "flexsea_system.h"
+#include <stdint.h>
 
 //****************************************************************************
 // Prototype(s):
@@ -57,5 +61,8 @@ void rx_cmd_motortb_rr(uint8_t *buf, uint8_t *info);
 // Shared variable(s)
 //****************************************************************************
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif	//INC_FLEXSEA_CMD_MOTORTB_H

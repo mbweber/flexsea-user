@@ -32,6 +32,10 @@
 #ifndef INC_FLEXSEA_USER_STRUCT_H
 #define INC_FLEXSEA_USER_STRUCT_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //****************************************************************************
 // Include(s)
 //****************************************************************************
@@ -62,5 +66,9 @@ struct motortb_s
 //****************************************************************************
 
 extern struct motortb_s motortb;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif	//INC_FLEXSEA_GLOBAL_STRUCT_H
