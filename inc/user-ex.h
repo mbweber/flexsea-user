@@ -204,7 +204,7 @@ void user_fsm(void);
     #define CURRENT_ZERO		((int32)2048)
 
 	//Slave ID:
-	#define SLAVE_ID		FLEXSEA_EXECUTE_1
+	#define SLAVE_ID			FLEXSEA_EXECUTE_1
 
 	//Project specific definitions:
 	//...
