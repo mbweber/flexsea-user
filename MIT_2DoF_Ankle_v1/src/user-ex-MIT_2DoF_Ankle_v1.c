@@ -17,7 +17,7 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *****************************************************************************
 	[Lead developper] Luke Mooney, lmooney at dephy dot com.
-	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab 
+	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab
 	Biomechatronics research group <http://biomech.media.mit.edu/>
 	[Contributors]
 *****************************************************************************
@@ -27,75 +27,78 @@
 	* 2016-10-28 | jfduval | New release
 	*
 ****************************************************************************/
- 
-#include "main.h"
 
 #ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 
 //****************************************************************************
 // Include(s)
 //****************************************************************************
- 
+
+#include <flexsea_board.h>
 #include "../inc/user-ex-MIT_2DoF_Ankle_v1.h"
- 
+#include "user-ex.h"
+#include "control.h"
+#include "motor.h"
+#include "flexsea_sys_def.h"
+
 //****************************************************************************
 // Variable(s)
 //****************************************************************************
- 
+
 
 //****************************************************************************
 // Private Function Prototype(s):
-//****************************************************************************  
+//****************************************************************************
 
 static void ankle_refresh_values(void);
- 
+
 //****************************************************************************
 // Public Function(s)
 //****************************************************************************
- 
+
 //Call this function once in main.c, just before the while()
 void init_ankle_2dof(void)
-{   
-	board_id = SLAVE_ID;
-	
+{
+	setBoardID(SLAVE_ID);
+
     //Controller setup:
     ctrl.active_ctrl = CTRL_OPEN;   //Position controller
     motor_open_speed_1(0);              //0% PWM
 	#if(MOTOR_COMMUT == COMMUT_BLOCK)
     Coast_Brake_Write(1);               //Brake (regen)
 	#endif
-        
+
     //Position PID gains - initially 0
     ctrl.position.gain.P_KP = 0;
     ctrl.position.gain.P_KI = 0;
 }
- 
+
 //Knee Finite State Machine.
 //Call this function in one of the main while time slots.
 void ankle_fsm(void)
 {
     static int state = 0;
-     
+
     ankle_refresh_values();
-     
+
     switch (state)
     {
         case 0:
 			//...
             break;
 	}
-	
+
 	//Code does nothing, everything is happening on Manage
 }
 
 //****************************************************************************
 // Private Function(s)
 //****************************************************************************
- 
+
 //Here's an example function:
 static void ankle_refresh_values(void)
 {
-	//...     
+	//...
 }
 
 
