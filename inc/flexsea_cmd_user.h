@@ -28,17 +28,14 @@
 #ifndef INC_FLEXSEA_CMD_USER_H
 #define INC_FLEXSEA_CMD_USER_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 //****************************************************************************
 // Include(s)
 //****************************************************************************
-
-#include "flexsea_system.h"
-#include "flexsea_user_structs.h"
-
-//Include one or more a user project(s):
-#include "../MIT_2DoF_Ankle_v1/inc/cmd-MIT_2DoF_Ankle_v1.h"
-#include "../RICNU_Knee_v1/inc/cmd-RICNU_Knee_v1.h"
-#include "../MotorTestBench/inc/cmd-MotorTestBench.h"
 
 //****************************************************************************
 // Prototype(s):
@@ -53,12 +50,14 @@ void init_flexsea_payload_ptr_user(void);
 //Give nickname to function codes here. Always remember that they have to be
 //in the 100-127 range!
 
-#define CMD_A2DOF				100
-#define CMD_RICNU				101
-#define CMD_READ_ALL_RICNU		102
-#define CMD_MOTORTB				103
+#define CMD_A2DOF					100
+#define CMD_RICNU					101
+#define CMD_READ_ALL_RICNU			102
+#define CMD_MOTORTB					103
 
-//****************************************************************************
+#define CMD_USER_DYNAMIC 			127
+
+//***************
 // Structure(s):
 //****************************************************************************
 
@@ -66,5 +65,8 @@ void init_flexsea_payload_ptr_user(void);
 // Shared variable(s)
 //****************************************************************************
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif	//INC_FLEXSEA_CMD_USER_H

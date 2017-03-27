@@ -25,50 +25,66 @@
 	used across the project
 *****************************************************************************
 	[Change log] (Convention: YYYY-MM-DD | author | comment)
-	* 2016-12-08 | jfduval | Initial release
+	* 2017-03-14 | David Weisdorf | Initial release
 	*
 ****************************************************************************/
 
-#ifndef INC_FLEXSEA_USER_STRUCT_H
-#define INC_FLEXSEA_USER_STRUCT_H
+#ifndef INC_FLEXSEA_DYNAMIC_USER_STRUCTS_H
+#define INC_FLEXSEA_DYNAMIC_USER_STRUCTS_H
 
 #ifdef __cplusplus
-extern "C" {
+	extern "C" {
 #endif
-
-//****************************************************************************
-// Include(s)
-//****************************************************************************
 
 #include <stdint.h>
 
-//****************************************************************************
-// Prototype(s):
-//****************************************************************************
+//The following are for the user to define in dynamic_user_structs_common.c
+struct DynamicUserData_s;
 
-//****************************************************************************
-// Definition(s):
-//****************************************************************************
+typedef struct DynamicUserData_s DynamicUserData_t;
+// you may also wish to typedef this type to a more convenient name
+// typedef struct DynamicUserData_s YourNameHere_t
 
-//****************************************************************************
-// Structure(s):
-//****************************************************************************
+void tx_cmd_user_dyn_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t *len, \
+						uint8_t sendMetaData);
 
-struct motortb_s
-{
-	int16_t ex1[6];
-	int16_t ex2[6];
-	int16_t mn1[4];
-};
+void tx_cmd_user_dyn_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t *len, \
+						uint8_t numOffsets, uint8_t* offsets);
 
-//****************************************************************************
-// Shared variable(s)
-//****************************************************************************
+void rx_cmd_user_dyn_r(uint8_t *buf, uint8_t *info);
+void rx_cmd_user_dyn_w(uint8_t *buf, uint8_t *info);
 
-extern struct motortb_s motortb;
+void rx_cmd_user_dyn_rr(uint8_t *buf, uint8_t *info);
+
+void init_flexsea_payload_ptr_dynamic();
+
+#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
+extern DynamicUserData_t dynamicUserData;
+#endif
+
+#ifdef BOARD_TYPE_FLEXSEA_PLAN
+
+//void initFlexseaDynamicUserStructs();
+extern uint8_t newMetaDataAvailable;
+extern uint8_t newDataAvailable;
+
+extern int dynamicUser_slaveId;
+extern uint8_t* dynamicUser_data;
+extern uint8_t dynamicUser_numFields;
+extern uint8_t* dynamicUser_fieldTypes;
+extern uint8_t* dynamicUser_fieldLengths;
+extern uint8_t* dynamicUser_labelLengths;
+extern char** dynamicUser_labels;
+
+#endif
+
+// Flags
+#define SEND_DATA       0x00
+#define SEND_METADATA   0x01
+
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif	//INC_FLEXSEA_GLOBAL_STRUCT_H
+#endif //INC_FLEXSEA_DYNAMIC_USER_STRUCTS_H

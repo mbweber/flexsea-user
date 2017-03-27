@@ -2,7 +2,6 @@
 extern "C" {
 #endif
 
-#include "main.h"
 #include "unity.h"
 #include "flexsea-user_test-all.h"
 

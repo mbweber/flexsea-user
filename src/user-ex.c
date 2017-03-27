@@ -17,7 +17,7 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *****************************************************************************
 	[Lead developper] Jean-Francois Duval, jfduval at dephy dot com.
-	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab 
+	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab
 	Biomechatronics research group <http://biomech.media.mit.edu/>
 	[Contributors]
 *****************************************************************************
@@ -27,8 +27,6 @@
 	* 2016-10-30 | jfduval | New release
 	*
 ****************************************************************************/
-
-#include "main.h"
 
 #ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 
@@ -59,22 +57,22 @@ static void init_barebone(void);
 
 //Initialization function - call once in main.c, before while()
 void init_user(void)
-{	
+{
 	//Barebone:
 	#if(ACTIVE_PROJECT == PROJECT_BAREBONE)
 	init_barebone();
 	#endif	//PROJECT_BAREBONE
-	
+
 	//MIT Ankle 2-DoF:
 	#if(ACTIVE_PROJECT == PROJECT_ANKLE_2DOF)
 	init_ankle_2dof();
 	#endif	//PROJECT_ANKLE_2DOF
-	
+
 	//RIC/NU Knee:
 	#if(ACTIVE_PROJECT == PROJECT_RICNU_KNEE)
 	init_ricnu_knee();
 	#endif	//PROJECT_RICNU_KNEE
-	
+
 	//Motor Test Bench:
 	#if(ACTIVE_PROJECT == PROJECT_MOTORTB)
 	initMotorTestBench();
@@ -86,8 +84,8 @@ void user_fsm(void)
 {
 	//Motor Test Bench:
 	#if(ACTIVE_PROJECT == PROJECT_MOTORTB)
-        MotorTestBench_refresh_values();   
-        #if(RUNTIME_FSM == ENABLED)            
+        MotorTestBench_refresh_values();
+        #if(RUNTIME_FSM == ENABLED)
 	        MotorTestBench_fsm();
         #endif
 	#endif	//PROJECT_MOTORTB
@@ -101,7 +99,7 @@ static void init_barebone(void)
 {
 	//Barebone:
 	#if(ACTIVE_PROJECT == PROJECT_BAREBONE)
-	board_id = SLAVE_ID;
+	setBoardID(SLAVE_ID);
 	#endif	//PROJECT_BAREBONE
 }
 

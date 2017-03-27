@@ -33,8 +33,6 @@
   to select a different TopDesign file than the one included by default (check
   the folder, there is more than one included) */
 
-#include "flexsea_board.h"
-
 #ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 
 #ifndef INC_USER_EX_H
@@ -45,9 +43,12 @@
 //****************************************************************************
 
 #include "main.h"
+#include "flexsea_board.h"
 #include "../MIT_2DoF_Ankle_v1/inc/user-ex-MIT_2DoF_Ankle_v1.h"
 #include "../RICNU_Knee_v1/inc/user-ex-RICNU_Knee_v1.h"
 #include "../MotorTestBench/inc/user-ex-MotorTestBench.h"
+#include "flexsea_sys_def.h"
+#include "user-ex.h"
 //Add your project specific user_x.h file here
 
 //****************************************************************************
