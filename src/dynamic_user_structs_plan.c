@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "flexsea_system.h"
 #include "flexsea_dataformats.h"
+#include <string.h>
 
 #ifdef __cplusplus
 	extern "C" {
@@ -17,6 +18,7 @@
 */
 uint8_t newMetaDataAvailable = 0;
 uint8_t newDataAvailable = 0;
+uint8_t waitingOnFieldFlags = 0;
 
 int dynamicUser_slaveId = -1;
 uint8_t dynamicUser_numFields = 0;
@@ -34,7 +36,10 @@ void* getMemory(void* ptr, int size)
 	if(ptr)
 		realloc(ptr, size);
 	else
+	{
 		ptr = malloc(size);
+		memset(ptr, 0, size);
+	}
 
 	return ptr;
 }
@@ -76,6 +81,12 @@ void rx_metaData(uint8_t *buf, uint16_t index)
 
 		dynamicUser_fieldFlagsExec =  (uint8_t*) getMemory(dynamicUser_fieldFlagsExec, sizeof(uint8_t)*numFields);
 		dynamicUser_fieldFlagsPlan =  (uint8_t*) getMemory(dynamicUser_fieldFlagsPlan, sizeof(uint8_t)*numFields);
+
+		if(numFields > dynamicUser_numFields)
+		{
+			memset(dynamicUser_fieldFlagsExec + dynamicUser_numFields, 0, numFields - dynamicUser_numFields);
+			memset(dynamicUser_fieldFlagsPlan + dynamicUser_numFields, 0, numFields - dynamicUser_numFields);
+		}
 	}
 
 	dynamicUser_numFields = numFields;
@@ -96,6 +107,8 @@ void rx_metaData(uint8_t *buf, uint16_t index)
 	if(length != lastLength)
 	{
 		dynamicUser_data =  (uint8_t*) getMemory(dynamicUser_data, length);
+		if(length > lastLength)
+			memset(dynamicUser_data+lastLength, 0, length - lastLength);
 		lastLength = length;
 	}
 
@@ -105,9 +118,13 @@ void rx_metaData(uint8_t *buf, uint16_t index)
 	{
 		//parse label length
 		uint8_t labelLength = buf[index++];
-		dynamicUser_labelLengths[i] = labelLength;
+
 		//allocate for label length
-		dynamicUser_labels[i] = (char*) getMemory(dynamicUser_labels[i], labelLength);
+		if(labelLength != dynamicUser_labelLengths[i] || !dynamicUser_labels[i])
+		{
+			dynamicUser_labelLengths[i] = labelLength;
+			dynamicUser_labels[i] = (char*) getMemory(dynamicUser_labels[i], labelLength);
+		}
 
 		//parse  label
 		for(j = 0; j < labelLength; j++)
@@ -140,6 +157,13 @@ void rx_data(uint8_t *shBuf, uint16_t index)
 				totalBytesRead++;
 			}
 		}
+		else
+		{
+			for(j = 0; j < fieldLength; j++)
+			{
+				dynamicUser_data[fieldOffset + j] = 0;
+			}
+		}
 
 		fieldOffset += fieldLength;
 	}
@@ -161,7 +185,7 @@ void rx_cmd_user_dyn_rr(uint8_t *buf, uint8_t *info)
 	else if(flag == SEND_FIELD_FLAGS)
 	{
 		if(!unpackFieldFlags(buf+index, dynamicUser_fieldFlagsExec, dynamicUser_numFields))
-			newMetaDataAvailable = 1;
+			waitingOnFieldFlags = 0;
 	}
 	else
 	{
@@ -187,7 +211,7 @@ void tx_cmd_user_dyn_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t 
 	*cmdType = CMD_WRITE;
 
 	uint16_t index = packFieldFlags(shBuf, dynamicUser_numFields, dynamicUser_fieldFlagsPlan);
-
+	waitingOnFieldFlags = 1;
 	*len = index;
 }
 
