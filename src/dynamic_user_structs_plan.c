@@ -8,11 +8,11 @@
 #endif
 
 /* This works for Plan - Execute only
-    Requirements:
+	Requirements:
 
-    - send labels to GUI
-    - send data to GUI
-    - keep msg under max size
+	- send labels to GUI
+	- send data to GUI
+	- keep msg under max size
 
 */
 uint8_t newMetaDataAvailable = 0;
@@ -24,16 +24,19 @@ uint8_t* dynamicUser_data = NULL;
 uint8_t* dynamicUser_fieldTypes = NULL;
 uint8_t* dynamicUser_fieldLengths = NULL;
 uint8_t* dynamicUser_labelLengths = NULL;
-char** dynamicUser_labels = NULL;  
+char** dynamicUser_labels = NULL;
+
+uint8_t* dynamicUser_fieldFlagsPlan = NULL;
+uint8_t* dynamicUser_fieldFlagsExec = NULL;
 
 void* getMemory(void* ptr, int size)
 {
-    if(ptr)
+	if(ptr)
 		realloc(ptr, size);
 	else
 		ptr = malloc(size);
 
-    return ptr;
+	return ptr;
 }
 
 uint8_t sizeOfFieldType(uint8_t format)
@@ -45,10 +48,10 @@ uint8_t sizeOfFieldType(uint8_t format)
 }
 
 void rx_metaData(uint8_t *buf, uint16_t index)
-{   
+{
 	dynamicUser_slaveId = buf[P_XID];
 
-    //parse number of fields
+	//parse number of fields
 	uint8_t numFields = buf[index++];
 	if(numFields != dynamicUser_numFields)
 	{
@@ -70,20 +73,24 @@ void rx_metaData(uint8_t *buf, uint16_t index)
 		int i;
 		for(i=0; i < numFields; i++)
 			dynamicUser_labels[i] = NULL;
+
+		dynamicUser_fieldFlagsExec =  (uint8_t*) getMemory(dynamicUser_fieldFlagsExec, sizeof(uint8_t)*numFields);
+		dynamicUser_fieldFlagsPlan =  (uint8_t*) getMemory(dynamicUser_fieldFlagsPlan, sizeof(uint8_t)*numFields);
 	}
+
 	dynamicUser_numFields = numFields;
 
-    //parse field types
-    int i; 
+	//parse field types
+	int i;
 	int length = 0;
-    for(i = 0; i < dynamicUser_numFields; i++)
-    {
+	for(i = 0; i < dynamicUser_numFields; i++)
+	{
 		uint8_t fieldType = buf[index++];
 		if(dynamicUser_fieldTypes[i] != fieldType)
 		   dynamicUser_fieldTypes[i] = fieldType;
-        dynamicUser_fieldLengths[i] = sizeOfFieldType(fieldType);
+		dynamicUser_fieldLengths[i] = sizeOfFieldType(fieldType);
 		length += dynamicUser_fieldLengths[i];
-    }
+	}
 
 	static int lastLength = -1;
 	if(length != lastLength)
@@ -92,14 +99,14 @@ void rx_metaData(uint8_t *buf, uint16_t index)
 		lastLength = length;
 	}
 
-    //parse label of each field
-    int j;
-    for(i = 0; i < dynamicUser_numFields; i++)
-    {
-        //parse label length
-        uint8_t labelLength = buf[index++];
-        dynamicUser_labelLengths[i] = labelLength;
-        //allocate for label length
+	//parse label of each field
+	int j;
+	for(i = 0; i < dynamicUser_numFields; i++)
+	{
+		//parse label length
+		uint8_t labelLength = buf[index++];
+		dynamicUser_labelLengths[i] = labelLength;
+		//allocate for label length
 		dynamicUser_labels[i] = (char*) getMemory(dynamicUser_labels[i], labelLength);
 
 		//parse  label
@@ -108,112 +115,92 @@ void rx_metaData(uint8_t *buf, uint16_t index)
 			dynamicUser_labels[i][j] = buf[index++];
 		}
 	}
-    newMetaDataAvailable = 1;
+
+	newMetaDataAvailable = 1;
 }
 void rx_data(uint8_t *shBuf, uint16_t index)
 {
-    if(!dynamicUser_fieldTypes) return;
+	if(!dynamicUser_fieldTypes) return;
 	if(!dynamicUser_data) return;
 
-    uint16_t length = 0;
-    int i;
-    for(i = 0; i < dynamicUser_numFields; i++)
-    {
-        length += sizeOfFieldType(dynamicUser_fieldTypes[i]);
-    }
+	uint8_t totalBytesToRead = shBuf[index++];
 
-	uint8_t* readIn = (uint8_t*)(dynamicUser_data);
-    for(i = 0; i < length; i++)
-    {
-        readIn[i] = shBuf[index++];
-    }
+	int i, j, fieldLength, fieldOffset = 0, totalBytesRead = 0;
+	for(i = 0; i < dynamicUser_numFields; i++)
+	{
+		fieldLength = 1;
+		if(dynamicUser_fieldTypes[i] < 8 && FORMAT_SIZE_MAP[dynamicUser_fieldTypes[i]] > 0)
+			fieldLength = FORMAT_SIZE_MAP[dynamicUser_fieldTypes[i]];
 
-    newDataAvailable = 1;
+		if(dynamicUser_fieldFlagsExec[i])
+		{
+			for(j = 0; j < fieldLength && totalBytesRead < totalBytesToRead; j++)
+			{
+				dynamicUser_data[fieldOffset + j] = shBuf[index++];
+				totalBytesRead++;
+			}
+		}
+
+		fieldOffset += fieldLength;
+	}
+
+	newDataAvailable = 1;
 }
 
 void rx_cmd_user_dyn_rr(uint8_t *buf, uint8_t *info)
 {
+	(void)info;
+
 	uint16_t index = P_DATA1;
 
-    uint8_t sentMetaData = (buf[index++] == SEND_METADATA);
-    if(sentMetaData)
-    {
-        rx_metaData(buf, index);
-    }
-    else 
-    {
-        rx_data(buf, index);   
-    }
+	uint8_t flag = buf[index++];
+	if(flag == SEND_METADATA)
+	{
+		rx_metaData(buf, index);
+		if(newMetaDataAvailable)
+		{
+			tx_cmd_user_dyn_w(TX_N_DEFAULT);
+			packAndSend(P_AND_S_DEFAULT, dynamicUser_slaveId, info, SEND_TO_SLAVE);
+		}
+
+	}
+	else if(flag == SEND_FIELD_FLAGS)
+	{
+		if(!unpackFieldFlags(buf+index, dynamicUser_fieldFlagsExec, dynamicUser_numFields))
+			newMetaDataAvailable = 1;
+	}
+	else
+	{
+		rx_data(buf, index);
+	}
 }
 
 void tx_cmd_user_dyn_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t *len, \
-                        uint8_t sendMetaData)
+						uint8_t sendMetaData)
 {
-    *cmd = CMD_USER_DYNAMIC;
-    *cmdType = CMD_READ;
+	*cmd = CMD_USER_DYNAMIC;
+	*cmdType = CMD_READ;
 
-    uint16_t index = 0;
-    shBuf[index++] = sendMetaData;
-    *len = index;
+	uint16_t index = 0;
+	shBuf[index++] = sendMetaData;
+	*len = index;
 }
 
-void packFlags(uint8_t* shBuf, uint8_t numFields, uint8_t* fieldFlags)
+void tx_cmd_user_dyn_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t *len)
 {
-	//We pack so that the least significant bit is the first flag
-	// Since we are left shifting that means we have to start with the last flag
 
-	uint8_t numBytes = numFields / 8 + (numFields % 8 != 0);
+	*cmd = CMD_USER_DYNAMIC;
+	*cmdType = CMD_WRITE;
 
-	int fieldIndex, byteIndex, i = 0, bufIndex=0;
-	uint8_t packedByte = 0, shouldSend;
+	uint16_t index = packFieldFlags(shBuf, dynamicUser_numFields, dynamicUser_fieldFlagsPlan);
 
-	shBuf[bufIndex++] = numFields;
-
-	for(byteIndex = 0; byteIndex < numBytes; byteIndex++)
-	{
-		for(fieldIndex = (byteIndex+1) * 8 - 1; fieldIndex >= 0 ; fieldIndex--)
-		{
-			if(fieldIndex >= numFields)
-				continue;
-
-			packedByte = packedByte << 1;
-			shouldSend = fieldFlags[fieldIndex] > 0 ? 1 : 0;
-			packedByte |= shouldSend;
-			i++;
-			if(i % 8 == 0)
-			{
-				shBuf[bufIndex++] = packedByte;
-				i=0;
-			}
-		}
-	}
-
-	return bufIndex;
-}
-
-void tx_cmd_user_dyn_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t *len, \
-						uint8_t numFields, uint8_t* fieldFlags)
-{
-	numFields = numFields > 0 ? numFields : 0;
-    
-    *cmd = CMD_USER_DYNAMIC;
-    *cmdType = CMD_READ;
-
-    uint16_t index = 0;
-    shBuf[index++] = numOffsets;
-    int i;
-    for(i = 0; i < numOffsets; i++)
-    {
-        shBuf[index++] = offsets[i];
-    }
-
-    *len = index;
+	*len = index;
 }
 
 void init_flexsea_payload_ptr_dynamic()
 {
-    flexsea_payload_ptr[CMD_USER_DYNAMIC][RX_PTYPE_REPLY] = &rx_cmd_user_dyn_rr;
-}    
+	flexsea_payload_ptr[CMD_USER_DYNAMIC][RX_PTYPE_REPLY] = &rx_cmd_user_dyn_rr;
+}
 
 #ifdef __cplusplus
 	}
