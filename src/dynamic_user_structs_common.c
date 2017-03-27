@@ -11,14 +11,14 @@ uint16_t packFieldFlags(uint8_t* shBuf, uint8_t numFields, uint8_t* fieldFlags)
 
 	uint8_t numBytes = numFields / 8 + (numFields % 8 != 0);
 
-	int fieldIndex, byteIndex, i = 0, bufIndex=0;
+	int fieldIndex, byteIndex, bufIndex=0;
 	uint8_t packedByte = 0, shouldSend;
 
 	shBuf[bufIndex++] = numFields;
 
 	for(byteIndex = 0; byteIndex < numBytes; byteIndex++)
 	{
-		for(fieldIndex = (byteIndex+1) * 8 - 1; fieldIndex >= 0 ; fieldIndex--)
+		for(fieldIndex = (byteIndex+1) * 8 - 1; fieldIndex >= (byteIndex*8); fieldIndex--)
 		{
 			if(fieldIndex >= numFields)
 				continue;
@@ -26,13 +26,8 @@ uint16_t packFieldFlags(uint8_t* shBuf, uint8_t numFields, uint8_t* fieldFlags)
 			packedByte = packedByte << 1;
 			shouldSend = fieldFlags[fieldIndex] > 0 ? 1 : 0;
 			packedByte |= shouldSend;
-			i++;
-			if(i % 8 == 0)
-			{
-				shBuf[bufIndex++] = packedByte;
-				i=0;
-			}
 		}
+		shBuf[bufIndex++] = packedByte;
 	}
 
 	return bufIndex;

@@ -157,12 +157,6 @@ void rx_cmd_user_dyn_rr(uint8_t *buf, uint8_t *info)
 	if(flag == SEND_METADATA)
 	{
 		rx_metaData(buf, index);
-		if(newMetaDataAvailable)
-		{
-			tx_cmd_user_dyn_w(TX_N_DEFAULT);
-			packAndSend(P_AND_S_DEFAULT, dynamicUser_slaveId, info, SEND_TO_SLAVE);
-		}
-
 	}
 	else if(flag == SEND_FIELD_FLAGS)
 	{
