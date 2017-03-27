@@ -21,22 +21,20 @@ volatile struct DynamicUserData_s
 };
 
 DynamicUserData_t dynamicUserData;
-
+/*
 #define DYNAMIC_USER_NUM_FIELDS  2
 const uint8_t fieldTypes[DYNAMIC_USER_NUM_FIELDS] = {FORMAT_32S, FORMAT_32S};
 const char* fieldLabels[DYNAMIC_USER_NUM_FIELDS] = {"a", "b"}; 
 // Keep your label names short, each character is a byte, which takes a lot of memory to send in one packet
 // If label names are too long we may fail to send meta data info to plan.
 
-/*
+*/
 
 #define DYNAMIC_USER_NUM_FIELDS  3
-const uint8_t fieldTypes[DYNAMIC_USER_NUM_FIELDS] = {FORMAT_8U, FORMAT_32S, FORMAT_32S};
+const uint8_t fieldTypes[DYNAMIC_USER_NUM_FIELDS] = {FORMAT_32S, FORMAT_32S, FORMAT_32S};
 // Keep your label names short, each character is a byte, which takes a lot of memory to send in one packet
 // If label names are too long we may fail to send meta data info to plan.
 const char* fieldLabels[DYNAMIC_USER_NUM_FIELDS] = {"a", "b", "c"}; 
-
-*/
 
 static uint8_t fieldFlags[DYNAMIC_USER_NUM_FIELDS] = {0};
 
@@ -77,6 +75,20 @@ void tx_cmd_user_dyn_sendMetaData(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType
         }
     }
 
+    *len = index;
+}
+
+void tx_cmd_user_dyn_sendFieldFlags(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t *len)
+{
+    *cmd = CMD_USER_DYNAMIC;
+    *cmdType = CMD_WRITE;    
+
+    uint16_t index = 0;
+
+    shBuf[index++] = SEND_FIELD_FLAGS;
+    //Number of fields
+	index = index + packFieldFlags(shBuf + index, DYNAMIC_USER_NUM_FIELDS, fieldFlags);
+	
     *len = index;
 }
 
@@ -123,7 +135,7 @@ void tx_cmd_user_dyn_sendData(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, ui
 
     	if(fieldFlags[i])
     	{
-    		for(j = 0; j < fieldLength; j++)
+    		for(j = 0; j < fieldLength && fieldOffset+j < length; j++)
     		{
     			shBuf[index++] = writeOut[fieldOffset + j];
     			totalBytes++;
@@ -160,12 +172,12 @@ void rx_cmd_user_dyn_w(uint8_t *buf, uint8_t *info)
     uint16_t index = P_DATA1;
 
     (void)info;
-
-    if(unpackFieldFlags(buf + P_DATA1, fieldFlags, DYNAMIC_USER_NUM_FIELDS))
-    {
-    	//Some kind of error
-    	;
-    }
+    if(!unpackFieldFlags(buf + P_DATA1, fieldFlags, DYNAMIC_USER_NUM_FIELDS))
+	{
+		//respond
+		tx_cmd_user_dyn_sendFieldFlags(TX_N_DEFAULT);
+		packAndSend(P_AND_S_DEFAULT, buf[P_XID], info, SEND_TO_MASTER);
+	}
 }
 
 void init_flexsea_payload_ptr_dynamic()
