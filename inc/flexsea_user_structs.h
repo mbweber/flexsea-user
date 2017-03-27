@@ -61,11 +61,21 @@ struct motortb_s
 	int16_t mn1[4];
 };
 
+struct filtvar_s
+{
+	int64_t raws[2];
+	int64_t filts[2];
+	int32_t raw;
+    int32_t filt;
+};
+
+
 //****************************************************************************
 // Shared variable(s)
 //****************************************************************************
 
 extern struct motortb_s motortb;
+extern int16_t globvar[10];
 
 #ifdef __cplusplus
 }

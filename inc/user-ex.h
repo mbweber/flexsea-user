@@ -88,7 +88,7 @@ void user_fsm(void);
 #define CS_LEGACY				0
 #define CS_DEFAULT				1
 
-//Types of motor orientation
+//Types of motor orientation. Rotation of motor when rotor is facing away from you
 #define CLOCKWISE_ORIENTATION 			1
 #define COUNTER_CLOCKWISE_ORIENTATION 	-1
 
@@ -111,7 +111,7 @@ void user_fsm(void);
 //Step 1) Select active project (from list):
 //==========================================
 
-#define ACTIVE_PROJECT			PROJECT_BAREBONE
+#define ACTIVE_PROJECT			PROJECT_SIMPLE_MOTOR
 #define ACTIVE_SUBPROJECT		SUBPROJECT_NONE
 
 //Step 2) Customize the enabled/disabled sub-modules:
