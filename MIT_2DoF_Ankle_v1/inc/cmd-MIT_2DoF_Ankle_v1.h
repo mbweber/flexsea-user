@@ -27,11 +27,15 @@
 #ifndef INC_FLEXSEA_CMD_MITA2DOF_H
 #define INC_FLEXSEA_CMD_MITA2DOF_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //****************************************************************************
 // Include(s)
 //****************************************************************************
 
-#include "flexsea_system.h"
+#include <stdint.h>
 
 //****************************************************************************
 // Prototype(s):
@@ -63,5 +67,8 @@ void rx_cmd_special_5(uint8_t *buf);
 // Shared variable(s)
 //****************************************************************************
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif	//INC_FLEXSEA_CMD_MITA2DOF_H

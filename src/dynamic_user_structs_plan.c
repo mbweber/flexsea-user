@@ -1,8 +1,12 @@
-#include "dynamic_user_structs.h"
+#ifdef BOARD_TYPE_FLEXSEA_PLAN
+
 #include <stdlib.h>
-#include "flexsea_system.h"
+#include <flexsea.h>
+#include <dynamic_user_structs.h>
+#include <flexsea_system.h>
 #include "flexsea_dataformats.h"
 #include <string.h>
+#include <flexsea_cmd_user.h>
 
 #ifdef __cplusplus
 	extern "C" {
@@ -226,3 +230,5 @@ void init_flexsea_payload_ptr_dynamic()
 #ifdef __cplusplus
 	}
 #endif
+
+#endif 	//BOARD_TYPE_FLEXSEA_PLAN

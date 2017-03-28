@@ -33,8 +33,6 @@
   to select a different TopDesign file than the one included by default (check
   the folder, there is more than one included) */
 
-#include "flexsea_board.h"
-
 #ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 
 #ifndef INC_USER_EX_H
@@ -45,9 +43,12 @@
 //****************************************************************************
 
 #include "main.h"
+#include "flexsea_board.h"
 #include "../MIT_2DoF_Ankle_v1/inc/user-ex-MIT_2DoF_Ankle_v1.h"
 #include "../RICNU_Knee_v1/inc/user-ex-RICNU_Knee_v1.h"
 #include "../MotorTestBench/inc/user-ex-MotorTestBench.h"
+#include "flexsea_sys_def.h"
+#include "user-ex.h"
 //Add your project specific user_x.h file here
 
 //****************************************************************************
@@ -87,7 +88,7 @@ void user_fsm(void);
 #define CS_LEGACY				0
 #define CS_DEFAULT				1
 
-//Types of motor orientation
+//Types of motor orientation. Rotation of motor when rotor is facing away from you
 #define CLOCKWISE_ORIENTATION 			1
 #define COUNTER_CLOCKWISE_ORIENTATION 	-1
 
@@ -110,7 +111,7 @@ void user_fsm(void);
 //Step 1) Select active project (from list):
 //==========================================
 
-#define ACTIVE_PROJECT			PROJECT_BAREBONE
+#define ACTIVE_PROJECT			PROJECT_SIMPLE_MOTOR
 #define ACTIVE_SUBPROJECT		SUBPROJECT_NONE
 
 //Step 2) Customize the enabled/disabled sub-modules:
@@ -204,7 +205,7 @@ void user_fsm(void);
     #define CURRENT_ZERO		((int32)2048)
 
 	//Slave ID:
-	#define SLAVE_ID		FLEXSEA_EXECUTE_1
+	#define SLAVE_ID			FLEXSEA_EXECUTE_1
 
 	//Project specific definitions:
 	//...

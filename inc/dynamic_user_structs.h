@@ -37,7 +37,6 @@
 #endif
 
 #include <stdint.h>
-#include <flexsea_board.h>
 
 //The following are for the user to define in dynamic_user_structs_common.c
 struct DynamicUserData_s;

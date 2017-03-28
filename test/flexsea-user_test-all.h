@@ -1,7 +1,6 @@
 #ifndef TEST_ALL_FX_USER_H
 #define TEST_ALL_FX_USER_H
 
-#include "main.h"
 #include "unity.h"
 #include "../inc/flexsea_cmd_user.h"
 

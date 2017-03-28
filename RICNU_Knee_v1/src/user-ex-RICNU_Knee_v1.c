@@ -17,7 +17,7 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *****************************************************************************
 	[Lead developper] Luke Mooney, lmooney at dephy dot com.
-	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab 
+	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab
 	Biomechatronics research group <http://biomech.media.mit.edu/>
 	[Contributors] Luke Mooney, Elliott Rouse
 *****************************************************************************
@@ -28,8 +28,6 @@
 	*
 ****************************************************************************/
 
-#include "main.h"
-
 #ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 
 //****************************************************************************
@@ -37,6 +35,13 @@
 //****************************************************************************
 
 #include "../inc/user-ex-RICNU_Knee_v1.h"
+#include <flexsea_board.h>
+#include "user-ex.h"
+#include "control.h"
+#include "motor.h"
+#include "trapez.h"
+#include "main_fsm.h"
+#include "flexsea_sys_def.h"
 
 //****************************************************************************
 // Variable(s)
@@ -44,7 +49,7 @@
 
 //****************************************************************************
 // Private Function Prototype(s):
-//****************************************************************************	
+//****************************************************************************
 
 static void ricnu_knee_refresh_values(void);
 
@@ -54,9 +59,9 @@ static void ricnu_knee_refresh_values(void);
 
 //Call this function once in main.c, just before the while()
 void init_ricnu_knee(void)
-{	
-	board_id = SLAVE_ID;
-	
+{
+	setBoardID(SLAVE_ID);
+
 	//FlexSEA-Execute setup:
     //Example:	ctrl.active_ctrl = CTRL_OPEN;	//Open controller
     //Example: motor_open_speed_1(0);			//0% PWM
@@ -65,15 +70,15 @@ void init_ricnu_knee(void)
 	#if(MOTOR_COMMUT == COMMUT_BLOCK)
 	Coast_Brake_Write(1);			//Brake (rather than Coast)
 	#endif
-	   
+
     //Position PID gains:
 	//ctrl.position.gain.P_KP = 22;
 	//ctrl.position.gain.P_KI = 5;
-    
+
     //Starts off:
 	LED_R_Write(1);
 	LED_G_Write(1);
-	LED_B_Write(1);    
+	LED_B_Write(1);
 }
 
 //Knee Finite State Machine.
@@ -81,18 +86,18 @@ void init_ricnu_knee(void)
 void ricnu_knee_fsm(void)
 {
     static uint16 time = 0;
-    static uint8 state = 0;
+    static uint8_t state = 0;
     static uint16 tmp_posi = 0;
 	static uint16 tmp_posf = 0;
 	static uint16 tmp_spdm = 0;
 	static uint16 tmp_acc = 0;
-	
+
     //Increment time
     time++;
-    
+
 	//Before going to a state we refresh values:
 	ricnu_knee_refresh_values();
-	
+
     if (time == 0)
     {
         state = 0;
@@ -101,16 +106,16 @@ void ricnu_knee_fsm(void)
         tmp_spdm = 10000;
         tmp_acc = 10000;
     }
-    
-    if (time == 2000) 
+
+    if (time == 2000)
     {
         state = 1;
         tmp_posi = *exec1.enc_ang;
         tmp_posf = -2000;
         tmp_spdm = 20000;
         tmp_acc = 20000;
-    }    
-    
+    }
+
 	switch(state)
 	{
 		case 0:
@@ -128,8 +133,8 @@ void ricnu_knee_fsm(void)
 			ctrl.position.posf = tmp_posf;
 			ctrl.position.spdm = tmp_spdm;
 			ctrl.position.acc = tmp_acc;
-            steps = trapez_gen_motion_1(tmp_posi, tmp_posf, tmp_spdm, tmp_acc);          
-            
+            steps = trapez_gen_motion_1(tmp_posi, tmp_posf, tmp_spdm, tmp_acc);
+
             time = -1000;
             state = 2;
             break;

@@ -32,6 +32,10 @@
 #ifndef INC_FLEXSEA_USER_STRUCT_H
 #define INC_FLEXSEA_USER_STRUCT_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //****************************************************************************
 // Include(s)
 //****************************************************************************
@@ -57,10 +61,24 @@ struct motortb_s
 	int16_t mn1[4];
 };
 
+struct filtvar_s
+{
+	int64_t raws[2];
+	int64_t filts[2];
+	int32_t raw;
+    int32_t filt;
+};
+
+
 //****************************************************************************
 // Shared variable(s)
 //****************************************************************************
 
 extern struct motortb_s motortb;
+extern int16_t globvar[10];
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif	//INC_FLEXSEA_GLOBAL_STRUCT_H
