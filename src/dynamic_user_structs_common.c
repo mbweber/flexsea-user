@@ -1,4 +1,4 @@
-#include "dynamic_user_structs.h"
+#include "../inc/dynamic_user_structs.h"
 
 #ifdef __cplusplus
 	extern "C" {
