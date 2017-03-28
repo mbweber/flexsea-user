@@ -9,7 +9,7 @@ uint16_t packFieldFlags(uint8_t* shBuf, uint8_t numFields, uint8_t* fieldFlags)
 	// We pack so that the least significant bit is the first flag
 	// Since we are left shifting that means we have to start with the last flag
 
-	if(!fieldFlags) return;
+	if(!fieldFlags) return 0;
 
 	uint8_t numBytes = numFields / 8 + (numFields % 8 != 0);
 
