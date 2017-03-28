@@ -34,7 +34,7 @@ uint8_t* dynamicUser_fieldFlagsExec = NULL;
 void* getMemory(void* ptr, int size)
 {
 	if(ptr)
-		realloc(ptr, size);
+        ptr = realloc(ptr, size);
 	else
 	{
 		ptr = malloc(size);
@@ -83,8 +83,11 @@ void rx_metaData(uint8_t *buf, uint16_t index)
 		dynamicUser_fieldFlagsPlan =  (uint8_t*) getMemory(dynamicUser_fieldFlagsPlan, sizeof(uint8_t)*numFields);
 
 		if(numFields > dynamicUser_numFields)
-		{
-			memset(dynamicUser_fieldFlagsExec + dynamicUser_numFields, 0, numFields - dynamicUser_numFields);
+        {
+            memset(dynamicUser_fieldTypes + dynamicUser_numFields, 0, numFields - dynamicUser_numFields);
+            memset(dynamicUser_fieldLengths + dynamicUser_numFields, 0, numFields - dynamicUser_numFields);
+            memset(dynamicUser_labelLengths + dynamicUser_numFields, 0, numFields - dynamicUser_numFields);
+            memset(dynamicUser_fieldFlagsExec + dynamicUser_numFields, 0, numFields - dynamicUser_numFields);
 			memset(dynamicUser_fieldFlagsPlan + dynamicUser_numFields, 0, numFields - dynamicUser_numFields);
 		}
 	}
@@ -107,8 +110,8 @@ void rx_metaData(uint8_t *buf, uint16_t index)
 	if(length != lastLength)
 	{
 		dynamicUser_data =  (uint8_t*) getMemory(dynamicUser_data, length);
-		if(length > lastLength)
-			memset(dynamicUser_data+lastLength, 0, length - lastLength);
+        memset(dynamicUser_data, 0, length);
+//        if(length > lastLength)
 		lastLength = length;
 	}
 
