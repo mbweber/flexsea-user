@@ -23,6 +23,7 @@ volatile struct DynamicUserData_s
     int a;
     int b;
 	int c;
+	uint16_t d;
 };
 
 DynamicUserData_t dynamicUserData;
@@ -32,14 +33,16 @@ const uint8_t fieldTypes[DYNAMIC_USER_NUM_FIELDS] = {FORMAT_32S, FORMAT_32S};
 const char* fieldLabels[DYNAMIC_USER_NUM_FIELDS] = {"a", "b"};
 // Keep your label names short, each character is a byte, which takes a lot of memory to send in one packet
 // If label names are too long we may fail to send meta data info to plan.
-
 */
 
-#define DYNAMIC_USER_NUM_FIELDS  3
-const uint8_t fieldTypes[DYNAMIC_USER_NUM_FIELDS] = {FORMAT_32S, FORMAT_32S, FORMAT_32S};
+
+#define DYNAMIC_USER_NUM_FIELDS  4
+const uint8_t fieldTypes[DYNAMIC_USER_NUM_FIELDS] = {FORMAT_32S, FORMAT_32S, FORMAT_32S, FORMAT_16U};
 // Keep your label names short, each character is a byte, which takes a lot of memory to send in one packet
 // If label names are too long we may fail to send meta data info to plan.
-const char* fieldLabels[DYNAMIC_USER_NUM_FIELDS] = {"a", "b", "c"};
+const char* fieldLabels[DYNAMIC_USER_NUM_FIELDS] = {"a", "b", "c", "d"};
+
+
 
 static uint8_t fieldFlags[DYNAMIC_USER_NUM_FIELDS] = {0};
 
@@ -174,8 +177,6 @@ void rx_cmd_user_dyn_r(uint8_t *buf, uint8_t *info)
 
 void rx_cmd_user_dyn_w(uint8_t *buf, uint8_t *info)
 {
-    uint16_t index = P_DATA1;
-
     (void)info;
     if(!unpackFieldFlags(buf + P_DATA1, fieldFlags, DYNAMIC_USER_NUM_FIELDS))
 	{
