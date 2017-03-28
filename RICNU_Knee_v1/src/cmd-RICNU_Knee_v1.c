@@ -42,9 +42,8 @@ extern "C" {
 #include <flexsea_system.h>
 #include "../inc/cmd-RICNU_Knee_v1.h"
 
-//Execute & Manage boards only:
-#if (defined BOARD_TYPE_FLEXSEA_EXECUTE || defined BOARD_TYPE_FLEXSEA_MANAGE)
-#include "main.h"
+//Execute boards only:
+#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
 #include "imu.h"
 #include "strain.h"
 #include "safety.h"
