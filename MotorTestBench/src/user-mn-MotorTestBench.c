@@ -33,9 +33,14 @@
 // Include(s)
 //****************************************************************************
 
-#include "../inc/user-mn-MotorTestBench.h"
+#include "user-mn-MotorTestBench.h"
+#include "cmd-MotorTestBench.h"
 #include <flexsea_user_structs.h>
+#include <flexsea_global_structs.h>
+#include "flexsea_sys_def.h"
 #include <math.h>
+#include "flexsea.h"
+#include "flexsea_system.h"
 
 //****************************************************************************
 // Variable(s)
@@ -255,7 +260,7 @@ void MotorTestBench_fsm_1(void)
 			mtb_my_pwm[0] = user_data_1.w[3];
 			mtb_my_pwm[1] = 0;
 			break;
-        default:
+		default:
 			//Handle exceptions here
 			break;
 
@@ -273,7 +278,7 @@ void MotorTestBench_fsm_2(void)
 
 	static uint8_t ex_refresh_fsm_state = 0;
 	static uint32_t timer = 0;
-	uint8_t info[2] = {PORT_485_1, PORT_485_1};
+	uint8_t info[2] = {PORT_RS485_1, PORT_RS485_1};
 
 	//This FSM talks to the slaves at 250Hz each
 	switch(ex_refresh_fsm_state)
@@ -295,12 +300,12 @@ void MotorTestBench_fsm_2(void)
 
 		case 1:	//Communicating with Execute #1
 
-			info[0] = PORT_485_1;
+			info[0] = PORT_RS485_1;
 			tx_cmd_motortb_r(TX_N_DEFAULT, 0, mtb_my_control, mtb_my_cur[0], mtb_my_pwm[0]);
 			packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_1, info, SEND_TO_SLAVE);
 
 			//slaves_485_1.xmit.listen = 1;	//Legacy - remove once tested
-			slaves_485_1.xmit.willListenSoon = 1;	//New version
+			//slaves_485_1.xmit.willListenSoon = 1;	//New version
 			ex_refresh_fsm_state++;
 
 			break;
@@ -314,12 +319,12 @@ void MotorTestBench_fsm_2(void)
 
 		case 3:	//Communicating with Execute #2
 
-			info[0] = PORT_485_2;
+			info[0] = PORT_RS485_2;
 			tx_cmd_motortb_r(TX_N_DEFAULT, 1, mtb_my_control, mtb_my_cur[1], mtb_my_pwm[1]);
 			packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_2, info, SEND_TO_SLAVE);
 
 			//slaves_485_2.xmit.listen = 1;	//Legacy - remove once tested
-			slaves_485_2.xmit.willListenSoon = 1;	//New version
+			//slaves_485_2.xmit.willListenSoon = 1;	//New version
 			ex_refresh_fsm_state++;
 
 			break;
