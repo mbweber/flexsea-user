@@ -5,6 +5,7 @@
 #include <dynamic_user_structs.h>
 #include <flexsea_system.h>
 #include "flexsea_dataformats.h"
+#include <string.h>
 #include <flexsea_cmd_user.h>
 
 #ifdef __cplusplus
@@ -21,6 +22,7 @@
 */
 uint8_t newMetaDataAvailable = 0;
 uint8_t newDataAvailable = 0;
+uint8_t waitingOnFieldFlags = 0;
 
 int dynamicUser_slaveId = -1;
 uint8_t dynamicUser_numFields = 0;
@@ -30,12 +32,18 @@ uint8_t* dynamicUser_fieldLengths = NULL;
 uint8_t* dynamicUser_labelLengths = NULL;
 char** dynamicUser_labels = NULL;
 
+uint8_t* dynamicUser_fieldFlagsPlan = NULL;
+uint8_t* dynamicUser_fieldFlagsExec = NULL;
+
 void* getMemory(void* ptr, int size)
 {
 	if(ptr)
-		realloc(ptr, size);
+        ptr = realloc(ptr, size);
 	else
+	{
 		ptr = malloc(size);
+		memset(ptr, 0, size);
+	}
 
 	return ptr;
 }
@@ -74,7 +82,20 @@ void rx_metaData(uint8_t *buf, uint16_t index)
 		int i;
 		for(i=0; i < numFields; i++)
 			dynamicUser_labels[i] = NULL;
+
+		dynamicUser_fieldFlagsExec =  (uint8_t*) getMemory(dynamicUser_fieldFlagsExec, sizeof(uint8_t)*numFields);
+		dynamicUser_fieldFlagsPlan =  (uint8_t*) getMemory(dynamicUser_fieldFlagsPlan, sizeof(uint8_t)*numFields);
+
+		if(numFields > dynamicUser_numFields)
+        {
+            memset(dynamicUser_fieldTypes + dynamicUser_numFields, 0, numFields - dynamicUser_numFields);
+            memset(dynamicUser_fieldLengths + dynamicUser_numFields, 0, numFields - dynamicUser_numFields);
+            memset(dynamicUser_labelLengths + dynamicUser_numFields, 0, numFields - dynamicUser_numFields);
+            memset(dynamicUser_fieldFlagsExec + dynamicUser_numFields, 0, numFields - dynamicUser_numFields);
+			memset(dynamicUser_fieldFlagsPlan + dynamicUser_numFields, 0, numFields - dynamicUser_numFields);
+		}
 	}
+
 	dynamicUser_numFields = numFields;
 
 	//parse field types
@@ -93,6 +114,8 @@ void rx_metaData(uint8_t *buf, uint16_t index)
 	if(length != lastLength)
 	{
 		dynamicUser_data =  (uint8_t*) getMemory(dynamicUser_data, length);
+        memset(dynamicUser_data, 0, length);
+//        if(length > lastLength)
 		lastLength = length;
 	}
 
@@ -102,9 +125,13 @@ void rx_metaData(uint8_t *buf, uint16_t index)
 	{
 		//parse label length
 		uint8_t labelLength = buf[index++];
-		dynamicUser_labelLengths[i] = labelLength;
+
 		//allocate for label length
-		dynamicUser_labels[i] = (char*) getMemory(dynamicUser_labels[i], labelLength);
+		if(labelLength != dynamicUser_labelLengths[i] || !dynamicUser_labels[i])
+		{
+			dynamicUser_labelLengths[i] = labelLength;
+			dynamicUser_labels[i] = (char*) getMemory(dynamicUser_labels[i], labelLength);
+		}
 
 		//parse  label
 		for(j = 0; j < labelLength; j++)
@@ -112,6 +139,7 @@ void rx_metaData(uint8_t *buf, uint16_t index)
 			dynamicUser_labels[i][j] = buf[index++];
 		}
 	}
+
 	newMetaDataAvailable = 1;
 }
 void rx_data(uint8_t *shBuf, uint16_t index)
@@ -119,17 +147,32 @@ void rx_data(uint8_t *shBuf, uint16_t index)
 	if(!dynamicUser_fieldTypes) return;
 	if(!dynamicUser_data) return;
 
-	uint16_t length = 0;
-	int i;
+	uint8_t totalBytesToRead = shBuf[index++];
+
+	int i, j, fieldLength, fieldOffset = 0, totalBytesRead = 0;
 	for(i = 0; i < dynamicUser_numFields; i++)
 	{
-		length += sizeOfFieldType(dynamicUser_fieldTypes[i]);
-	}
+		fieldLength = 1;
+		if(dynamicUser_fieldTypes[i] < 8 && FORMAT_SIZE_MAP[dynamicUser_fieldTypes[i]] > 0)
+			fieldLength = FORMAT_SIZE_MAP[dynamicUser_fieldTypes[i]];
 
-	uint8_t* readIn = (uint8_t*)(dynamicUser_data);
-	for(i = 0; i < length; i++)
-	{
-		readIn[i] = shBuf[index++];
+		if(dynamicUser_fieldFlagsExec[i])
+		{
+			for(j = 0; j < fieldLength && totalBytesRead < totalBytesToRead; j++)
+			{
+				dynamicUser_data[fieldOffset + j] = shBuf[index++];
+				totalBytesRead++;
+			}
+		}
+		else
+		{
+			for(j = 0; j < fieldLength; j++)
+			{
+				dynamicUser_data[fieldOffset + j] = 0;
+			}
+		}
+
+		fieldOffset += fieldLength;
 	}
 
 	newDataAvailable = 1;
@@ -137,12 +180,19 @@ void rx_data(uint8_t *shBuf, uint16_t index)
 
 void rx_cmd_user_dyn_rr(uint8_t *buf, uint8_t *info)
 {
+	(void)info;
+
 	uint16_t index = P_DATA1;
 
-	uint8_t sentMetaData = (buf[index++] == SEND_METADATA);
-	if(sentMetaData)
+	uint8_t flag = buf[index++];
+	if(flag == SEND_METADATA)
 	{
 		rx_metaData(buf, index);
+	}
+	else if(flag == SEND_FIELD_FLAGS)
+	{
+		if(!unpackFieldFlags(buf+index, dynamicUser_fieldFlagsExec, dynamicUser_numFields))
+			waitingOnFieldFlags = 0;
 	}
 	else
 	{
@@ -161,22 +211,14 @@ void tx_cmd_user_dyn_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t 
 	*len = index;
 }
 
-void tx_cmd_user_dyn_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t *len, \
-						uint8_t numOffsets, uint8_t* offsets)
+void tx_cmd_user_dyn_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t *len)
 {
-	numOffsets = numOffsets > 0 ? numOffsets : 0;
 
 	*cmd = CMD_USER_DYNAMIC;
-	*cmdType = CMD_READ;
+	*cmdType = CMD_WRITE;
 
-	uint16_t index = 0;
-	shBuf[index++] = numOffsets;
-	int i;
-	for(i = 0; i < numOffsets; i++)
-	{
-		shBuf[index++] = offsets[i];
-	}
-
+	uint16_t index = packFieldFlags(shBuf, dynamicUser_numFields, dynamicUser_fieldFlagsPlan);
+	waitingOnFieldFlags = 1;
 	*len = index;
 }
 
