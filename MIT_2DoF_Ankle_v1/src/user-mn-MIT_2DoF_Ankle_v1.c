@@ -34,9 +34,12 @@
 // Include(s)
 //****************************************************************************
 
-#include "../inc/user-ex-MIT_2DoF_Ankle_v1.h"
+#include "user-mn-MIT_2DoF_Ankle_v1.h"
+#include "cmd-MIT_2DoF_Ankle_v1.h"
 #include <flexsea_comm.h>
 #include <math.h>
+#include "flexsea_sys_def.h"
+#include "flexsea_system.h"
 
 //****************************************************************************
 // Variable(s)
