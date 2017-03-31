@@ -40,9 +40,7 @@ const char* fieldLabels[DYNAMIC_USER_NUM_FIELDS] = {"a", "b"};
 const uint8_t fieldTypes[DYNAMIC_USER_NUM_FIELDS] = {FORMAT_32S, FORMAT_32S, FORMAT_32S, FORMAT_16U};
 // Keep your label names short, each character is a byte, which takes a lot of memory to send in one packet
 // If label names are too long we may fail to send meta data info to plan.
-const char* fieldLabels[DYNAMIC_USER_NUM_FIELDS] = {"a", "b", "c", "d"};
-
-
+const char* fieldLabels[DYNAMIC_USER_NUM_FIELDS] = {"variable1", "variable2", "variable3", "variable4"};
 
 static uint8_t fieldFlags[DYNAMIC_USER_NUM_FIELDS] = {0};
 
@@ -158,6 +156,49 @@ void tx_cmd_user_dyn_sendData(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, ui
     *len = index;
 }
 
+void tx_overall_metadata(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t *len)
+{
+    *cmd = CMD_USER_DYNAMIC;
+    *cmdType = CMD_WRITE;
+
+    uint16_t index = 0;
+
+    shBuf[index++] = SEND_METADATA;
+    //Number of fields
+    shBuf[index++] = DYNAMIC_USER_NUM_FIELDS;
+	
+	uint16_t totalBytes = sizeof(DynamicUserData_t) / sizeof(uint8_t);
+	shBuf[index++] = totalBytes;
+    *len = index;
+}
+
+void tx_offset_metadata(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t *len, uint8_t offset)
+{
+	if(offset >= DYNAMIC_USER_NUM_FIELDS) return;
+
+    *cmd = CMD_USER_DYNAMIC;
+    *cmdType = CMD_WRITE;
+
+    uint16_t index = 0;
+
+    shBuf[index++] = SEND_METADATA;
+    //Number of fields
+    shBuf[index++] = offset;
+	shBuf[index++] = fieldTypes[offset];
+	
+	uint16_t labelLength = strlen(fieldLabels[offset]);
+	shBuf[index++] = labelLength;
+	
+	int j;
+    for(j = 0; j < labelLength; j++)
+    {
+        shBuf[index++] = fieldLabels[offset][j];
+    }
+
+    *len = index;	
+	
+}
+
 void rx_cmd_user_dyn_r(uint8_t *buf, uint8_t *info)
 {
     uint16_t index = P_DATA1;
@@ -165,7 +206,27 @@ void rx_cmd_user_dyn_r(uint8_t *buf, uint8_t *info)
     (void)buf;
 
     if(shouldSendMetaData == SEND_METADATA)
-        tx_cmd_user_dyn_sendMetaData(TX_N_DEFAULT);
+	{
+		uint8_t offset = buf[index++];
+		if(offset == 0xFF)
+		{
+			tx_overall_metadata(TX_N_DEFAULT);
+		}
+		else if(offset < DYNAMIC_USER_NUM_FIELDS)
+		{
+			volatile int x=1;
+			if(offset == 1)
+			{
+				x*=3;
+			}
+			if(offset == 2)
+			{
+				x*=2;
+			}
+			
+			tx_offset_metadata(TX_N_DEFAULT, offset);
+		}
+	}
     else
     {
         tx_cmd_user_dyn_sendData(TX_N_DEFAULT);
