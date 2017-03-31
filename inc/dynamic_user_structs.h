@@ -64,6 +64,7 @@ extern DynamicUserData_t dynamicUserData;
 #ifdef BOARD_TYPE_FLEXSEA_PLAN
 
 extern uint8_t newMetaDataAvailable;
+extern uint8_t packAndSendOffsetRequest;
 extern uint8_t newDataAvailable;
 extern uint8_t waitingOnFieldFlags;
 
@@ -71,7 +72,7 @@ extern int dynamicUser_slaveId;
 extern uint8_t* dynamicUser_data;
 extern uint8_t dynamicUser_numFields;
 extern uint8_t* dynamicUser_fieldTypes;
-extern uint8_t* dynamicUser_fieldLengths;
+//extern uint8_t* dynamicUser_fieldLengths;
 extern uint8_t* dynamicUser_labelLengths;
 extern char** dynamicUser_labels;
 
