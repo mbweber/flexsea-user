@@ -38,12 +38,22 @@
 
 #include <stdint.h>
 
-//The following are for the user to define in dynamic_user_structs_common.c
-struct DynamicUserData_s;
+#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
+volatile struct DynamicUserData_s
+{
+	int a;
+	int b;
+	int c;
+	uint16_t d;
+} __attribute__ ((packed));
+extern DynamicUserData_t dynamicUserData;
 
+//The following are for the user to define in dynamic_user_structs_common.c
 typedef struct DynamicUserData_s DynamicUserData_t;
-// you may also wish to typedef this type to a more convenient name
+
+// you may also wish to typedef this type to another more convenient name
 // typedef struct DynamicUserData_s YourNameHere_t
+#endif
 
 void tx_cmd_user_dyn_r(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t *len, \
 						uint8_t sendMetaData);
@@ -57,10 +67,6 @@ void rx_cmd_user_dyn_rr(uint8_t *buf, uint8_t *info);
 
 void init_flexsea_payload_ptr_dynamic();
 
-#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
-extern DynamicUserData_t dynamicUserData;
-#endif
-
 #ifdef BOARD_TYPE_FLEXSEA_PLAN
 
 extern uint8_t newMetaDataAvailable;
@@ -72,7 +78,6 @@ extern int dynamicUser_slaveId;
 extern uint8_t* dynamicUser_data;
 extern uint8_t dynamicUser_numFields;
 extern uint8_t* dynamicUser_fieldTypes;
-//extern uint8_t* dynamicUser_fieldLengths;
 extern uint8_t* dynamicUser_labelLengths;
 extern char** dynamicUser_labels;
 

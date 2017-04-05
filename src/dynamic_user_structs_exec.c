@@ -18,14 +18,6 @@
 	- (one time message in tx_..._w, which would tell us which offsets to send)
 */
 
-volatile struct DynamicUserData_s
-{
-    int a;
-    int b;
-	int c;
-	uint16_t d;
-};
-
 DynamicUserData_t dynamicUserData;
 /*
 #define DYNAMIC_USER_NUM_FIELDS  2
