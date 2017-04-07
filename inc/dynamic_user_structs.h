@@ -46,10 +46,11 @@ volatile struct DynamicUserData_s
 	int c;
 	uint16_t d;
 } __attribute__ ((packed));
-extern DynamicUserData_t dynamicUserData;
 
 //The following are for the user to define in dynamic_user_structs_common.c
 typedef struct DynamicUserData_s DynamicUserData_t;
+
+extern DynamicUserData_t dynamicUserData;
 
 // you may also wish to typedef this type to another more convenient name
 // typedef struct DynamicUserData_s YourNameHere_t
