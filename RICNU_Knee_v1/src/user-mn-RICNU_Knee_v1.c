@@ -35,8 +35,12 @@
 // Include(s)
 //****************************************************************************
 
-#include "../inc/user-mn-RICNU_Knee_v1.h"
+#include "user-mn-RICNU_Knee_v1.h"
+#include "cmd-RICNU_Knee_v1.h"
 #include <math.h>
+#include "flexsea_system.h"
+#include "flexsea_sys_def.h"
+#include "flexsea.h"
 
 //****************************************************************************
 // Variable(s)
@@ -138,7 +142,7 @@ void ricnu_knee_fsm_2(void)
 
 	static uint8_t ex_refresh_fsm_state = 0;
 	static uint32_t timer = 0;
-	uint8_t info[2] = {PORT_485_1, PORT_485_1};
+	uint8_t info[2] = {PORT_RS485_1, PORT_RS485_1};
 
 	//This FSM talks to the slaves at 250Hz each
 	switch(ex_refresh_fsm_state)
@@ -160,12 +164,12 @@ void ricnu_knee_fsm_2(void)
 
 		case 1:	//Communicating with Execute #1, offset = 0
 
-			info[0] = PORT_485_1;
+			info[0] = PORT_RS485_1;
 			tx_cmd_ricnu_rw(TX_N_DEFAULT, 0, my_ricnu_control, my_ricnu_pwm, KEEP, 0, 0, 0, 0);
 			packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_1, info, SEND_TO_SLAVE);
 
 			//slaves_485_1.xmit.listen = 1;	//Legacy - remove once tested
-			slaves_485_1.xmit.willListenSoon = 1;	//New version
+			//slaves_485_1.xmit.willListenSoon = 1;	//New version
 			ex_refresh_fsm_state++;
 
 			break;
@@ -179,12 +183,12 @@ void ricnu_knee_fsm_2(void)
 
 		case 3:	//Communicating with Execute #1, offset = 1
 
-			info[0] = PORT_485_1;
+			info[0] = PORT_RS485_1;
 			tx_cmd_ricnu_rw(TX_N_DEFAULT, 1, my_ricnu_control, my_ricnu_pwm, KEEP, 0, 0, 0, 0);
 			packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_1, info, SEND_TO_SLAVE);
 
 			//slaves_485_1.xmit.listen = 1;	//Legacy - remove once tested
-			slaves_485_1.xmit.willListenSoon = 1;	//New version
+			//slaves_485_1.xmit.willListenSoon = 1;	//New version
 			ex_refresh_fsm_state++;
 
 			break;
