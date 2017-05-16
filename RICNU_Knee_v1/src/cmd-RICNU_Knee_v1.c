@@ -342,29 +342,29 @@ void rx_cmd_ricnu_rr(uint8_t *buf, uint8_t *info)
 		if(offset == 0)
 		{
 			//Typical Execute variables, + new encoders:
-			rn->ex.gyro.x = (int16_t) REBUILD_UINT16(buf, &index);
-			rn->ex.gyro.y = (int16_t) REBUILD_UINT16(buf, &index);
-			rn->ex.gyro.z = (int16_t) REBUILD_UINT16(buf, &index);
-			rn->ex.accel.x = (int16_t) REBUILD_UINT16(buf, &index);
-			rn->ex.accel.y = (int16_t) REBUILD_UINT16(buf, &index);
-			rn->ex.accel.z = (int16_t) REBUILD_UINT16(buf, &index);
+			rn->ex->gyro.x = (int16_t) REBUILD_UINT16(buf, &index);
+			rn->ex->gyro.y = (int16_t) REBUILD_UINT16(buf, &index);
+			rn->ex->gyro.z = (int16_t) REBUILD_UINT16(buf, &index);
+			rn->ex->accel.x = (int16_t) REBUILD_UINT16(buf, &index);
+			rn->ex->accel.y = (int16_t) REBUILD_UINT16(buf, &index);
+			rn->ex->accel.z = (int16_t) REBUILD_UINT16(buf, &index);
 			rn->enc_motor = (int32_t) REBUILD_UINT32(buf, &index);
 			rn->enc_joint = (int32_t) REBUILD_UINT32(buf, &index);
-			rn->ex.current = (int16_t) REBUILD_UINT16(buf, &index);
-			rn->ex.sine_commut_pwm = (int16_t) REBUILD_UINT16(buf, &index);
+			rn->ex->current = (int16_t) REBUILD_UINT16(buf, &index);
+			rn->ex->sine_commut_pwm = (int16_t) REBUILD_UINT16(buf, &index);
 		}
 		else if(offset == 1)
 		{
 			//Strain amplifier:
-			rn->st.compressedBytes[0] = buf[index++];
-			rn->st.compressedBytes[1] = buf[index++];
-			rn->st.compressedBytes[2] = buf[index++];
-			rn->st.compressedBytes[3] = buf[index++];
-			rn->st.compressedBytes[4] = buf[index++];
-			rn->st.compressedBytes[5] = buf[index++];
-			rn->st.compressedBytes[6] = buf[index++];
-			rn->st.compressedBytes[7] = buf[index++];
-			rn->st.compressedBytes[8] = buf[index++];
+			rn->st->compressedBytes[0] = buf[index++];
+			rn->st->compressedBytes[1] = buf[index++];
+			rn->st->compressedBytes[2] = buf[index++];
+			rn->st->compressedBytes[3] = buf[index++];
+			rn->st->compressedBytes[4] = buf[index++];
+			rn->st->compressedBytes[5] = buf[index++];
+			rn->st->compressedBytes[6] = buf[index++];
+			rn->st->compressedBytes[7] = buf[index++];
+			rn->st->compressedBytes[8] = buf[index++];
 
 			#ifdef BOARD_TYPE_FLEXSEA_PLAN
 				//Battery board:
@@ -394,7 +394,7 @@ void rx_cmd_ricnu_rr(uint8_t *buf, uint8_t *info)
 		}
 
 		//Copy RICNU to Exec:
-		*ex = rn->ex;
+		ex = &rn->ex;
 
 	#endif	//((defined BOARD_TYPE_FLEXSEA_MANAGE) || (defined BOARD_TYPE_FLEXSEA_PLAN))
 }
