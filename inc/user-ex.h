@@ -168,7 +168,7 @@ void user_fsm(void);
 	#define USE_USB
 	#define USE_COMM			//Requires USE_RS485 and/or USE_USB
 	//#define USE_QEI
-	#define USE_TRAPEZ
+	//#define USE_TRAPEZ
 	#define USE_I2C_0			//3V3, IMU & Expansion.
 	#define USE_I2C_1			//5V, Safety-CoP & strain gauge pot.
 	#define USE_IMU				//Requires USE_I2C_0
@@ -308,7 +308,7 @@ void user_fsm(void);
 	#define USE_AS5047			//16-bit Position Sensor, SPI
 	//#define USE_MINM_RGB		//External RGB LED. Requires USE_I2C_0.
 	#define USE_EEPROM			//Non-volatile memory, EEPROM
-	//#define USE_FLASH			//Non-volatile memory, FLASH
+	#define USE_FLASH			//Non-volatile memory, FLASH
 	//#define USE_BLUETOOTH		//Bluetooth module on EX12/EX13
 	#define USE_I2T_LIMIT		//I2t current limit
 	#define USE_EXT_I2C_STRAIN	//External Strain Amplifier, on I2C0
@@ -317,7 +317,7 @@ void user_fsm(void);
 	//Motor type, direction and commutation:
 	#define MOTOR_COMMUT 			COMMUT_SINE
 	#define MOTOR_TYPE				MOTOR_BRUSHLESS
-	#define PWM_SIGN				1
+	#define MOTOR_ORIENTATION 		CLOCKWISE_ORIENTATION
 
 	//Define if you want to find the poles:
 	//#define FINDPOLES
@@ -338,6 +338,7 @@ void user_fsm(void);
 	#define ENC_COMMUT				ENC_AS5047
 	#define ENC_DISPLAY				ENC_CONTROL
 
+	/*
 	//Control encoder function:
 	#if (ENC_CONTROL == ENC_AS5047)
 		#define CTRL_ENC_FCT(x) 		(x)	//ToDo make better
@@ -346,9 +347,10 @@ void user_fsm(void);
 		#define CTRL_ENC_FCT(x) 		(x)	//ToDo make better
 		#define CTRL_ENC_VEL_FCT(x) 	((x>>8))	//encoder velocity is measured in clicks/ms x 1024
 	#endif
+	*/
 
 	//Project specific definitions:
-	#define CURRENT_ZERO			((int32)2065)
+	#define CURRENT_ZERO			((int32)2048)
 
 	//Slave ID:
 	#define SLAVE_ID				FLEXSEA_EXECUTE_1
