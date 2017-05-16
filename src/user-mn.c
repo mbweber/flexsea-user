@@ -47,6 +47,11 @@ struct ankle2dof_s ankle2dof_left, ankle2dof_right;
 
 #endif	//PROJECT_ANKLE_2DOF
 
+//Dev
+#if(ACTIVE_PROJECT == PROJECT_DEV)
+#include "dev.h"
+#endif	//PROJECT_MOTORTB
+
 //****************************************************************************
 // Private Function Prototype(s):
 //****************************************************************************
@@ -91,6 +96,11 @@ void user_fsm_1(void)
 	#if(ACTIVE_PROJECT == PROJECT_MOTORTB)
 	MotorTestBench_fsm_1();
 	#endif	//PROJECT_MOTORTB
+
+	//Dev
+	#if(ACTIVE_PROJECT == PROJECT_DEV)
+	dev_fsm_1();
+	#endif	//PROJECT_MOTORTB
 }
 
 //Optional second FSM
@@ -110,6 +120,11 @@ void user_fsm_2(void)
 	//Motor Test Bench
 	#if(ACTIVE_PROJECT == PROJECT_MOTORTB)
 	MotorTestBench_fsm_2();
+	#endif	//PROJECT_MOTORTB
+
+	//Dev
+	#if(ACTIVE_PROJECT == PROJECT_DEV)
+	dev_fsm_2();
 	#endif	//PROJECT_MOTORTB
 }
 
