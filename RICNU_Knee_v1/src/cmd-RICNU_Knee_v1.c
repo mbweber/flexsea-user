@@ -50,6 +50,7 @@ extern "C" {
 #include "analog.h"
 #include "motor.h"
 #include "control.h"
+#include "mag_encoders.h"
 #endif	//BOARD_TYPE_FLEXSEA_EXECUTE
 
 //****************************************************************************
@@ -140,7 +141,7 @@ void tx_cmd_ricnu_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 			SPLIT_16((uint16_t)imu.accel.y, shBuf, &index);
 			SPLIT_16((uint16_t)imu.accel.z, shBuf, &index);
 			SPLIT_32((uint32_t)(*exec1.enc_ang), shBuf, &index);
-			SPLIT_32((uint32_t)1234, shBuf, &index);	//ToDo should be AS5048 *******
+			SPLIT_32((uint32_t)as5048b.ang_abs_clks, shBuf, &index);
 			SPLIT_16((uint16_t)ctrl.current.actual_val, shBuf, &index);
 			SPLIT_16((uint16_t)exec1.sine_commut_pwm, shBuf, &index);
 			//(24 bytes)
