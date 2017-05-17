@@ -394,8 +394,9 @@ void rx_cmd_ricnu_rr(uint8_t *buf, uint8_t *info)
 			//...
 		}
 
-		//Copy RICNU to Exec:
-		ex = &rn->ex;
+		//Copy RICNU to Exec (that way we refresh the Execute window):
+		ex = rn->ex;
+		*(ex->enc_ang) = rn->enc_motor;
 
 	#endif	//((defined BOARD_TYPE_FLEXSEA_MANAGE) || (defined BOARD_TYPE_FLEXSEA_PLAN))
 }
