@@ -197,30 +197,30 @@ void tx_cmd_ricnu_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 		//Arguments:
 		if(offset == 0)
 		{
-			SPLIT_16((uint16_t)rn->ex.gyro.x, shBuf, &index);
-			SPLIT_16((uint16_t)rn->ex.gyro.y, shBuf, &index);
-			SPLIT_16((uint16_t)rn->ex.gyro.z, shBuf, &index);
-			SPLIT_16((uint16_t)rn->ex.accel.x, shBuf, &index);
-			SPLIT_16((uint16_t)rn->ex.accel.y, shBuf, &index);
-			SPLIT_16((uint16_t)rn->ex.accel.z, shBuf, &index);
+			SPLIT_16((uint16_t)rn->ex->gyro.x, shBuf, &index);
+			SPLIT_16((uint16_t)rn->ex->gyro.y, shBuf, &index);
+			SPLIT_16((uint16_t)rn->ex->gyro.z, shBuf, &index);
+			SPLIT_16((uint16_t)rn->ex->accel.x, shBuf, &index);
+			SPLIT_16((uint16_t)rn->ex->accel.y, shBuf, &index);
+			SPLIT_16((uint16_t)rn->ex->accel.z, shBuf, &index);
 			SPLIT_32((uint32_t)rn->enc_motor, shBuf, &index);
 			SPLIT_32((uint32_t)rn->enc_joint, shBuf, &index);
-			SPLIT_16((uint16_t)rn->ex.current, shBuf, &index);
-			SPLIT_16((uint16_t)rn->ex.sine_commut_pwm, shBuf, &index);
+			SPLIT_16((uint16_t)rn->ex->current, shBuf, &index);
+			SPLIT_16((uint16_t)rn->ex->sine_commut_pwm, shBuf, &index);
 			//(24 bytes)
 		}
 		else if(offset == 1)
 		{
 			//Compressed Strain:
-			shBuf[index++] = rn->st.compressedBytes[0];
-			shBuf[index++] = rn->st.compressedBytes[1];
-			shBuf[index++] = rn->st.compressedBytes[2];
-			shBuf[index++] = rn->st.compressedBytes[3];
-			shBuf[index++] = rn->st.compressedBytes[4];
-			shBuf[index++] = rn->st.compressedBytes[5];
-			shBuf[index++] = rn->st.compressedBytes[6];
-			shBuf[index++] = rn->st.compressedBytes[7];
-			shBuf[index++] = rn->st.compressedBytes[8];
+			shBuf[index++] = rn->st->compressedBytes[0];
+			shBuf[index++] = rn->st->compressedBytes[1];
+			shBuf[index++] = rn->st->compressedBytes[2];
+			shBuf[index++] = rn->st->compressedBytes[3];
+			shBuf[index++] = rn->st->compressedBytes[4];
+			shBuf[index++] = rn->st->compressedBytes[5];
+			shBuf[index++] = rn->st->compressedBytes[6];
+			shBuf[index++] = rn->st->compressedBytes[7];
+			shBuf[index++] = rn->st->compressedBytes[8];
 
 			//Battery board?
 			#ifdef USE_BATTBOARD
