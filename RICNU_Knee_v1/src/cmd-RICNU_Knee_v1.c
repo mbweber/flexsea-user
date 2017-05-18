@@ -53,6 +53,10 @@ extern "C" {
 #include "mag_encoders.h"
 #endif	//BOARD_TYPE_FLEXSEA_EXECUTE
 
+#ifdef BOARD_TYPE_FLEXSEA_MANAGE
+#include "user-mn.h"
+#endif	//BOARD_TYPE_FLEXSEA_MANAGE
+
 //****************************************************************************
 // Variable(s)
 //****************************************************************************
