@@ -69,7 +69,7 @@ void user_fsm_2(void);
 //****************************************************************************
 
 //List of projects:
-#define PROJECT_BAREBONE		0	//Barebone Execute, default option.
+#define PROJECT_BAREBONE		0	//Barebone Manage, default option.
 #define PROJECT_ANKLE_2DOF		1	//Biomechatronics 2-DOF Ankle
 #define PROJECT_RICNU_KNEE		3	//RIC/NU Knee
 #define PROJECT_MOTORTB			4
