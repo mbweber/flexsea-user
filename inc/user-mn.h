@@ -104,6 +104,7 @@ void user_fsm_2(void);
 	//#define USE_FLASH_MEM		//FLASH memory
 	//#define USE_COMM_TEST		//Comm. characterization tool
 	#define USE_UART3			//Expansion UART
+	//#define USE_BATTBOARD		//Battery Board, requires USE_I2C_2
 
 	//Runtime finite state machine (FSM):
 	#define RUNTIME_FSM1		DISABLED
@@ -124,7 +125,7 @@ void user_fsm_2(void);
 	#define USE_I2C_1			//3V3, IMU & Digital pot
 	#define USE_I2C_2			//3V3, Expansion
 	#define USE_IMU				//Requires USE_I2C_1
-	#define USE_BATTBOARD		//Battery Board, requires USE_I2C_1
+	#define USE_BATTBOARD		//Battery Board, requires USE_I2C_2
 
 	//Runtime finite state machine (FSM):
 	//Disable both FSM to use manage as a passthru
