@@ -102,7 +102,7 @@ void user_fsm_1(void)
 		//Dev
 		#if(ACTIVE_PROJECT == PROJECT_DEV)
 		dev_fsm_1();
-		#endif	//PROJECT_MOTORTB
+		#endif	//PROJECT_DEV
 
 	#endif
 }
@@ -131,7 +131,7 @@ void user_fsm_2(void)
 		//Dev
 		#if(ACTIVE_PROJECT == PROJECT_DEV)
 		dev_fsm_2();
-		#endif	//PROJECT_MOTORTB
+		#endif	//PROJECT_DEV
 
 	#endif
 }

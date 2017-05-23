@@ -187,11 +187,9 @@ void ricnu_knee_fsm_2(void)
 
 		case 3:	//Communicating with Execute #1, offset = 1
 
-			/*
 			info[0] = PORT_RS485_1;
 			tx_cmd_ricnu_rw(TX_N_DEFAULT, 1, my_ricnu_control, my_ricnu_pwm, KEEP, 0, 0, 0, 0);
 			packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_1, info, SEND_TO_SLAVE);
-			*/
 			ex_refresh_fsm_state++;
 
 			break;
