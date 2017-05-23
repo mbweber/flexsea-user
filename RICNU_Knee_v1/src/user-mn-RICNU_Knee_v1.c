@@ -50,6 +50,7 @@
 uint8_t my_ricnu_control = CTRL_NONE;
 int16_t my_ricnu_pwm = 0;
 int16_t my_ricnu_cur = 0;
+uint8_t offset = 0;
 
 //****************************************************************************
 // Private Function Prototype(s):
@@ -67,6 +68,10 @@ void init_ricnu_knee(void)
 	//Default init state:
 	my_ricnu_control = CTRL_NONE;
 	my_ricnu_pwm = 0;
+
+	//Data structures:
+	ricnu_1.ex = &exec1;
+	ricnu_1.st = &strain1;
 }
 
 //Knee Finite State Machine.
@@ -165,7 +170,9 @@ void ricnu_knee_fsm_2(void)
 		case 1:	//Communicating with Execute #1, offset = 0
 
 			info[0] = PORT_RS485_1;
-			tx_cmd_ricnu_rw(TX_N_DEFAULT, 0, my_ricnu_control, my_ricnu_pwm, KEEP, 0, 0, 0, 0);
+			offset++;
+			offset %= 2;
+			tx_cmd_ricnu_rw(TX_N_DEFAULT, offset, my_ricnu_control, my_ricnu_pwm, KEEP, 0, 0, 0, 0);
 			packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_1, info, SEND_TO_SLAVE);
 			ex_refresh_fsm_state++;
 
