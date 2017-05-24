@@ -369,14 +369,14 @@ void rx_cmd_ricnu_rr(uint8_t *buf, uint8_t *info)
 
 			#ifdef BOARD_TYPE_FLEXSEA_PLAN
 				//Battery board:
-				batt1.rawBytes[0] = buf[index++];
-				batt1.rawBytes[1] = buf[index++];
-				batt1.rawBytes[2] = buf[index++];
-				batt1.rawBytes[3] = buf[index++];
-				batt1.rawBytes[4] = buf[index++];
-				batt1.rawBytes[5] = buf[index++];
-				batt1.rawBytes[6] = buf[index++];
-				batt1.rawBytes[7] = buf[index++];
+				rn->batt->rawBytes[0] = buf[index++];
+				rn->batt->rawBytes[1] = buf[index++];
+				rn->batt->rawBytes[2] = buf[index++];
+				rn->batt->rawBytes[3] = buf[index++];
+				rn->batt->rawBytes[4] = buf[index++];
+				rn->batt->rawBytes[5] = buf[index++];
+				rn->batt->rawBytes[6] = buf[index++];
+				rn->batt->rawBytes[7] = buf[index++];
 			#endif
 		}
 		else if(offset == 2)
