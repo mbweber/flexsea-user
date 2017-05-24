@@ -50,6 +50,7 @@
 uint8_t my_ricnu_control = CTRL_NONE;
 int16_t my_ricnu_pwm = 0;
 int16_t my_ricnu_cur = 0;
+uint8_t offset = 0;
 
 //****************************************************************************
 // Private Function Prototype(s):
@@ -67,6 +68,10 @@ void init_ricnu_knee(void)
 	//Default init state:
 	my_ricnu_control = CTRL_NONE;
 	my_ricnu_pwm = 0;
+
+	//Data structures:
+	ricnu_1.ex = &exec1;
+	ricnu_1.st = &strain1;
 }
 
 //Knee Finite State Machine.
@@ -99,7 +104,7 @@ void ricnu_knee_fsm_1(void)
 				state = 1;
 			}
 
-            break;
+			break;
 
 		case 1:	//PWM = 100 for 5s
 
@@ -111,9 +116,9 @@ void ricnu_knee_fsm_1(void)
 				state = 2;
 			}
 
-            break;
+			break;
 
-        case 2:	//PWM = 0 for 5s
+		case 2:	//PWM = 0 for 5s
 
 			my_ricnu_pwm = 0;
 
@@ -123,9 +128,9 @@ void ricnu_knee_fsm_1(void)
 				state = 1;
 			}
 
-            break;
+			break;
 
-        default:
+		default:
 			//Handle exceptions here
 			break;
 	}
@@ -165,11 +170,10 @@ void ricnu_knee_fsm_2(void)
 		case 1:	//Communicating with Execute #1, offset = 0
 
 			info[0] = PORT_RS485_1;
-			tx_cmd_ricnu_rw(TX_N_DEFAULT, 0, my_ricnu_control, my_ricnu_pwm, KEEP, 0, 0, 0, 0);
+			offset++;
+			offset %= 2;
+			tx_cmd_ricnu_rw(TX_N_DEFAULT, offset, my_ricnu_control, my_ricnu_pwm, KEEP, 0, 0, 0, 0);
 			packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_1, info, SEND_TO_SLAVE);
-
-			//slaves_485_1.xmit.listen = 1;	//Legacy - remove once tested
-			//slaves_485_1.xmit.willListenSoon = 1;	//New version
 			ex_refresh_fsm_state++;
 
 			break;
@@ -186,9 +190,6 @@ void ricnu_knee_fsm_2(void)
 			info[0] = PORT_RS485_1;
 			tx_cmd_ricnu_rw(TX_N_DEFAULT, 1, my_ricnu_control, my_ricnu_pwm, KEEP, 0, 0, 0, 0);
 			packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_1, info, SEND_TO_SLAVE);
-
-			//slaves_485_1.xmit.listen = 1;	//Legacy - remove once tested
-			//slaves_485_1.xmit.willListenSoon = 1;	//New version
 			ex_refresh_fsm_state++;
 
 			break;

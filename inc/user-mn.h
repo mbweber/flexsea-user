@@ -39,22 +39,12 @@
 // Include(s)
 //****************************************************************************
 
+#include "flexsea_sys_def.h"
 #include "user-mn-RICNU_Knee_v1.h"
 #include "user-mn-MIT_2DoF_Ankle_v1.h"
 #include "user-mn-MotorTestBench.h"
 #include  "flexsea_global_structs.h"
 //Add your project specific user_x.h file here
-
-//****************************************************************************
-// Shared variable(s)
-//****************************************************************************
-
-//MIT Ankle 2-DoF:
-#if(ACTIVE_PROJECT == PROJECT_ANKLE_2DOF)
-
-extern struct ankle2dof_s ankle2dof_left, ankle2dof_right;
-
-#endif	//PROJECT_ANKLE_2DOF
 
 //****************************************************************************
 // Public Function Prototype(s):
@@ -85,7 +75,7 @@ void user_fsm_2(void);
 //Step 1) Select active project (from list):
 //==========================================
 
-#define ACTIVE_PROJECT			PROJECT_BAREBONE
+#define ACTIVE_PROJECT			PROJECT_RICNU_KNEE
 #define ACTIVE_SUBPROJECT		SUBPROJECT_NONE
 
 //Step 2) Customize the enabled/disabled sub-modules:
@@ -99,11 +89,12 @@ void user_fsm_2(void);
 	#define USE_USB
 	#define USE_COMM			//Requires USE_RS485 and/or USE_USB
 	#define USE_I2C_1			//3V3, IMU & Digital pot
-	//#define USE_I2C_2			//3V3, Expansion
+	#define USE_I2C_2			//3V3, Expansion
 	#define USE_IMU				//Requires USE_I2C_1
 	//#define USE_FLASH_MEM		//FLASH memory
 	//#define USE_COMM_TEST		//Comm. characterization tool
 	#define USE_UART3			//Expansion UART
+	#define USE_BATTBOARD		//Battery Board, requires USE_I2C_2
 
 	//Runtime finite state machine (FSM):
 	#define RUNTIME_FSM1		DISABLED
@@ -124,12 +115,12 @@ void user_fsm_2(void);
 	#define USE_I2C_1			//3V3, IMU & Digital pot
 	#define USE_I2C_2			//3V3, Expansion
 	#define USE_IMU				//Requires USE_I2C_1
-	#define USE_BATTBOARD		//Battery Board, requires USE_I2C_1
+	#define USE_BATTBOARD		//Battery Board, requires USE_I2C_2
 
 	//Runtime finite state machine (FSM):
 	//Disable both FSM to use manage as a passthru
-	#define RUNTIME_FSM1		DISABLED 	// Control
-	#define RUNTIME_FSM2		ENABLED 	//
+	#define RUNTIME_FSM1		DISABLED 	//Control
+	#define RUNTIME_FSM2		ENABLED 	//Comm w/ Execute 1
 	//FSM2: Communication, we enabled this state machine to send data
 	//back to the GUI.  Manage will now control execute, rather than the GUI.
 
@@ -214,6 +205,17 @@ struct ankle2dof_s
 	uint8_t ctrl_i;					//Current
 	struct gains_s ctrl_i_gains;	//Current controller gains
 };
+
+//****************************************************************************
+// Shared variable(s)
+//****************************************************************************
+
+//MIT Ankle 2-DoF:
+#if(ACTIVE_PROJECT == PROJECT_ANKLE_2DOF)
+
+extern struct ankle2dof_s ankle2dof_left, ankle2dof_right;
+
+#endif	//PROJECT_ANKLE_2DOF
 
 #endif	//INC_USER_H
 

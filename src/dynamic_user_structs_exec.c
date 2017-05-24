@@ -90,32 +90,12 @@ void tx_cmd_user_dyn_sendFieldFlags(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdTy
     *len = index;
 }
 
-float quickSin(int y)
-{
-	y %= 360;
-	float x = y > 180 ? -360+y : y;
-
-	x = x * 314 / 18000;
-
-	float x3 = x*x*x;
-	float x5 = x3*x*x;
-	float x7 = x5*x*x;
-	float x9 = x7*x*x;
-
-	return x - x3/6 + x5/120 - x7/5040 + x9/362880;
-}
-
 void tx_cmd_user_dyn_sendData(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, uint16_t *len)
 {
     *cmd = CMD_USER_DYNAMIC;
     *cmdType = CMD_WRITE;
     uint16_t index = 0;
-
-	static int x = 0;
-	x++;
-	dynamicUserData.a = 100 * quickSin(x);
-	dynamicUserData.b = 100 * quickSin(x/2);
-
+    
     shBuf[index++] = SEND_DATA;
     //we save a byte to write total number of dynamicUserData bytes written
     uint16_t indexOfTotalBytesWritten = index++;

@@ -37,7 +37,7 @@
 
 #ifndef INC_USER_EX_H
 #define INC_USER_EX_H
-	
+
 //****************************************************************************
 // Include(s)
 //****************************************************************************
@@ -134,19 +134,19 @@ void user_fsm(void);
 	//#define USE_FLASH			//
 	//#define USE_BLUETOOTH		//
 	#define USE_I2T_LIMIT		//I2t current limit
-	
+
 	#define RUNTIME_FSM	 		DISABLED
-	
+
 	//Motor type, direction and commutation:
 	#define MOTOR_TYPE			MOTOR_BRUSHLESS
 	#define MOTOR_COMMUT 		COMMUT_NONE
 	#define CURRENT_ZERO		((int32)2048)
-	
+
 	//Encoders:
 	#define ENC_CONTROL			ENC_NONE
 	#define ENC_COMMUT			ENC_NONE
 	#define ENC_DISPLAY			ENC_NONE
-	
+
 	//Control encoder function:
 	#define PWM_SIGN			1
 	#define CTRL_ENC_FCT(x) 	(x)
@@ -201,7 +201,7 @@ void user_fsm(void);
 	#define ENC_CONTROL			ENC_AS5047
 	#define ENC_COMMUT			ENC_AS5047
 	#define ENC_DISPLAY			ENC_CONTROL
-    
+
     #define CURRENT_ZERO		((int32)2048)
 
 	//Slave ID:
@@ -408,7 +408,7 @@ void user_fsm(void);
 		#define CTRL_ENC_FCT(x) 	(x)
 		#define CTRL_ENC_VEL_FCT(x) (x)
 		//...
-        
+
         #define CURRENT_ZERO		((int32)1981)
 
 		//Slave ID:
@@ -424,9 +424,9 @@ void user_fsm(void);
 		#define CTRL_ENC_FCT(x) (x)
 		#define CTRL_ENC_VEL_FCT(x) (x)
 		//...
-        
+
         #define CURRENT_ZERO		((int32)2123)
-        
+
 		//Slave ID:
 		#define SLAVE_ID		FLEXSEA_EXECUTE_1
 
@@ -459,7 +459,7 @@ void user_fsm(void);
 	//Motor type and commutation:
 	#define MOTOR_COMMUT		COMMUT_BLOCK
 	#define MOTOR_TYPE			MOTOR_BRUSHLESS
-	
+
 	//Current sensing:
 	#define CURRENT_SENSING		CS_DEFAULT
 
@@ -476,7 +476,7 @@ void user_fsm(void);
 	#define CTRL_ENC_FCT(x) 	(x)
 	#define CTRL_ENC_VEL_FCT(x) (x)
 	//...
-    
+
     #define CURRENT_ZERO		((int32)2091)
 
 	//Slave ID:
