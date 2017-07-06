@@ -99,6 +99,7 @@ void user_fsm(void);
 #define PROJECT_RICNU_KNEE		3	//RIC/NU Knee
 #define PROJECT_MOTORTB			4	//Motor TestBench
 #define PROJECT_SIMPLE_MAXON	5	//Demo/test code, Maxon + Hall + QEI
+#define PROJECT_DEV				6	//Development branch - use with care
 //*No external sensor, no sinusoidal commutation
 
 //List of sub-projects:
@@ -111,7 +112,7 @@ void user_fsm(void);
 //Step 1) Select active project (from list):
 //==========================================
 
-#define ACTIVE_PROJECT			PROJECT_RICNU_KNEE
+#define ACTIVE_PROJECT			PROJECT_DEV
 #define ACTIVE_SUBPROJECT		SUBPROJECT_NONE
 
 //Step 2) Customize the enabled/disabled sub-modules:
@@ -202,7 +203,60 @@ void user_fsm(void);
 	#define ENC_COMMUT			ENC_AS5047
 	#define ENC_DISPLAY			ENC_CONTROL
 
-    #define CURRENT_ZERO		((int32)2048)
+	#define CURRENT_ZERO		((int32)2048)
+
+	//Slave ID:
+	#define SLAVE_ID			FLEXSEA_EXECUTE_1
+
+	//Project specific definitions:
+	//...
+
+#endif  //PROJECT_SIMPLE_MOTOR
+
+
+//Similar to Simple Motor, but including some experimental code
+#if(ACTIVE_PROJECT == PROJECT_DEV)
+
+	//Enable/Disable sub-modules:
+	#define USE_RS485
+	#define USE_USB
+	#define USE_COMM			//Requires USE_RS485 and/or USE_USB
+	//#define USE_QEI
+	//#define USE_TRAPEZ
+	#define USE_I2C_0			//3V3, IMU & Expansion.
+	#define USE_I2C_1			//5V, Safety-CoP & strain gauge pot.
+	#define USE_IMU				//Requires USE_I2C_0
+	#define USE_STRAIN			//Requires USE_I2C_1
+	#define USE_AS5047			//16-bit Position Sensor, SPI
+	#define USE_EEPROM			//
+	#define USE_FLASH			//
+	#define USE_I2T_LIMIT		//I2t current limit
+
+	//Motor type and commutation:
+	#define MOTOR_COMMUT		COMMUT_NONE //COMMUT_SINE
+	#define MOTOR_TYPE			MOTOR_BRUSHLESS
+	#define MOTOR_ORIENTATION 	CLOCKWISE_ORIENTATION
+
+	//Runtime finite state machine (FSM):
+
+	//#define FINDPOLES //define if you want to find the poles
+
+	#ifdef FINDPOLES
+		#define RUNTIME_FSM	 DISABLED
+	#else
+		#ifdef USE_TRAPEZ
+			#define RUNTIME_FSM	 DISABLED
+		#else
+			#define RUNTIME_FSM	 ENABLED
+		#endif
+	#endif
+
+	//Encoders:
+	#define ENC_CONTROL			ENC_AS5047
+	#define ENC_COMMUT			ENC_AS5047
+	#define ENC_DISPLAY			ENC_CONTROL
+
+	#define CURRENT_ZERO		((int32)2048)
 
 	//Slave ID:
 	#define SLAVE_ID			FLEXSEA_EXECUTE_1
