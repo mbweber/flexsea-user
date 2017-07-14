@@ -48,9 +48,12 @@
 
 //Use this to share info between the two FSM:
 uint8_t my_ricnu_control = CTRL_NONE;
-int16_t my_ricnu_pwm = 0;
+int16_t my_ricnu_setpoint = 0;
 int16_t my_ricnu_cur = 0;
+uint8_t ctrlSet = KEEP;
 uint8_t offset = 0;
+uint8_t my_ricnu_i_kp = 0, my_ricnu_i_ki = 0;
+uint8_t my_ricnu_z_k = 0, my_ricnu_z_b = 0;
 
 //****************************************************************************
 // Private Function Prototype(s):
@@ -67,7 +70,7 @@ void init_ricnu_knee(void)
 {
 	//Default init state:
 	my_ricnu_control = CTRL_NONE;
-	my_ricnu_pwm = 0;
+	my_ricnu_setpoint = 0;
 
 	//Data structures:
 	ricnu_1.ex = &exec1;
@@ -82,11 +85,11 @@ void ricnu_knee_fsm_1(void)
 {
 	#if(ACTIVE_PROJECT == PROJECT_RICNU_KNEE)
 
-    static uint32_t time = 0;
-    static int8_t state = 0;
+	static uint32_t time = 0;
+	static int8_t state = 0;
 
-    //Increment time (1 tick = 1ms)
-    time++;
+	//Increment time (1 tick = 1ms)
+	time++;
 
 	//Before going to a state we refresh values:
 	ricnu_knee_refresh_values();
@@ -95,8 +98,13 @@ void ricnu_knee_fsm_1(void)
 	{
 		case 0:	//Wait for 10 seconds to let everything load
 
-			my_ricnu_control = CTRL_OPEN;
-			my_ricnu_pwm = 0;
+			my_ricnu_control = CTRL_IMPEDANCE;
+			my_ricnu_i_kp = 10;
+			my_ricnu_i_ki = 1;
+			my_ricnu_z_k = 5;
+			my_ricnu_z_b = 1;
+			my_ricnu_setpoint = 0;
+			ctrlSet = CHANGE;
 
 			if (time >= 10000)
 			{
@@ -106,11 +114,12 @@ void ricnu_knee_fsm_1(void)
 
 			break;
 
-		case 1:	//PWM = 100 for 5s
+		case 1:	//PWM = 500mV for 2s
 
-			my_ricnu_pwm = 100;
+			ctrlSet = KEEP;
+			my_ricnu_setpoint = 5000;
 
-			if (time >= 5000)
+			if (time >= 2000)
 			{
 				time = 0;
 				state = 2;
@@ -118,11 +127,12 @@ void ricnu_knee_fsm_1(void)
 
 			break;
 
-		case 2:	//PWM = 0 for 5s
+		case 2:	//PWM = 0 for 2s
 
-			my_ricnu_pwm = 0;
+			ctrlSet = KEEP;
+			my_ricnu_setpoint = 0;
 
-			if (time >= 5000)
+			if (time >= 2000)
 			{
 				time = 0;
 				state = 1;
@@ -170,9 +180,11 @@ void ricnu_knee_fsm_2(void)
 		case 1:	//Communicating with Execute #1, offset = 0
 
 			info[0] = PORT_RS485_1;
-			offset++;
-			offset %= 2;
-			tx_cmd_ricnu_rw(TX_N_DEFAULT, offset, my_ricnu_control, my_ricnu_pwm, KEEP, 0, 0, 0, 0);
+			//offset++;
+			//offset %= 2;
+			tx_cmd_ricnu_rw(TX_N_DEFAULT, 0, my_ricnu_control, \
+							my_ricnu_setpoint, ctrlSet, my_ricnu_z_k, \
+							my_ricnu_z_b, my_ricnu_i_kp, my_ricnu_i_ki);
 			packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_1, info, SEND_TO_SLAVE);
 			ex_refresh_fsm_state++;
 
@@ -188,7 +200,9 @@ void ricnu_knee_fsm_2(void)
 		case 3:	//Communicating with Execute #1, offset = 1
 
 			info[0] = PORT_RS485_1;
-			tx_cmd_ricnu_rw(TX_N_DEFAULT, 1, my_ricnu_control, my_ricnu_pwm, KEEP, 0, 0, 0, 0);
+			tx_cmd_ricnu_rw(TX_N_DEFAULT, 1, my_ricnu_control, \
+					my_ricnu_setpoint, ctrlSet, my_ricnu_z_k, \
+					my_ricnu_z_b, my_ricnu_i_kp, my_ricnu_i_ki);
 			packAndSend(P_AND_S_DEFAULT, FLEXSEA_EXECUTE_1, info, SEND_TO_SLAVE);
 			ex_refresh_fsm_state++;
 
