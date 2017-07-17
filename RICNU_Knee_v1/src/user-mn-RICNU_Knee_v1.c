@@ -51,7 +51,6 @@ uint8_t my_ricnu_control = CTRL_NONE;
 int16_t my_ricnu_setpoint = 0;
 int16_t my_ricnu_cur = 0;
 uint8_t ctrlSet = KEEP;
-uint8_t offset = 0;
 uint8_t my_ricnu_i_kp = 0, my_ricnu_i_ki = 0;
 uint8_t my_ricnu_z_k = 0, my_ricnu_z_b = 0;
 
@@ -81,6 +80,8 @@ void init_ricnu_knee(void)
 //Call this function in one of the main while time slots.
 //Note: this is a dumb example to showcase how to use the code, modify for
 //your application!
+#define PERIOD		1000
+#define DELTA_POS	5000
 void ricnu_knee_fsm_1(void)
 {
 	#if(ACTIVE_PROJECT == PROJECT_RICNU_KNEE)
@@ -101,7 +102,7 @@ void ricnu_knee_fsm_1(void)
 			my_ricnu_control = CTRL_IMPEDANCE;
 			my_ricnu_i_kp = 10;
 			my_ricnu_i_ki = 1;
-			my_ricnu_z_k = 5;
+			my_ricnu_z_k = 10;
 			my_ricnu_z_b = 1;
 			my_ricnu_setpoint = 0;
 			ctrlSet = CHANGE;
@@ -114,12 +115,11 @@ void ricnu_knee_fsm_1(void)
 
 			break;
 
-		case 1:	//PWM = 500mV for 2s
+		case 1:	//Low damping, hold at 0
 
-			ctrlSet = KEEP;
-			my_ricnu_setpoint = 5000;
+			my_ricnu_setpoint = 0;
 
-			if (time >= 2000)
+			if (time >= PERIOD)
 			{
 				time = 0;
 				state = 2;
@@ -127,15 +127,46 @@ void ricnu_knee_fsm_1(void)
 
 			break;
 
-		case 2:	//PWM = 0 for 2s
+		case 2:	//Low damping, hold at 5000
 
-			ctrlSet = KEEP;
+			my_ricnu_setpoint = DELTA_POS;
+
+			if (time >= PERIOD)
+			{
+				time = 0;
+				state = 3;
+
+				//Update gains:
+				my_ricnu_z_b = 15;
+				ctrlSet = CHANGE;
+			}
+
+			break;
+
+		case 3:	//High damping, hold at 0
+
 			my_ricnu_setpoint = 0;
 
-			if (time >= 2000)
+			if (time >= PERIOD)
+			{
+				time = 0;
+				state = 4;
+			}
+
+			break;
+
+		case 4:	//Low damping, hold at 5000
+
+			my_ricnu_setpoint = DELTA_POS;
+
+			if (time >= PERIOD)
 			{
 				time = 0;
 				state = 1;
+
+				//Update gains:
+				my_ricnu_z_b = 1;
+				ctrlSet = CHANGE;
 			}
 
 			break;
@@ -180,8 +211,6 @@ void ricnu_knee_fsm_2(void)
 		case 1:	//Communicating with Execute #1, offset = 0
 
 			info[0] = PORT_RS485_1;
-			//offset++;
-			//offset %= 2;
 			tx_cmd_ricnu_rw(TX_N_DEFAULT, 0, my_ricnu_control, \
 							my_ricnu_setpoint, ctrlSet, my_ricnu_z_k, \
 							my_ricnu_z_b, my_ricnu_i_kp, my_ricnu_i_ki);
@@ -215,6 +244,8 @@ void ricnu_knee_fsm_2(void)
 
 			break;
 	}
+
+	if(ctrlSet == CHANGE){ctrlSet = KEEP;}
 
 	#endif	//ACTIVE_PROJECT == PROJECT_RICNU_KNEE
 }
