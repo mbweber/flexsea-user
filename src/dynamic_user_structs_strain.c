@@ -1,4 +1,4 @@
-#ifdef BOARD_TYPE_FLEXSEA_STRAIN
+#ifdef BOARD_TYPE_FLEXSEA_STRAIN_AMP
 
 #include <string.h>
 #include <flexsea.h>
