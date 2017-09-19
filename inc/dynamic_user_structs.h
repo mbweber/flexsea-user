@@ -38,7 +38,7 @@
 
 #include <stdint.h>
 
-#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
+#if(defined BOARD_TYPE_FLEXSEA_EXECUTE || defined BOARD_TYPE_FLEXSEA_STRAIN)
 volatile struct DynamicUserData_s
 {
 	int a;
