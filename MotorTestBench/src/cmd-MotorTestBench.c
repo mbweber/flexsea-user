@@ -164,6 +164,12 @@ void tx_cmd_motortb_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 
 	#endif	//BOARD_TYPE_FLEXSEA_EXECUTE
 
+	#ifdef BOARD_TYPE_FLEXSEA_PLAN
+
+		(void)motortbPtr;
+
+	#endif	//BOARD_TYPE_FLEXSEA_PLAN
+
 	//Payload length:
 	(*len) = index;
 }
@@ -271,6 +277,7 @@ void rx_cmd_motortb_rr(uint8_t *buf, uint8_t *info)
 
 		#if((defined BOARD_TYPE_FLEXSEA_PLAN))
 
+			(void)slave;
 			offset = buf[P_DATA1];
 			//Assign data structure based on slave:
 			if(offset == 0)
