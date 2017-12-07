@@ -112,7 +112,7 @@ void user_fsm(void);
 //Step 1) Select active project (from list):
 //==========================================
 
-#define ACTIVE_PROJECT			PROJECT_SIMPLE_MOTOR
+#define ACTIVE_PROJECT			PROJECT_SIMPLE_MAXON
 #define ACTIVE_SUBPROJECT		SUBPROJECT_NONE
 
 //Step 2) Customize the enabled/disabled sub-modules:
@@ -500,7 +500,7 @@ void user_fsm(void);
 	#define USE_USB
 	#define USE_COMM			//Requires USE_RS485 and/or USE_USB
 	#define USE_QEI
-	#define USE_TRAPEZ
+	//#define USE_TRAPEZ		//Broken - do not use for now
 	#define USE_I2C_0			//3V3, IMU & Expansion.
 	#define USE_I2C_1			//5V, Safety-CoP & strain gauge pot.
 	#define USE_IMU				//Requires USE_I2C_0
@@ -527,7 +527,7 @@ void user_fsm(void);
 
 	//Control encoder function:
 	#define PWM_SIGN			1
-	#define CTRL_ENC_FCT(x) 	(x)
+	#define CTRL_ENC_FCT(x) 	(-x)
 	#define CTRL_ENC_VEL_FCT(x) (x)
 	//...
 

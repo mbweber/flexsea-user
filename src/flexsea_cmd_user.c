@@ -69,9 +69,11 @@ void init_flexsea_payload_ptr_user(void)
 	flexsea_payload_ptr[CMD_RICNU][RX_PTYPE_REPLY] = &rx_cmd_ricnu_rr;
 	#endif //(ACTIVE_SUBPROJECT == PROJECT_RICNU_KNEE)
 
+	#ifdef INCLUDE_UPROJ_USERTB
 	//Motor Test Bench:
 	flexsea_payload_ptr[CMD_MOTORTB][RX_PTYPE_READ] = &rx_cmd_motortb_rw;
 	flexsea_payload_ptr[CMD_MOTORTB][RX_PTYPE_REPLY] = &rx_cmd_motortb_rr;
+	#endif	//INCLUDE_UPROJ_USERTB
 
 	init_flexsea_payload_ptr_dynamic();
 }
