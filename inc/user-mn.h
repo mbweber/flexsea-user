@@ -28,23 +28,19 @@
 	*
 ****************************************************************************/
 
-#include "main.h"
-
 #ifdef BOARD_TYPE_FLEXSEA_MANAGE
 
-#ifndef INC_USER_H
-#define INC_USER_H
+#ifndef INC_USER_MN_H
+#define INC_USER_MN_H
 
 //****************************************************************************
 // Include(s)
 //****************************************************************************
 
+#include "main.h"
+#include "flexsea_board.h"
 #include "flexsea_sys_def.h"
-#include "user-mn-RICNU_Knee_v1.h"
-#include "user-mn-MIT_2DoF_Ankle_v1.h"
-#include "user-mn-MotorTestBench.h"
-#include  "flexsea_global_structs.h"
-//Add your project specific user_x.h file here
+#include "flexsea_global_structs.h"
 
 //****************************************************************************
 // Public Function Prototype(s):
@@ -64,13 +60,18 @@ void user_fsm_2(void);
 #define PROJECT_RICNU_KNEE		3	//RIC/NU Knee
 #define PROJECT_MOTORTB			4
 #define PROJECT_DEV				5	//Experimental code - use with care
+#define PROJECT_ACTPACK			11	//Dephy's Actuator Package (ActPack)
 
 //List of sub-projects:
 #define SUBPROJECT_NONE			0
-#define SUBPROJECT_A			1
-#define SUBPROJECT_B			2
+#define SUBPROJECT_A			1	//(typically the right side)
+#define SUBPROJECT_B			2	//(typically the left side)
 //(ex.: the 2-DoF ankle has 2 Execute. They both use PROJECT_2DOF_ANKLE, and each
 // 		of them has a sub-project for specific configs)
+
+//Exo sign:
+#define RIGHT					1
+#define LEFT					2
 
 //Step 1) Select active project (from list):
 //==========================================
@@ -191,6 +192,27 @@ void user_fsm_2(void);
 	//...
 
 #endif	//PROJECT_BAREBONE
+//Dephy's Actuator Package (ActPack)
+#if(ACTIVE_PROJECT == PROJECT_ACTPACK)
+
+	//Enable/Disable sub-modules:
+	#define USE_USB
+	#define USE_COMM			//Requires USE_RS485 and/or USE_USB
+	#define USE_I2C_1			//3V3, IMU & Digital pot
+	#define USE_I2C_2			//3V3, Expansion
+	#define USE_I2C_3			//Onboard, Regulate & Execute
+	#define USE_IMU				//Requires USE_I2C_1
+	#define USE_UART3			//Bluetooth
+	#define USE_EEPROM			//Emulated EEPROM, onboard FLASH
+	#define USE_WATCHDOG		//Independent watchdog (IWDG)
+	#define USE_6CH_AMP			//Requires USE_I2C_2. 6-ch Strain Amp.
+	#define USE_SPI_PLAN		//Enables the external SPI port
+
+	//Runtime finite state machine (FSM):
+	//#define RUNTIME_FSM1		ENABLED	//Enable only if you DO NOT use Plan
+	#define RUNTIME_FSM2		ENABLED	//Enable at all time, Mn <> Ex comm.
+
+#endif	//PROJECT_ACTPACK
 
 //****************************************************************************
 // Structure(s)
@@ -217,6 +239,6 @@ extern struct ankle2dof_s ankle2dof_left, ankle2dof_right;
 
 #endif	//PROJECT_ANKLE_2DOF
 
-#endif	//INC_USER_H
+#endif	//INC_USER_MN_H
 
 #endif //BOARD_TYPE_FLEXSEA_MANAGE

@@ -53,7 +53,14 @@ void init_flexsea_payload_ptr_user(void);
 #define CMD_A2DOF					100
 #define CMD_RICNU					101
 #define CMD_MOTORTB					103
+#define CMD_ANGLE_TORQUE_PROFILE	104
+#define CMD_CYCLE_TESTER			105
+#define CMD_DPEB31					106
+#define CMD_UTT						107
 
+#define CMD_READ_ALL_RIGID			120
+#define CMD_ACTPACK					121
+#define CMD_BILATERAL				125
 #define CMD_USER_DYNAMIC 			126
 
 //***************

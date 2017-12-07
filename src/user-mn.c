@@ -34,7 +34,11 @@
 // Include(s)
 //****************************************************************************
 
-#include "../inc/user-mn.h"
+#include "user-mn.h"
+//Dephy's Actuator Package (ActPack)
+#if(ACTIVE_PROJECT == PROJECT_ACTPACK)
+#include "user-mn-ActPack.h"
+#endif	//PROJECT_ACTPACK
 
 //****************************************************************************
 // Variable(s)
@@ -77,6 +81,37 @@ void init_user(void)
 	#if(ACTIVE_PROJECT == PROJECT_MOTORTB)
 	init_MotorTestBench();
 	#endif	//PROJECT_MOTORTB
+
+	//Rigid:
+	#if(ACTIVE_PROJECT == PROJECT_RIGID)
+	init_rigid();
+	#endif	//PROJECT_RIGID
+
+	//Automatic Cycle Tester:
+	#if(ACTIVE_PROJECT == PROJECT_CYCLE_TESTER)
+	init_cycle_tester();
+	#endif	//PROJECT_CYCLE_TESTER
+
+	//DpEb3.1 Exo:
+	#if(ACTIVE_PROJECT == PROJECT_DPEB31)
+	init_DpEb31();
+	#endif	//PROJECT_DPEB31
+
+	//Barebone Rigid:
+	#if(ACTIVE_PROJECT == PROJECT_BB_RIGID)
+	init_rigid();
+	#endif	//PROJECT_BB_RIGID
+
+	//University of Michigan's Knee:
+	#if(ACTIVE_PROJECT == PROJECT_UMICH_KNEE)
+	init_rigid();
+	//ToDo: switch to their init
+	#endif	//PROJECT_UMICH_KNEE
+
+	//Dephy's Actuator Package (ActPack)
+	#if(ACTIVE_PROJECT == PROJECT_ACTPACK)
+	init_ActPack();
+	#endif	//PROJECT_ACTPACK
 }
 
 //Call this function in one of the main while time slots.
@@ -104,7 +139,12 @@ void user_fsm_1(void)
 		dev_fsm_1();
 		#endif	//PROJECT_DEV
 
-	#endif
+		//Dephy's Actuator Package (ActPack)
+		#if(ACTIVE_PROJECT == PROJECT_ACTPACK)
+		ActPack_fsm_1();
+		#endif	//PROJECT_ACTPACK
+
+	#endif	//(RUNTIME_FSM1 == ENABLED)
 }
 
 //Optional second FSM
@@ -133,7 +173,12 @@ void user_fsm_2(void)
 		dev_fsm_2();
 		#endif	//PROJECT_DEV
 
-	#endif
+		//Dephy's Actuator Package (ActPack)
+		#if(ACTIVE_PROJECT == PROJECT_ACTPACK)
+		ActPack_fsm_2();
+		#endif	//PROJECT_ACTPACK
+
+	#endif	//(RUNTIME_FSM2 == ENABLED)
 }
 
 //****************************************************************************

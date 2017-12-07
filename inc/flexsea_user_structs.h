@@ -41,10 +41,7 @@ extern "C" {
 //****************************************************************************
 
 #include <stdint.h>
-
-//****************************************************************************
-// Prototype(s):
-//****************************************************************************
+#include <flexsea_global_structs.h>
 
 //****************************************************************************
 // Definition(s):
@@ -66,9 +63,102 @@ struct filtvar_s
 	int64_t raws[2];
 	int64_t filts[2];
 	int32_t raw;
-    int32_t filt;
+	int32_t filt;
 };
 
+//FlexSEA-Rigid:
+
+struct fx_rigid_re_s
+{
+	uint16_t vb;
+	uint16_t vg;
+	uint16_t v5;
+	int16_t current;
+	int8_t temp;
+	uint8_t button;
+	uint8_t state;
+
+	uint16_t status;
+};
+
+struct decoded_fx_rigid_mn_s
+{
+	struct decoded_xyz_s gyro;
+	struct decoded_xyz_s accel;
+	struct decoded_xyz_s magneto;
+};
+
+struct fx_rigid_mn_s
+{
+	struct xyz_s gyro;
+	struct xyz_s accel;
+	struct xyz_s magneto; 	//Useless
+
+	uint16_t analog[4];
+	uint16_t status;
+
+	int16_t genVar[10];
+
+	//Decoded:
+	struct decoded_fx_rigid_mn_s decoded;
+};
+
+struct fx_rigid_ex_s
+{
+	uint16_t strain;
+	int32_t mot_current;
+	int32_t mot_volt;
+	int32_t* enc_ang;
+	int32_t* enc_ang_vel;
+	int16_t* joint_ang;
+	int16_t* joint_ang_vel;
+	int16_t* joint_ang_from_mot;
+	int32_t mot_acc;
+
+	uint16_t status;
+
+	struct ctrl_s ctrl;
+};
+
+struct fx_rigid_ctrl_s
+{
+	uint32_t timestamp;
+	int8_t walkingState;
+	int8_t gaitState;
+
+	int16_t* ank_ang_deg;
+	int16_t* ank_vel;
+	int16_t* ank_ang_from_mot;
+
+	int16_t contra_hs;
+	int16_t step_energy;
+};
+
+struct rigid_s
+{
+	struct fx_rigid_re_s re;
+	struct fx_rigid_mn_s mn;
+	struct fx_rigid_ex_s ex;
+	struct fx_rigid_ctrl_s	ctrl;
+	uint8_t lastOffsetDecoded;
+};
+
+struct utt_s
+{
+	uint8_t ctrl;
+	uint8_t ctrlOption;
+	uint8_t amplitude;
+	int8_t timing;
+	uint8_t powerOn;
+
+	int8_t torquePoints[6][2];
+};
+
+struct dual_utt_s
+{
+	uint8_t target;
+	struct utt_s leg[2];
+};
 
 //****************************************************************************
 // Shared variable(s)

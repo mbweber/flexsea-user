@@ -27,12 +27,21 @@ const char* fieldLabels[DYNAMIC_USER_NUM_FIELDS] = {"a", "b"};
 // If label names are too long we may fail to send meta data info to plan.
 */
 
-
-#define DYNAMIC_USER_NUM_FIELDS  4
-const uint8_t fieldTypes[DYNAMIC_USER_NUM_FIELDS] = {FORMAT_32S, FORMAT_32S, FORMAT_32S, FORMAT_16U};
+*/ 
+    
+#define DYNAMIC_USER_NUM_FIELDS  27
+const uint8_t fieldTypes[DYNAMIC_USER_NUM_FIELDS] = {FORMAT_32S, FORMAT_8S, FORMAT_8S, FORMAT_16S, FORMAT_16S, 
+                                                     FORMAT_16S, FORMAT_16S, FORMAT_16U, FORMAT_16S, FORMAT_16S,
+                                                     FORMAT_16S, FORMAT_16S, FORMAT_16S, FORMAT_16S, FORMAT_16S,
+                                                     FORMAT_16S, FORMAT_16S, FORMAT_16S, FORMAT_16S, FORMAT_16S, FORMAT_16S,
+                                                     FORMAT_32S, FORMAT_32S, FORMAT_32S, FORMAT_16S, FORMAT_16S, FORMAT_16S};
 // Keep your label names short, each character is a byte, which takes a lot of memory to send in one packet
 // If label names are too long we may fail to send meta data info to plan.
-const char* fieldLabels[DYNAMIC_USER_NUM_FIELDS] = {"variable1", "variable2", "variable3", "variable4"};
+const char* fieldLabels[DYNAMIC_USER_NUM_FIELDS] = {"time", "x_ste", "g_ste", "a_ang", "m_cur",
+                                                    "m_vol", "m_ang", "b_vol", "x_trq", "x_pow",
+                                                    "e_pow", "a_vel", "m_cur_sp", "x_gyr", "g_min_df",
+                                                    "a_ang_ctrl", "trq_ang_out", "ana_m_ang", "m_vel", "m_acc", "pwm",
+                                                    "gen1", "gen2", "gen3", "gen4", "gen5", "gen6"};
 
 static uint8_t fieldFlags[DYNAMIC_USER_NUM_FIELDS] = {0};
 
