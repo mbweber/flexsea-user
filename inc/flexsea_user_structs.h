@@ -166,6 +166,15 @@ struct dual_utt_s
 
 extern struct motortb_s motortb;
 extern int16_t globvar[10];
+extern struct rigid_s rigid1, rigid2;
+extern int16_t globvar[10];
+extern struct dual_utt_s utt;
+
+//****************************************************************************
+// Prototype(s):
+//****************************************************************************
+
+void initializeUserStructs(void);
 
 #ifdef __cplusplus
 }

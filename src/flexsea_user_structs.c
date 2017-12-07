@@ -29,7 +29,11 @@
 // Include(s)
 //****************************************************************************
 
-#include "../inc/flexsea_user_structs.h"
+#include "flexsea_user_structs.h"
+
+#if(defined BOARD_TYPE_FLEXSEA_EXECUTE)
+	#include "mag_encoders.h"
+#endif
 
 //****************************************************************************
 // Variable(s)
@@ -40,6 +44,21 @@ struct motortb_s motortb;
 
 int16_t globvar[10] = {0,0,0,0,0,0,0,0,0,0};
 
+struct rigid_s rigid1, rigid2;
+struct dual_utt_s utt;
+
 //****************************************************************************
 // Function(s)
 //****************************************************************************
+
+void initializeUserStructs(void)
+{
+	#if(defined BOARD_TYPE_FLEXSEA_EXECUTE)
+		#ifdef BOARD_SUBTYPE_RIGID
+			rigid1.ex.enc_ang = &(as5047.signed_ang);
+			rigid1.ex.enc_ang_vel = &(as5047.signed_ang_vel);
+			rigid1.ex.joint_ang = &(as5048b.filt.ang_clks_16b);
+			rigid1.ex.joint_ang_vel = &(as5048b.filt.vel_cpms_16b);
+		#endif
+	#endif
+}
