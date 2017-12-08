@@ -247,7 +247,7 @@ void tx_cmd_actpack_w(uint8_t *shBuf, uint8_t *cmd, uint8_t *cmdType, \
 		}
 
 	#endif	//BOARD_TYPE_FLEXSEA_MANAGE
-	
+
 	//Payload length:
 	(*len) = index;
 }
@@ -256,14 +256,14 @@ void rx_cmd_actpack_rw(uint8_t *buf, uint8_t *info)
 {
 	uint16_t index = 0;
 	(void)info;
-	
+
 	//Temporary variables
 	uint8_t offset = 0;
 	uint8_t tmpController = 0, tmpSetGains = 0;
 	int32_t tmpSetpoint = 0;
 	int16_t tmpGain[4] = {0,0,0,0};
-	
-		//Decode data received:
+
+	//Decode data received:
 	index = P_DATA1;
 	offset = buf[index++];
 	tmpController = buf[index++];
