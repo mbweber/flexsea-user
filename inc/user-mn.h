@@ -60,6 +60,12 @@ void user_fsm_2(void);
 #define PROJECT_RICNU_KNEE		3	//RIC/NU Knee
 #define PROJECT_MOTORTB			4
 #define PROJECT_DEV				5	//Experimental code - use with care
+#define PROJECT_CYCLE_TESTER	6	//Automatic Cycle Tester
+#define PROJECT_DPEB			7	//DpEb2.1 and below
+#define PROJECT_DPEB31			8	//DpEb3.1 Exo
+#define PROJECT_BB_RIGID		9	//Barebone Rigid
+#define PROJECT_RIGID			PROJECT_BB_RIGID
+#define PROJECT_UMICH_KNEE		10	//University of Michigan's Knee
 #define PROJECT_ACTPACK			11	//Dephy's Actuator Package (ActPack)
 
 //List of sub-projects:
@@ -76,7 +82,7 @@ void user_fsm_2(void);
 //Step 1) Select active project (from list):
 //==========================================
 
-#define ACTIVE_PROJECT			PROJECT_DEV
+#define ACTIVE_PROJECT			PROJECT_BAREBONE
 #define ACTIVE_SUBPROJECT		SUBPROJECT_NONE
 
 //Step 2) Customize the enabled/disabled sub-modules:
