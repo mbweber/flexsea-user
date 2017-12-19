@@ -77,11 +77,6 @@ void init_user(void)
 	#if(ACTIVE_PROJECT == PROJECT_MOTORTB)
 	initMotorTestBench();
 	#endif	//PROJECT_MOTORTB
-    
-        //ExoBoots:
-	#if(ACTIVE_PROJECT == PROJECT_PEGASUS)
-	init_pegasus();
-	#endif	//PROJECT_EXOCUTE
 }
 
 //Call this function in one of the main while time slots.
@@ -94,11 +89,6 @@ void user_fsm(void)
 			MotorTestBench_fsm();
 		#endif
 	#endif	//PROJECT_MOTORTB
-    
-        //ExoBoot code
-	#if(ACTIVE_PROJECT == PROJECT_PEGASUS)				                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
-	pegasus_fsm();							
-	#endif	//PROJECT_PEGASUS
 }
 
 //****************************************************************************
