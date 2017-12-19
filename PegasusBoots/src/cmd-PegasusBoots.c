@@ -36,7 +36,7 @@ extern "C" {
 // Include(s)
 //****************************************************************************
 
-#include <cmd-PegasusBoots.h>
+#include <..\flexsea-user\PegasusBoots\inc\cmd-PegasusBoots.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <flexsea.h>
