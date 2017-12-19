@@ -47,6 +47,7 @@
 #include "../MIT_2DoF_Ankle_v1/inc/user-ex-MIT_2DoF_Ankle_v1.h"
 #include "../RICNU_Knee_v1/inc/user-ex-RICNU_Knee_v1.h"
 #include "../MotorTestBench/inc/user-ex-MotorTestBench.h"
+#include "../PegasusBoots/inc/user-ex-PegasusBoots.h"
 #include "flexsea_sys_def.h"
 #include "user-ex.h"
 //Add your project specific user_x.h file here
@@ -100,6 +101,7 @@ void user_fsm(void);
 #define PROJECT_MOTORTB			4	//Motor TestBench
 #define PROJECT_SIMPLE_MAXON	5	//Demo/test code, Maxon + Hall + QEI
 #define PROJECT_DEV				6	//Development branch - use with care
+#define PROJECT_PEGASUS         7   //X-O-Boots
 //*No external sensor, no sinusoidal commutation
 
 //List of sub-projects:
@@ -112,7 +114,7 @@ void user_fsm(void);
 //Step 1) Select active project (from list):
 //==========================================
 
-#define ACTIVE_PROJECT			PROJECT_SIMPLE_MAXON
+#define ACTIVE_PROJECT			PROJECT_PEGASUS
 #define ACTIVE_SUBPROJECT		SUBPROJECT_NONE
 
 //Step 2) Customize the enabled/disabled sub-modules:

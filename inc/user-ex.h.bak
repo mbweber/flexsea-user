@@ -541,6 +541,56 @@ void user_fsm(void);
 
 #endif  //PROJECT_SIMPLE_MAXON
 
+//Similar to Barebone, but including a Maxon motor and its typical companions:
+//Hall sensors (commutation) and QEI encoder
+#if(ACTIVE_PROJECT == PROJECT_PEGASUS)
+
+	//Enable/Disable sub-modules:
+	#define USE_RS485
+	#define USE_USB
+	#define USE_COMM			//Requires USE_RS485 and/or USE_USB
+	#define USE_QEI
+	//#define USE_TRAPEZ		//Broken - do not use for now
+	#define USE_I2C_0			//3V3, IMU & Expansion.
+	#define USE_I2C_1			//5V, Safety-CoP & strain gauge pot.
+	#define USE_IMU				//Requires USE_I2C_0
+	#define USE_STRAIN			//Requires USE_I2C_1
+	//#define USE_AS5047		//16-bit Position Sensor, SPI. Used by Sine Commut.
+	#define USE_EEPROM			//
+	#define USE_FLASH			//
+	#define USE_I2T_LIMIT		//I2t current limit
+
+	//Motor type and commutation:
+	#define MOTOR_COMMUT		COMMUT_BLOCK
+	#define MOTOR_TYPE			MOTOR_BRUSHLESS
+
+	//Current sensing:
+	#define CURRENT_SENSING		CS_DEFAULT
+
+	//Runtime finite state machine (FSM):
+	#define RUNTIME_FSM	        ENABLED
+
+	//Encoders:
+	#define ENC_CONTROL			ENC_QUADRATURE
+	#define ENC_COMMUT			ENC_HALL
+	#define ENC_DISPLAY			ENC_QUADRATURE
+
+	//Control encoder function:
+	#define PWM_SIGN			1
+	#define CTRL_ENC_FCT(x) 	(-x)
+	#define CTRL_ENC_VEL_FCT(x) (x)
+	//...
+
+    #define CURRENT_ZERO		((int32)2091)
+
+	//Slave ID:
+	#define SLAVE_ID			FLEXSEA_EXECUTE_1
+
+	//Project specific definitions:
+	//...
+
+#endif  //PROJECT_PEGASUS
+
 //****************************************************************************
 // Structure(s)
 //****************************************************************************
