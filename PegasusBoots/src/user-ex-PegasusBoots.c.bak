@@ -55,7 +55,7 @@
 #define PARABOLIC //Leave in for parabolic torque profile, comment out for positive velocity feedback (EXPERIMENTAL)
 
 // System Specific
-#define EXO_ID BP1 //Can be WKR, WKL, BP1, BP2
+#define EXO_ID BP2 //Can be WKR, WKL, BP1, BP2
 #define DRIVEPULLEY (14) // 14 teeth
 #define SPOOLPULLEY (44) // 44 teeth
 #define SPOOLRADIUS 40 //10*mm, so 4.0 mm (8mm shaft diameter)
@@ -70,6 +70,7 @@
     int32 mom_5=0;
     int32 mom_6=0;
     int32 mom_7=0;
+    int32 actual_mot_volt=0;
     
 // Coefficients and Constants
 //pegasus_fsm
@@ -91,8 +92,8 @@ int32 ankle_swing_angle = 15; //[-100 x rad] angle to let out during swing (nega
 //position_control
 int32 pid_setpos_a = -7500 ;
 int32 pid_setpos_b = 5000;
-int32 pos_Pgain = 300; 
-int32 pos_Igain = 0; //60 worked well if want an I term
+int32 pos_Pgain = 300; // WAS 300
+int32 pos_Igain = 0; //WAS 0 //60 worked well if want an I term
 //set_mot_torque
 int32 torque_Pgain = 1000; // TO BE ADJUSTED
 int32 torque_Igain = 30;
@@ -225,7 +226,7 @@ void pegasus_fsm(void)
 			exo_zero_strain();  
             if (exo_mot_pos[0]>=0 && statetimer>100) // second clause just prevents skipping this step
             {
-                change_state(3);
+                change_state(0);
             }
             break;
 		case 0: // stance phase - get a desired moment from spring equation            
@@ -283,7 +284,7 @@ void pegasus_fsm(void)
            
             if ((statetimer>500) || (statetimer>150 && exo_angvel_gyro<0)) // wait for "1 sec" or "0.3 sec and now I'm done swinging forward"
             {
-                change_state(3);
+                change_state(0);
             }
            
 			break;
@@ -319,6 +320,13 @@ void pegasus_fsm(void)
 	}
 
     //After picking a state, we update the motor command
+    actual_mot_volt = mot_volt;
+    
+    if (mot_volt > (exo_batvolt-10000)){
+        mot_volt = exo_batvolt-10000;
+    } else if (mot_volt < (-exo_batvolt+10000)) {
+        mot_volt = -exo_batvolt+10000;
+    }
     exo_set_volt();
 }
 
@@ -433,13 +441,13 @@ static void exo_refresh_values(void) {
         
         //Update the communication structure
         exo.state = (int8_t)(exo_state); // Mapped to Gyro X
-        exo.des_mom = (int16_t)(ankle_des_mom); // Mapped to Gyro Y (REMEMBER TO DIV BY 10 LATER)
+        exo.des_mom = (int16_t)(exo_mot_pos[0]+10000); // Mapped to Gyro Y (REMEMBER TO DIV BY 10 LATER)
         exo.mot_volt = (int16_t)(mot_volt); // Mapped to Gyro Z (REMEMBER TO DIV BY 10 LATER)
-        exo.pwm = (int16_t)(torque_Pterm);//(mot_pwm); // Mapped to Accel X
-        exo.max_PF_power = (int16_t)(torque_Iterm);//(max_PF_power); // Mapped to Accel Y
+        exo.pwm = (int16_t)(pos_despos+10000); //(mot_pwm); // Mapped to Accel X
+        exo.max_PF_power = (int16_t)(actual_mot_volt);//(max_PF_power); // Mapped to Accel Y
         exo.ankle_mom = (int16_t)(ankle_mom); // Mapped to Accel Z (REMEMBER TO DIV BY 10 LATER)
-        exo.ankle_ang = (int16_t)(mom_ctrl);//(ankle_ang); // Mapped to Analog 0
-        exo.ankle_vel = (int16_t)(ankle_vel_fil); // Mapped to Analog 1
+        exo.ankle_ang = (int16_t)(ankle_ang); // Mapped to Analog 0
+        exo.ankle_vel = (int16_t)(actual_mot_volt); // Mapped to Analog 1
         
         // Unmapped
         exo.time = exo_time; //int32
@@ -468,7 +476,7 @@ static void change_state(int8 newstate){
         torque_Istate = 0;
     } else if (newstate == 1){
         torque_Istate = 0;
-    } else if (newstate == 2)
+    } else if (newstate == 2 || newstate == 1)
     {
         pos_Istate=0;
     } else if (newstate == 3)
@@ -559,43 +567,22 @@ static void exo_spring(void){
 }
 
 static void exo_power(void){
-    //ankle_ang is in 10000 x rad  
-    //ankle_des_mom is in 100 x Nm
+    int32 exo_ppf_pos;
+
+    //enc_per_rad is in [clicks/rad /100]
+    //PPF_fin_angle is in [10000 x rad]
+    exo_ppf_pos = PPF_fin_angle*enc_per_rad/100; 
     
-    if (ankle_ang<maxDFang) {maxDFang = ankle_ang;} //for logging purposes
-        
-    exo_spring(); // get DF-based moment as a start based on spring
-    
-    #ifdef PARABOLIC
+    if (statetimer<exo_swg_time)
+    {
+        pos_despos = exo_lastpos + statetimer*(exo_ppf_pos-exo_lastpos)/(exo_ppf_time);
+    }
+    else // after swingtime your despos should be at full swgpos anyway
+    {
+        pos_despos = exo_ppf_pos;
+    } 
 
-        int32 parab_des_mom = peak_des_mom-4*peak_des_mom*((statetimer-parab_delay)-exo_ppf_time/2)/exo_ppf_time*((statetimer-parab_delay)-exo_ppf_time/2)/exo_ppf_time;
-
-        // may not need the first if statement given the second, TWEAK
-        if (statetimer > parab_delay)
-        {
-            if (ankle_des_mom < parab_des_mom) {ankle_des_mom = parab_des_mom;}
-        }
-        
-        // record maximum PF power
-        int32 PF_power = exo_mot_vel/100*ankle_mom/10; // 1000000 x rad/sec x Nm (or, 1000000 x W), will be better filtered and not time sensitive
-        if (PF_power > max_PF_power) {max_PF_power = PF_power;}
-
-    // less-tested, posfdbckvel mode
-    #else
-
-        int32 posfdbckvel = exo_mot_vel+200; //faster you're walking, more power injected
-        
-        if (posfdbckvel>0)
-        {ankle_des_mom = ankle_des_mom+posfdbckvel*3/4;}
-        
-        if (ankle_des_mom > max_mom) //if our calculated moment is the greatest we've seen, note that it's the max and use it. otherwise use the max.
-            {max_mom = ankle_des_mom;}
-        else
-            {ankle_des_mom = max_mom;}
-
-    #endif
-
-    set_mot_torque(ankle_des_mom);
+    position_control(pos_despos);
 }
 
 static void exo_swing(void){
@@ -658,6 +645,7 @@ static void set_mot_torque(int32 des_mom){
 }
 
 static void exo_set_volt(){
+    
     int32 voltsign = 1;
     int32 abvolt = mot_volt;
     if (abvolt<0)
